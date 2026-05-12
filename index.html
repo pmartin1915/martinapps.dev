@@ -48,7 +48,7 @@
 
 <h2>About</h2>
 
-<p>Martin Apps LLC is a single-founder Alabama limited liability company. We build small, focused mobile and reference applications for two communities we know well: nurses and nurse practitioners studying for certification, and outdoor users operating in environments where connectivity is unreliable and decisions have consequences.</p>
+<p>Martin Apps LLC is a single-founder Alabama limited liability company. We build small, focused mobile and reference applications for two audiences we know well: healthcare learners and clinicians who need accurate teaching tools, and outdoor users operating in environments where connectivity is unreliable and decisions have consequences.</p>
 
 <p>Our products are not general-purpose. They are narrow, deep, and held to standards appropriate for the context: clinical accuracy in healthcare education; sourced and citeable content in the outdoor reference category; offline-first design wherever a user might be cut off from the network when they need the app most.</p>
 
@@ -66,6 +66,17 @@
     <div class="links">
       <a href="https://apps.apple.com/us/app/wilderness-survival-companion/id6760920427">View on the App Store</a>
       <a href="/wilderness/privacy-policy.html">Privacy Policy</a>
+    </div>
+  </div>
+
+  <div class="app">
+    <h3>Burn Wizard <span class="badge badge-live">Available on the App Store</span></h3>
+    <p class="tagline">Pediatric burn assessment and fluid resuscitation, taught offline.</p>
+    <p>An educational app that teaches the Lund-Browder method for total body surface area (TBSA) calculation, the Parkland formula for fluid resuscitation, and the Holliday-Segar 4-2-1 method for maintenance fluids. Includes an interactive body diagram with age-adjusted percentages, an 8-chapter curriculum spanning pathophysiology through long-term management, clinical documentation templates, and full English / Latin-American Spanish translation. Built for medical students, nursing students, physician assistants, surgical residents, emergency medicine fellows, and first responders preparing for clinical practice.</p>
+    <p>Free. Works fully offline. No accounts, no analytics, no data collection. Local storage is encrypted with AES-256-GCM. Educational tool only &mdash; not a clinical device and not for direct patient care.</p>
+    <div class="links">
+      <a href="https://apps.apple.com/us/app/burn-wizard/id6760600512">View on the App Store</a>
+      <a href="https://burn-wizard-web.netlify.app/privacy-policy">Privacy Policy</a>
     </div>
   </div>
 
@@ -91,15 +102,15 @@
 <div class="pillars">
   <div class="pillar">
     <h3>1. Clinician- or practitioner-designed</h3>
-    <p>Every product is led by someone with active domain experience. BoardBound is built by an active DNP-FNP candidate who is preparing for the same boards the app teaches. Wilderness Survival Companion was sourced and structured against authoritative survival doctrine, not crowd-sourced advice.</p>
+    <p>Every product is led by someone with active domain experience. BoardBound and Burn Wizard are built by an active DNP-FNP candidate with a clinical background in pediatric critical care and pediatric neuro-oncology. Wilderness Survival Companion was sourced and structured against authoritative survival doctrine, not crowd-sourced advice.</p>
   </div>
   <div class="pillar">
     <h3>2. Sources are explicit, never invented</h3>
-    <p>For BoardBound's AI tutor, every clinical explanation is grounded in a human-written rationale attached to the question; the model is prompted to refuse rather than fabricate when the rationale doesn't support a claim. For Wilderness Survival Companion, every field tool and reference page traces back to a citable source (FM 21-76, SAS, CDC, NOAA).</p>
+    <p>For BoardBound's AI tutor, every clinical explanation is grounded in a human-written rationale attached to the question; the model is prompted to refuse rather than fabricate when the rationale doesn't support a claim. Burn Wizard's calculations (Lund-Browder, Parkland, Holliday-Segar) are established clinical formulas with their methodology explained transparently in-app. Wilderness Survival Companion traces every field tool and reference page back to a citable source (FM 21-76, SAS, CDC, NOAA).</p>
   </div>
   <div class="pillar">
     <h3>3. Built to work when the network can't</h3>
-    <p>Our outdoor product is fully offline. Our healthcare product caches its question bank locally so review sessions don't stall on a flaky cell signal at the library or in the hospital basement. Connectivity-resilient design is a design constraint, not an afterthought.</p>
+    <p>Burn Wizard and Wilderness Survival Companion are fully offline. BoardBound caches its question bank locally so review sessions don't stall on a flaky cell signal at the library or in the hospital basement. Connectivity-resilient design is a design constraint across the portfolio, not an afterthought.</p>
   </div>
 </div>
 
@@ -109,8 +120,9 @@
 
 <ul>
   <li><strong>BoardBound</strong> ships with an internal evaluation harness ("BoardBound Bench") that grades the AI tutor against a 100-case golden set on every change to the production prompt. Refusal canaries (PHI handling, jailbreak resistance) must pass at 100% or the change is blocked. Fidelity must clear a per-category floor or the change is blocked. The harness runs against a production-mirror of the prompt and uses an LLM-as-judge with rationale-aware grading; we publish the per-category pass rate in our internal release notes for every prompt iteration.</li>
+  <li><strong>Burn Wizard</strong> teaches only well-established clinical methods (Lund-Browder, Parkland, Holliday-Segar) and displays an unambiguous educational-only disclaimer at app launch, on the assessment screen, and on every calculation result. The app is filed under Apple's Education primary category (Medical secondary) precisely because it teaches; it is not a clinical decision-support device and does not market itself as one.</li>
   <li><strong>Wilderness Survival Companion</strong> sources every reference entry from primary survival doctrine and tags each with the source. Edible-plant entries include explicit toxic-lookalike warnings rather than encouraging field identification by visual similarity alone. Calculators use established NOAA / CDC / National Weather Service algorithms.</li>
-  <li><strong>Both products</strong> include explicit non-medical-advice and non-affiliation language where applicable. We are not affiliated with AANPCB&reg; or ANCC&reg; (BoardBound) or with any government, military, or rescue agency (Wilderness Survival Companion).</li>
+  <li><strong>Across the portfolio</strong>, we include explicit non-medical-advice and non-affiliation language where applicable. We are not affiliated with AANPCB&reg; or ANCC&reg; (BoardBound), with any burn center, professional society, or regulatory body (Burn Wizard), or with any government, military, or rescue agency (Wilderness Survival Companion).</li>
 </ul>
 
 <h2>Founder</h2>
