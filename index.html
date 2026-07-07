@@ -1,50 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Martin Apps LLC &mdash; Education and reference software for healthcare and the outdoors</title>
-  <meta name="description" content="Martin Apps LLC builds focused education and reference software for healthcare professionals and outdoor users. Alabama-based, founded by an active DNP-FNP candidate.">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1a1a1a; line-height: 1.7; max-width: 760px; margin: 0 auto; padding: 3rem 1.5rem 4rem; }
-    h1 { font-size: 2.4rem; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
-    h2 { font-size: 1.4rem; margin-top: 2.75rem; margin-bottom: 0.75rem; color: #111; letter-spacing: -0.01em; }
-    h3 { font-size: 1.1rem; margin-top: 1.5rem; margin-bottom: 0.4rem; color: #111; }
-    p, li { font-size: 0.98rem; color: #333; }
-    p { margin-bottom: 0.85rem; }
-    ul { padding-left: 1.25rem; margin-top: 0.4rem; margin-bottom: 1rem; }
-    li { margin-bottom: 0.4rem; }
-    .subtitle { color: #555; font-size: 1.1rem; margin-bottom: 1rem; }
-    a { color: #2563eb; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    .hero { padding-bottom: 1.5rem; border-bottom: 1px solid #e5e7eb; margin-bottom: 0.5rem; }
-    .lede { font-size: 1.05rem; color: #4b5563; margin-bottom: 0; }
-    .apps { margin-top: 1rem; }
-    .app { padding: 1.4rem 1.5rem; border: 1px solid #e5e7eb; border-radius: 12px; margin-bottom: 1.25rem; background: #fff; }
-    .app h3 { margin-top: 0; font-size: 1.25rem; display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
-    .app .tagline { color: #4b5563; font-size: 0.95rem; margin-bottom: 0.6rem; font-weight: 500; }
-    .app p { font-size: 0.95rem; margin-bottom: 0.85rem; }
-    .app .links a { font-size: 0.88rem; margin-right: 1.1rem; }
-    .badge { display: inline-block; padding: 0.2rem 0.7rem; border-radius: 999px; font-size: 0.7rem; font-weight: 600; vertical-align: middle; line-height: 1.4; }
-    .badge-live { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
-    .badge-soon { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
-    .pillars { display: grid; gap: 1rem; margin-top: 1rem; }
-    .pillar { padding: 1rem 1.2rem; background: #f9fafb; border-left: 3px solid #2563eb; border-radius: 4px; }
-    .pillar h3 { margin-top: 0; font-size: 1rem; color: #111; }
-    .pillar p { margin-bottom: 0; font-size: 0.92rem; color: #4b5563; }
-    .contact-list li { font-size: 0.95rem; }
-    .footer { margin-top: 3.5rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb; font-size: 0.85rem; color: #6b7280; text-align: center; }
-    .footer p { font-size: 0.85rem; color: #6b7280; margin-bottom: 0.4rem; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Martin Apps LLC &mdash; Education and reference software for healthcare and the outdoors</title>
+<meta name="description" content="Martin Apps LLC builds focused education and reference software for healthcare professionals and outdoor users. Alabama-based, founded by an active DNP-FNP candidate.">
+<meta name="theme-color" content="#EEF0E9">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<style>
+  :root {
+    --paper: #EEF0E9;
+    --paper-raised: #F6F7F2;
+    --ink: #16211C;
+    --ink-soft: #46524B;
+    --line: #C7CDC2;
+    --teal: #1F5C54;
+    --teal-soft: #2E7A6F;
+    --rust: #A8481A;
+    --serif: ui-serif, Charter, "Iowan Old Style", "Palatino Linotype", "Sitka Text", Cambria, Georgia, serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, "Courier New", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0E1512;
+      --paper-raised: #141C17;
+      --ink: #E7EDE7;
+      --ink-soft: #A8B5AC;
+      --line: #26332C;
+      --teal: #5FB3A5;
+      --teal-soft: #4A9186;
+      --rust: #E0935F;
+    }
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { color-scheme: light dark; }
+  body {
+    font-family: var(--sans);
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.7;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 3.5rem 1.5rem 4rem;
+    transition: background 120ms ease, color 120ms ease;
+  }
+  a { color: var(--teal); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+
+  /* Masthead */
+  .masthead { display: flex; align-items: flex-start; gap: 0.9rem; margin-bottom: 0.6rem; }
+  .mark { flex: none; width: 44px; height: 44px; margin-top: 0.2rem; }
+  .wordmark { font-family: var(--serif); font-weight: 600; font-size: 2.1rem; letter-spacing: -0.01em; line-height: 1.1; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--teal); margin-bottom: 0.3rem; display: block;
+  }
+  .lede { font-family: var(--serif); font-size: 1.18rem; color: var(--ink-soft); margin: 1.1rem 0 0; max-width: 62ch; }
+
+  /* Signature divider: ECG spike -> topo contour, one continuous line */
+  .signature { width: 100%; height: auto; margin: 2rem 0 2.25rem; display: block; }
+  .signature path { fill: none; stroke: var(--teal); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .signature-mini { width: 120px; height: auto; opacity: 0.7; }
+  .signature-mini path { fill: none; stroke: var(--ink-soft); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+  h2 {
+    font-family: var(--serif); font-weight: 600; font-size: 1.3rem; margin-top: 3rem; margin-bottom: 0.9rem;
+    letter-spacing: -0.005em; padding-bottom: 0.5rem; border-bottom: 1px solid var(--line);
+  }
+  h3 { font-family: var(--serif); font-weight: 600; font-size: 1.15rem; margin: 0 0 0.35rem; }
+  p, li { font-size: 0.98rem; color: var(--ink); }
+  p { margin-bottom: 0.9rem; }
+  ul { padding-left: 1.2rem; margin-bottom: 1rem; }
+  li { margin-bottom: 0.45rem; }
+
+  /* App cards */
+  .apps { margin-top: 0.5rem; display: flex; flex-direction: column; gap: 1.1rem; }
+  .app {
+    padding: 1.3rem 1.4rem 1.4rem; background: var(--paper-raised); border: 1px solid var(--line);
+    border-radius: 3px; border-left: 3px solid var(--line);
+  }
+  .app.is-live { border-left-color: var(--teal); }
+  .app.is-soon { border-left-color: var(--rust); }
+  .status-tag {
+    font-family: var(--mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.09em;
+    display: inline-flex; align-items: center; gap: 0.4em; margin-bottom: 0.5rem;
+  }
+  .status-tag::before { content: ""; width: 0.5em; height: 0.5em; border-radius: 50%; display: inline-block; }
+  .is-live .status-tag { color: var(--teal); }
+  .is-live .status-tag::before { background: var(--teal); }
+  .is-soon .status-tag { color: var(--rust); }
+  .is-soon .status-tag::before { background: var(--rust); }
+  .app .tagline { font-family: var(--serif); font-style: italic; color: var(--ink-soft); font-size: 1rem; margin-bottom: 0.7rem; }
+  .app p { font-size: 0.95rem; }
+  .app .links { margin-top: 0.9rem; padding-top: 0.8rem; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 0.82rem; }
+  .app .links a { margin-right: 1.3rem; }
+
+  /* Pillars: chart-annotation style, no numbering (not a sequence) */
+  .pillars { display: grid; gap: 1rem; margin-top: 1rem; }
+  .pillar { position: relative; padding: 0.2rem 0 0.2rem 1.1rem; border-left: 2px solid var(--teal); }
+  .pillar h3 { font-size: 1rem; }
+  .pillar p { margin-bottom: 0; font-size: 0.93rem; color: var(--ink-soft); }
+
+  .stats-line {
+    font-family: var(--mono); font-size: 0.82rem; color: var(--ink-soft);
+    background: var(--paper-raised); border: 1px solid var(--line); border-radius: 3px;
+    padding: 0.6rem 0.9rem; margin: 0.6rem 0 1rem;
+  }
+
+  /* Roadmap: genuinely sequential (dated quarters), so date labels double as the sequence marker */
+  .timeline { list-style: none; padding-left: 0; border-left: 1px solid var(--line); margin-left: 0.3rem; }
+  .timeline li { position: relative; padding: 0 0 1rem 1.3rem; }
+  .timeline li::before {
+    content: ""; position: absolute; left: -4.5px; top: 0.4em; width: 8px; height: 8px;
+    border-radius: 50%; background: var(--teal);
+  }
+  .timeline .when { font-family: var(--mono); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--teal); display: block; margin-bottom: 0.15rem; }
+
+  .contact-list li, .company-list li { font-size: 0.95rem; }
+
+  .footer {
+    margin-top: 3.5rem; padding-top: 1.5rem; border-top: 1px solid var(--line);
+    font-size: 0.85rem; color: var(--ink-soft); text-align: center;
+  }
+  .footer p { font-size: 0.85rem; color: var(--ink-soft); margin-bottom: 0.6rem; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .app { transition: border-color 150ms ease; }
+  }
+</style>
 </head>
 <body>
 
-<div class="hero">
-  <h1>Martin Apps LLC</h1>
-  <p class="subtitle">Focused education and reference software for healthcare and the outdoors.</p>
-  <p class="lede">Alabama-based independent software company. Each product is designed by an active practitioner or student in the field it serves, validated against authoritative sources, and built to perform when it matters &mdash; on a board exam, in the backcountry, or at the bedside.</p>
-</div>
+<header class="masthead">
+  <svg class="mark" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect x="0.75" y="0.75" width="42.5" height="42.5" rx="9" stroke="var(--line)" stroke-width="1.5"/>
+    <path d="M6 30 L14 30 L17 20 L20 34 L23 14 L26 30 L38 30" stroke="var(--teal)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <div>
+    <span class="eyebrow">Martin Apps LLC</span>
+    <div class="wordmark">Martin Apps</div>
+  </div>
+</header>
+
+<p class="lede">Focused education and reference software for healthcare and the outdoors. Alabama-based independent software company. Each product is designed by an active practitioner or student in the field it serves, validated against authoritative sources, and built to perform when it matters &mdash; on a board exam, in the backcountry, or at the bedside.</p>
+
+<svg class="signature" viewBox="0 0 800 60" preserveAspectRatio="none" aria-hidden="true">
+  <path d="M0,32 L54,32 L64,32 L72,10 L80,32 L92,32 L100,50 L106,8 L112,54 L120,32 L132,32 L144,20 L156,32 L210,32 C250,32 250,14 290,14 C330,14 330,48 370,48 C410,48 410,20 450,20 C490,20 490,44 530,44 C570,44 570,30 610,30 C650,30 650,38 690,38 C725,38 745,32 800,32"/>
+</svg>
 
 <h2>About</h2>
 
@@ -58,8 +162,9 @@
 
 <div class="apps">
 
-  <div class="app">
-    <h3>Wilderness Survival Companion <span class="badge badge-live">Available on the App Store</span></h3>
+  <div class="app is-live">
+    <span class="status-tag">Live &middot; App Store</span>
+    <h3>Wilderness Survival Companion</h3>
     <p class="tagline">Offline reference and field tools for the backcountry.</p>
     <p>A 100% offline reference and emergency-triage app for hikers, backpackers, hunters, search-and-rescue volunteers, and outdoor educators. Six field calculators (water purification, shelter selection, daylight estimation, pace and distance, wind chill and heat index, triage priority), 63+ reference entries (shelters, fire, water, navigation, knots, plants, wildlife, signals, first aid), and four adaptive color themes including a tactical-red mode that preserves night vision. Sources include the US Army Survival Manual (FM 21-76), SAS Survival Handbook, CDC guidelines, and NOAA solar algorithms.</p>
     <p>Free. No accounts, no tracking, no advertising, no data collection. Works in airplane mode.</p>
@@ -69,8 +174,9 @@
     </div>
   </div>
 
-  <div class="app">
-    <h3>Burn Wizard <span class="badge badge-live">Available on the App Store</span></h3>
+  <div class="app is-live">
+    <span class="status-tag">Live &middot; App Store</span>
+    <h3>Burn Wizard</h3>
     <p class="tagline">Pediatric burn assessment and fluid resuscitation, taught offline.</p>
     <p>An educational app that teaches the Lund-Browder method for total body surface area (TBSA) calculation, the Parkland formula for fluid resuscitation, and the Holliday-Segar 4-2-1 method for maintenance fluids. Includes an interactive body diagram with age-adjusted percentages, an 8-chapter curriculum spanning pathophysiology through long-term management, clinical documentation templates, and full English / Latin-American Spanish translation. Built for medical students, nursing students, physician assistants, surgical residents, emergency medicine fellows, and first responders preparing for clinical practice.</p>
     <p>Free. Works fully offline. No accounts, no analytics, no data collection. Local storage is encrypted with AES-256-GCM. Educational tool only &mdash; not a clinical device and not for direct patient care.</p>
@@ -80,13 +186,14 @@
     </div>
   </div>
 
-  <div class="app">
-    <h3>BoardBound <span class="badge badge-soon">Coming soon</span></h3>
+  <div class="app is-live">
+    <span class="status-tag">Live &middot; App Store</span>
+    <h3>BoardBound</h3>
     <p class="tagline">AI Tutor for FNP Board Exams.</p>
     <p>An AI-powered study companion for nurse practitioner students preparing for AANP and ANCC FNP board certification. A live AI tutor explains clinical reasoning the way a real NP preceptor would &mdash; grounded strictly in the human-written rationale attached to each question, never inventing clinical facts. Includes a 500+ question bank tagged to both exam blueprints, spaced repetition, Deep Dive mode for complex multi-system reasoning, and a readiness dashboard. Free tier included.</p>
-    <p>Pricing: $29.99 per month or $79.99 for a 3-month sprint. Coming to iOS in 2026.</p>
+    <p>Pricing: $29.99 per month or $79.99 for a 3-month sprint.</p>
     <div class="links">
-      <a href="/boardbound/">Product details</a>
+      <a href="https://apps.apple.com/us/app/boardbound-prep/id6761675393">View on the App Store</a>
       <a href="/boardbound/privacy">Privacy</a>
       <a href="/boardbound/terms">Terms</a>
       <a href="/boardbound/support">Support</a>
@@ -101,15 +208,15 @@
 
 <div class="pillars">
   <div class="pillar">
-    <h3>1. Clinician- or practitioner-designed</h3>
+    <h3>Clinician- or practitioner-designed</h3>
     <p>Every product is led by someone with active domain experience. BoardBound and Burn Wizard are built by an active DNP-FNP candidate with a clinical background in pediatric critical care and pediatric neuro-oncology. Wilderness Survival Companion was sourced and structured against authoritative survival doctrine, not crowd-sourced advice.</p>
   </div>
   <div class="pillar">
-    <h3>2. Sources are explicit, never invented</h3>
+    <h3>Sources are explicit, never invented</h3>
     <p>For BoardBound's AI tutor, every clinical explanation is grounded in a human-written rationale attached to the question; the model is prompted to refuse rather than fabricate when the rationale doesn't support a claim. Burn Wizard's calculations (Lund-Browder, Parkland, Holliday-Segar) are established clinical formulas with their methodology explained transparently in-app. Wilderness Survival Companion traces every field tool and reference page back to a citable source (FM 21-76, SAS, CDC, NOAA).</p>
   </div>
   <div class="pillar">
-    <h3>3. Built to work when the network can't</h3>
+    <h3>Built to work when the network can't</h3>
     <p>Burn Wizard and Wilderness Survival Companion are fully offline. BoardBound caches its question bank locally so review sessions don't stall on a flaky cell signal at the library or in the hospital basement. Connectivity-resilient design is a design constraint across the portfolio, not an afterthought.</p>
   </div>
 </div>
@@ -133,10 +240,9 @@
 
 <h2>Roadmap</h2>
 
-<ul>
-  <li><strong>2026 Q2</strong> &mdash; BoardBound iOS launch (FNP boards) following App Store review and organizational migration.</li>
-  <li><strong>2026 Q3</strong> &mdash; BoardBound v1.1: spaced-repetition refinements, expanded analytics, additional question bank breadth.</li>
-  <li><strong>2026 Q4 / 2027</strong> &mdash; Adjacent NP specialty exams under the BoardBound brand (PMHNP, AGPCNP), Android port, and continued expansion of Wilderness Survival Companion's reference library.</li>
+<ul class="timeline">
+  <li><span class="when">2026 Q3</span>BoardBound v1.1: spaced-repetition refinements, expanded analytics, additional question bank breadth.</li>
+  <li><span class="when">2026 Q4 / 2027</span>Adjacent NP specialty exams under the BoardBound brand (PMHNP, AGPCNP), Android port, and continued expansion of Wilderness Survival Companion's reference library.</li>
 </ul>
 
 <h2>Contact</h2>
@@ -148,7 +254,7 @@
 
 <h2>Company</h2>
 
-<ul>
+<ul class="company-list">
   <li><strong>Legal name:</strong> Martin Apps LLC</li>
   <li><strong>Entity type:</strong> Alabama limited liability company</li>
   <li><strong>Jurisdiction:</strong> State of Alabama, United States</li>
@@ -157,6 +263,9 @@
 </ul>
 
 <div class="footer">
+  <svg class="signature-mini" viewBox="0 0 800 60" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0,32 L54,32 L64,32 L72,10 L80,32 L92,32 L100,50 L106,8 L112,54 L120,32 L132,32 L144,20 L156,32 L210,32 C250,32 250,14 290,14 C330,14 330,48 370,48 C410,48 410,20 450,20 C490,20 490,44 530,44 C570,44 570,30 610,30 C650,30 650,38 690,38 C725,38 745,32 800,32"/>
+  </svg>
   <p>&copy; 2026 Martin Apps LLC &middot; Alabama, United States</p>
   <p>BoardBound and Burn Wizard are educational tools and are not medical advice; they must not be used for direct patient care, diagnosis, or treatment decisions. Wilderness Survival Companion is a reference tool and is not a substitute for professional training, search-and-rescue services, or emergency medical care.</p>
 </div>
