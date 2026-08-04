@@ -104,7 +104,7 @@
 <body>
   <div class="header">
     <h1>Wilderness Survival Companion Privacy Policy</h1>
-    <p>Last Updated: May 2026</p>
+    <p>Last Updated: August 2026</p>
   </div>
 
   <div class="container">
@@ -112,71 +112,103 @@
       <h2>Overview</h2>
       <p>Wilderness Survival Companion is an offline reference application for backcountry emergencies, hiking preparation, and wilderness skills. All content is based on authoritative sources including FM 21-76, SAS Survival Handbook, CDC, EPA, NWS, and NOAA.</p>
       <div class="highlight">
-        <strong>100% Offline:</strong> This application works entirely offline. No data is ever transmitted over any network.
+        <strong>No accounts, no servers, no tracking:</strong> The app has no backend, so nothing you enter, record, or measure is collected by us or uploaded anywhere. The only data that ever leaves your device is what you deliberately send yourself using the <em>Share</em> or <em>Copy</em> buttons.
       </div>
     </div>
 
     <div class="card">
       <h2>Data Collection</h2>
-      <p>We do <strong>NOT</strong> collect, store, or transmit:</p>
+      <p>We do <strong>NOT</strong> collect, receive, transmit, or share:</p>
       <ul>
         <li>Personal information</li>
-        <li>Location data</li>
+        <li>Your location</li>
+        <li>Camera images or video</li>
+        <li>Heart-rate or other physiological measurements</li>
         <li>Device identifiers</li>
-        <li>Usage analytics</li>
+        <li>Usage analytics or crash telemetry</li>
         <li>Browsing history</li>
       </ul>
+      <p>Some information <em>is</em> saved on your own device so the app is useful between sessions &mdash; see <strong>On-Device Storage</strong> below. That data stays on your device and is never uploaded.</p>
       <div class="highlight">
-        <strong>Zero Network Requests:</strong> This app makes no network connections. All content and calculations are performed locally on your device.
+        <strong>Nothing is sent automatically:</strong> The app performs all content lookup and all calculations on your device and never sends your data to us &mdash; there is no server behind it. Two deliberate exceptions are under your control: if you tap <em>Share</em> or <em>Copy</em> on a position, trip plan, or checklist, your device passes that text to whatever app or contact you pick; and if you use the web version rather than the iPhone app, your browser downloads and updates the app's own files from the site hosting it.
       </div>
     </div>
 
     <div class="card">
-      <h2>Local Storage</h2>
-      <p>The application stores the following data locally:</p>
+      <h2>On-Device Storage</h2>
+      <p>The application saves the following on your device, so your settings and work persist between sessions:</p>
       <ul>
-        <li>Theme preference (4 adaptive display modes)</li>
+        <li>Theme preference (4 adaptive display modes) and Survival Mode setting</li>
         <li>Unit system preference (imperial/metric)</li>
         <li>Bookmarked content entries</li>
         <li>Pace calibration setting</li>
+        <li>Packing checklists and their progress</li>
+        <li>Waypoints you save, including their coordinates</li>
+        <li>Your check-in interval and the emergency plan you write for it &mdash; this is free text, so it holds whatever you type into it, which may include names, routes, or phone numbers</li>
+        <li>Trip plans you create</li>
+        <li>Survival scenario progress</li>
+        <li>Any photos you attach to a waypoint (stored in the app's local database)</li>
       </ul>
-      <p>This data never leaves your device and can be cleared at any time through your device's app settings.</p>
+      <p>This data never leaves your device. You can erase all of it at any time by deleting the app, or item by item within the app.</p>
     </div>
 
     <div class="card">
       <h2>Location Data</h2>
-      <p>The Daylight Estimator calculator may request access to your device's GPS location to calculate sunrise and sunset times for your position. This location data is:</p>
+      <p>Several tools can use your device's GPS location: the compass and waypoint navigator, the daylight and sun-position estimators, the UV exposure estimator, and the check-in timer. While the app is open it also keeps a live position readout in the header, so location updates continuously during a session rather than only at the moment you open a tool.</p>
       <ul>
-        <li>Used only for the current calculation</li>
-        <li>Never stored beyond the active session</li>
-        <li>Never transmitted to any server</li>
-        <li>Completely optional (manual latitude/longitude entry is available)</li>
+        <li>Location is used on your device only, to show your position or perform the calculation you asked for</li>
+        <li>It is <strong>never</strong> transmitted to us or to any third party &mdash; there is no server to receive it</li>
+        <li>Most uses are transient: a reading is displayed, replaced by the next one, and never written to storage</li>
+        <li><strong>Exception:</strong> if you deliberately save a waypoint, its coordinates are stored on your device until you delete that waypoint</li>
+        <li>If you tap <em>Share</em> or <em>Copy</em> on your position, you are choosing to hand those coordinates to another app &mdash; that is the one way location leaves this app, and only at your direction</li>
       </ul>
       <div class="highlight">
-        <strong>Location Permission:</strong> If you deny location access, you can still use the Daylight Estimator by entering coordinates manually.
+        <strong>Location Permission:</strong> Location is optional and you may deny it. Some tools then accept manual latitude/longitude entry &mdash; the Daylight Estimator, for example &mdash; while others, such as the header position readout, need a real fix and will simply show no position.
       </div>
     </div>
 
     <div class="card">
-      <h2>Permissions</h2>
-      <p><strong>Permissions we MAY request:</strong></p>
+      <h2>Camera</h2>
+      <p>The app uses the camera for three features, and only while you are using them:</p>
       <ul>
-        <li>Location (optional, for daylight calculator only)</li>
+        <li><strong>Waypoint photos</strong> &mdash; when you add a photo to a saved waypoint, your device opens its normal camera or picker sheet. The image you take or choose <strong>is saved</strong> on your device, in the app's local database, until you delete it.</li>
+        <li><strong>Heart-rate monitor</strong> &mdash; measures your pulse optically by detecting colour changes when your fingertip covers the lens. This requires camera access.</li>
+        <li><strong>SOS signal beacon</strong> &mdash; flashes your device's flashlight (torch) in an SOS pattern. On iPhone the app drives the flashlight directly as hardware, which normally involves no camera prompt; where that direct path is unavailable it reaches the torch through the camera interface instead. No image is captured either way.</li>
       </ul>
-      <p><strong>Permissions we explicitly DO NOT request:</strong></p>
+      <div class="highlight">
+        <strong>Live camera frames are never recorded:</strong> For the heart-rate monitor and the SOS beacon, frames are analysed in memory as they arrive and immediately discarded &mdash; no photo or video is written, and the camera is released as soon as you leave the feature. The only images this app keeps are the waypoint photos you deliberately attach, and they stay on your device.
+      </div>
+      <p>The heart-rate reading is an estimate for field awareness only. It is not a medical device and is not written to Apple Health. It is not saved, though if you choose to carry a reading into the triage tool it is passed along for that session.</p>
+    </div>
+
+    <div class="card">
+      <h2>Motion &amp; Orientation Sensors</h2>
+      <p>The step tracker, compass, slope/avalanche inclinometer, and sun tracker read your device's motion and orientation sensors (accelerometer, gyroscope, magnetometer). Your device may ask your permission the first time.</p>
+      <p>These readings are used live on your device to display a heading, angle, or step count. They are not recorded and not transmitted. Your step count is not written to Apple Health.</p>
+    </div>
+
+    <div class="card">
+      <h2>Permissions</h2>
+      <p><strong>Permissions the app MAY request</strong> (each optional, each only for the feature named):</p>
       <ul>
-        <li>Camera</li>
+        <li>Location &mdash; navigation, sun/daylight, UV, and turnaround tools</li>
+        <li>Camera &mdash; waypoint photos, the optical heart-rate monitor, and the SOS flashlight beacon</li>
+        <li>Motion &amp; orientation &mdash; step tracker, compass, inclinometer, sun tracker</li>
+      </ul>
+      <p><strong>Permissions the app explicitly DOES NOT request:</strong></p>
+      <ul>
         <li>Microphone</li>
         <li>Contacts</li>
-        <li>Photos</li>
-        <li>Health data</li>
+        <li>Photo library</li>
+        <li>Apple Health / HealthKit</li>
         <li>Push notifications</li>
       </ul>
+      <p>Attaching a photo to a waypoint uses your device's standard photo picker. The app receives only the single image you choose &mdash; it never gains access to your photo library.</p>
     </div>
 
     <div class="card">
       <h2>Third-Party Services</h2>
-      <p>Wilderness Survival Companion does not use any third-party services. There are no analytics, advertising, tracking, or data-sharing integrations of any kind.</p>
+      <p>Wilderness Survival Companion does not use any third-party services. There are no analytics, advertising, tracking, or data-sharing integrations of any kind, and no third-party SDKs that collect data.</p>
     </div>
 
     <div class="card">
