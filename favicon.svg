@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44">
-  <rect width="44" height="44" rx="9" fill="#16211C"/>
-  <path d="M6 30 L14 30 L17 20 L20 34 L23 14 L26 30 L38 30" stroke="#5FB3A5" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 280" role="img" aria-labelledby="t">
+  <title id="t">Martin Apps LLC</title>
+  <path fill="#2A4A6B" d="M0,0 H100 L140,50 L180,0 H280 V280 H0 Z"/>
+  <path fill="#FFFFFF" d="M40,40 H80 L140,110 L200,40 H240 V80 H200 V120 H160 V160 H120 V200 H80 V240 H40 Z"/>
 </svg>
