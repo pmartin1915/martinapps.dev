@@ -154,7 +154,7 @@
 
     <div class="card">
       <h2>Location Data</h2>
-      <p>Several tools can use your device's GPS location: the compass and waypoint navigator, the daylight and sun-position estimators, the UV exposure estimator, and the check-in timer. While the app is open it also keeps a live position readout in the header, so location updates continuously during a session rather than only at the moment you open a tool.</p>
+      <p>Several tools can use your device's GPS location: the compass and waypoint navigator, the daylight and sun-position estimators, the UV exposure estimator, and the check-in timer. Location is requested only while one of these tools is open. A tool that shows a live position keeps it updated while it is on screen, and stops when you leave it.</p>
       <ul>
         <li>Location is used on your device only, to show your position or perform the calculation you asked for</li>
         <li>It is <strong>never</strong> transmitted to us or to any third party &mdash; there is no server to receive it</li>
@@ -163,7 +163,7 @@
         <li>If you tap <em>Share</em> or <em>Copy</em> on your position, you are choosing to hand those coordinates to another app &mdash; that is the one way location leaves this app, and only at your direction</li>
       </ul>
       <div class="highlight">
-        <strong>Location Permission:</strong> Location is optional and you may deny it. Some tools then accept manual latitude/longitude entry &mdash; the Daylight Estimator, for example &mdash; while others, such as the header position readout, need a real fix and will simply show no position.
+        <strong>Location Permission:</strong> Location is optional and you may deny it. Some tools then accept manual latitude/longitude entry &mdash; the Daylight Estimator, for example &mdash; while others, such as the compass position readout, need a real fix and will simply show no position.
       </div>
     </div>
 
