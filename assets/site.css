@@ -1,0 +1,298 @@
+/* martinapps.dev — one stylesheet for every page.
+   Palette: paper / ink / teal / rust. The slate --mark is used by the logo only. */
+
+:root {
+  --paper: #EEF0E9;
+  --paper-raised: #F6F7F2;
+  --paper-sunk: #E4E7DE;
+  --ink: #16211C;
+  --ink-soft: #46524B;
+  --line: #C7CDC2;
+  --teal: #1F5C54;
+  --teal-soft: #2E7A6F;
+  --teal-wash: #DDE8E3;
+  --rust: #A8481A;
+  --rust-wash: #F3E3D8;
+  --mark: #2A4A6B;
+  --header-bg: rgba(238, 240, 233, 0.88);
+  --serif: ui-serif, Charter, "Iowan Old Style", "Palatino Linotype", "Sitka Text", Cambria, Georgia, serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, "Courier New", monospace;
+  --measure: 720px;
+  --wide: 1000px;
+  --radius: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0E1512;
+    --paper-raised: #141C17;
+    --paper-sunk: #0A100D;
+    --ink: #E7EDE7;
+    --ink-soft: #A8B5AC;
+    --line: #26332C;
+    --teal: #5FB3A5;
+    --teal-soft: #4A9186;
+    --teal-wash: #15261F;
+    --rust: #E0935F;
+    --rust-wash: #2A1C13;
+    --mark: #4E7CA8;
+    --header-bg: rgba(14, 21, 18, 0.86);
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { color-scheme: light dark; scroll-padding-top: 5rem; -webkit-text-size-adjust: 100%; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+body {
+  font-family: var(--sans);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.7;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+img, svg { max-width: 100%; }
+a { color: var(--teal); text-decoration: none; text-underline-offset: 0.18em; }
+a:hover { text-decoration: underline; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; border-radius: 2px; }
+strong { font-weight: 650; }
+
+.skip-link {
+  position: absolute; left: 1rem; top: -3rem; z-index: 100;
+  background: var(--ink); color: var(--paper); padding: 0.5rem 0.9rem; border-radius: var(--radius);
+}
+.skip-link:focus { top: 0.75rem; text-decoration: none; }
+
+/* ---------- Site header ---------- */
+.site-header {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--header-bg);
+  -webkit-backdrop-filter: saturate(1.4) blur(10px);
+  backdrop-filter: saturate(1.4) blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.site-header .inner {
+  max-width: var(--wide); margin: 0 auto; padding: 0.7rem 1.25rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+}
+.brand { display: inline-flex; align-items: center; gap: 0.6rem; color: var(--ink); }
+.brand:hover { text-decoration: none; }
+.brand svg { width: 28px; height: 28px; flex: none; }
+.brand span { font-family: var(--serif); font-weight: 600; font-size: 1.2rem; letter-spacing: -0.01em; }
+.site-nav { display: flex; gap: 1.4rem; font-size: 0.92rem; }
+.site-nav a { color: var(--ink-soft); }
+.site-nav a:hover, .site-nav a[aria-current] { color: var(--teal); }
+
+/* Product sub-navigation on app pages */
+.product-bar { border-bottom: 1px solid var(--line); background: var(--paper-raised); }
+.product-bar .inner {
+  max-width: var(--wide); margin: 0 auto; padding: 0.55rem 1.25rem;
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.35rem 1.2rem;
+  font-family: var(--mono); font-size: 0.78rem;
+}
+.product-bar .product-name { font-family: var(--serif); font-size: 0.98rem; font-weight: 600; color: var(--ink); margin-right: 0.4rem; }
+.product-bar a { color: var(--ink-soft); }
+.product-bar a:hover { color: var(--teal); }
+.product-bar a[aria-current="page"] { color: var(--teal); font-weight: 600; }
+
+/* ---------- Page body (all subpages) ---------- */
+main { flex: 1; width: 100%; }
+.page { max-width: var(--measure); margin: 0 auto; padding: 2.75rem 1.25rem 3.5rem; }
+
+.page h1, .page-title {
+  font-family: var(--serif); font-weight: 600; font-size: clamp(1.75rem, 4.5vw, 2.3rem);
+  line-height: 1.2; letter-spacing: -0.015em; margin-bottom: 0.4rem;
+}
+.page h2 {
+  font-family: var(--serif); font-weight: 600; font-size: 1.3rem; line-height: 1.3;
+  margin: 2.4rem 0 0.75rem; padding-bottom: 0.45rem; border-bottom: 1px solid var(--line);
+}
+.page h3 { font-family: var(--serif); font-weight: 600; font-size: 1.08rem; margin: 1.5rem 0 0.35rem; }
+.page p, .page li { font-size: 0.98rem; }
+.page p { margin-bottom: 0.9rem; }
+.page ul, .page ol { padding-left: 1.35rem; margin: 0.4rem 0 1rem; }
+.page li { margin-bottom: 0.4rem; }
+.page li::marker { color: var(--ink-soft); }
+.subtitle { color: var(--ink-soft); font-size: 1rem; margin-bottom: 2rem; }
+
+.page table { width: 100%; border-collapse: collapse; margin: 0.9rem 0 1.2rem; font-size: 0.9rem; display: block; overflow-x: auto; }
+.page th, .page td { text-align: left; padding: 0.55rem 0.75rem; border: 1px solid var(--line); vertical-align: top; }
+.page th { background: var(--paper-sunk); font-weight: 600; }
+
+/* Callouts: .callout = information, .warning = safety */
+.callout, .warning, .highlight {
+  margin: 1.2rem 0; padding: 0.95rem 1.1rem; border-radius: var(--radius);
+  border: 1px solid var(--line); border-left: 4px solid var(--teal); background: var(--teal-wash);
+}
+.callout strong, .highlight strong { color: var(--teal); }
+.warning { border-left-color: var(--rust); background: var(--rust-wash); }
+.warning strong { color: var(--rust); }
+.callout p:last-child, .warning p:last-child, .highlight p:last-child { margin-bottom: 0; }
+
+/* FAQ */
+.faq-q { font-family: var(--serif); font-weight: 600; font-size: 1.04rem !important; margin: 1.6rem 0 0.25rem !important; }
+.faq-a { margin-top: 0; }
+
+/* Page-level fine print (kept from each page's original footer) */
+.page .footer {
+  margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--line);
+  font-size: 0.85rem; color: var(--ink-soft);
+}
+.page .footer p { font-size: 0.85rem; color: var(--ink-soft); margin-bottom: 0.4rem; }
+
+/* Wilderness privacy policy keeps its header/card markup */
+.page .header { margin-bottom: 1.5rem; }
+.page .header p { color: var(--ink-soft); }
+.page .card { margin-bottom: 0.5rem; }
+.page .container { padding: 0; }
+
+/* ---------- Product page pieces ---------- */
+.product-hero { display: flex; gap: 1.25rem; align-items: center; margin-bottom: 1.75rem; }
+.product-hero .app-icon { width: 88px; height: 88px; }
+.product-hero .subtitle { margin-bottom: 0.6rem; }
+.tier {
+  background: var(--paper-raised); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 1.1rem 1.3rem; margin: 0.9rem 0;
+}
+.tier h3 { margin-top: 0; }
+.tier .price { font-weight: 600; color: var(--ink-soft); font-family: var(--sans); font-size: 0.95rem; }
+.tier ul { margin-bottom: 0; }
+
+/* ---------- Shared components ---------- */
+.app-icon { border-radius: 22%; border: 1px solid var(--line); flex: none; background: var(--paper-raised); }
+
+.status-tag {
+  font-family: var(--mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.09em;
+  display: inline-block; color: var(--teal); line-height: 1.5;
+}
+.status-tag::before { content: ""; display: inline-block; width: 0.5em; height: 0.5em; margin-right: 0.45em; border-radius: 50%; background: currentColor; vertical-align: 0.05em; }
+.status-tag.is-soon { color: var(--rust); }
+
+.store-badges { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; margin: 1rem 0 0.2rem; }
+.product-hero + .store-badges { margin: -0.5rem 0 1.75rem; }
+.store-badges a { display: inline-block; line-height: 0; padding: 2px; }
+.store-badges a:hover { opacity: 0.85; }
+.store-badges img { height: 40px; width: auto; }
+
+.button {
+  display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.6rem 1.1rem; border-radius: var(--radius);
+  font-size: 0.93rem; font-weight: 600; border: 1px solid var(--teal); background: var(--teal); color: var(--paper);
+}
+.button:hover { text-decoration: none; background: var(--teal-soft); border-color: var(--teal-soft); }
+.button.secondary { background: transparent; color: var(--teal); }
+.button.secondary:hover { background: var(--teal-wash); }
+
+/* ---------- Site footer ---------- */
+.site-footer { border-top: 1px solid var(--line); background: var(--paper-raised); margin-top: auto; }
+.site-footer .inner { max-width: var(--wide); margin: 0 auto; padding: 2.25rem 1.25rem 1.75rem; }
+.footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 1.75rem; }
+.footer-grid h2 {
+  font-family: var(--mono); font-size: 0.72rem; font-weight: 500; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--ink-soft); margin-bottom: 0.6rem; border: 0; padding: 0;
+}
+.footer-grid ul { list-style: none; padding: 0; margin: 0; }
+.footer-grid li { font-size: 0.9rem; margin-bottom: 0.35rem; }
+.footer-grid p { font-size: 0.9rem; color: var(--ink-soft); }
+.footer-grid .brand { margin-bottom: 0.6rem; }
+.fine-print {
+  margin-top: 1.75rem; padding-top: 1.1rem; border-top: 1px solid var(--line);
+  font-size: 0.8rem; color: var(--ink-soft); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem 1.5rem;
+}
+
+@media (max-width: 720px) {
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .footer-grid > :first-child { grid-column: 1 / -1; }
+}
+@media (max-width: 420px) {
+  .site-nav { gap: 0.9rem; font-size: 0.88rem; }
+  .brand span { font-size: 1.08rem; }
+  .product-hero { align-items: flex-start; }
+  .product-hero .app-icon { width: 64px; height: 64px; }
+}
+
+/* ---------- Print: policies print as plain documents ---------- */
+@media print {
+  :root { --paper: #fff; --paper-raised: #fff; --ink: #000; --ink-soft: #333; --line: #bbb; --teal: #000; --rust: #000; --teal-wash: #fff; --rust-wash: #fff; }
+  .site-header, .product-bar, .site-footer, .skip-link, .store-badges { display: none !important; }
+  .page { padding: 0; max-width: none; }
+  a { color: #000; text-decoration: underline; }
+}
+
+/* ---------- Homepage ---------- */
+.home { max-width: 760px; margin: 0 auto; padding: 0 1.25rem 3rem; }
+.hero { padding: 3.75rem 0 0.5rem; }
+.eyebrow {
+  font-family: var(--mono); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--teal); display: block; margin-bottom: 0.9rem;
+}
+.hero h1 {
+  font-family: var(--serif); font-weight: 600; font-size: clamp(2rem, 6vw, 3rem); line-height: 1.12;
+  letter-spacing: -0.02em; max-width: 18ch;
+}
+.lede { font-family: var(--serif); font-size: 1.16rem; color: var(--ink-soft); margin: 1.2rem 0 0; max-width: 62ch; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 1.8rem; }
+
+/* Signature divider: ECG spike -> topo contour, one continuous line (stays teal) */
+.signature { width: 100%; height: auto; margin: 2.5rem 0 0.5rem; display: block; }
+.signature path { fill: none; stroke: var(--teal); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.home section { padding-top: 0.5rem; }
+.home h2 {
+  font-family: var(--serif); font-weight: 600; font-size: 1.45rem; margin: 3rem 0 1rem;
+  letter-spacing: -0.01em; padding-bottom: 0.5rem; border-bottom: 1px solid var(--line);
+}
+.home h3 { font-family: var(--serif); font-weight: 600; font-size: 1.2rem; line-height: 1.3; }
+.home p, .home li { font-size: 0.98rem; }
+.home p { margin-bottom: 0.9rem; }
+.home ul { padding-left: 1.2rem; margin-bottom: 1rem; }
+.home li { margin-bottom: 0.5rem; }
+
+/* App cards */
+.apps { display: flex; flex-direction: column; gap: 1.25rem; }
+.app {
+  padding: 1.4rem 1.5rem 1.3rem; background: var(--paper-raised); border: 1px solid var(--line);
+  border-radius: var(--radius); border-top: 3px solid var(--teal);
+}
+.app-head { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.9rem; }
+.app-head .app-icon { width: 64px; height: 64px; }
+.app-head .status-tag { margin-bottom: 0.15rem; }
+.app .tagline { font-family: var(--serif); font-style: italic; color: var(--ink-soft); font-size: 1rem; margin: 0.1rem 0 0; }
+.app p { font-size: 0.95rem; }
+.app .links {
+  margin-top: 0.9rem; padding-top: 0.8rem; border-top: 1px solid var(--line);
+  font-family: var(--mono); font-size: 0.8rem; display: flex; flex-wrap: wrap; gap: 0.4rem 1.3rem;
+}
+
+/* Pillars: chart-annotation style, no numbering (not a sequence) */
+.pillars { display: grid; gap: 1.1rem; margin-top: 1rem; }
+.pillar { padding: 0.2rem 0 0.2rem 1.1rem; border-left: 2px solid var(--teal); }
+.pillar h3 { font-size: 1.02rem; margin-bottom: 0.25rem; }
+.pillar p { margin-bottom: 0; font-size: 0.93rem; color: var(--ink-soft); }
+
+.timeline { list-style: none; padding-left: 0 !important; border-left: 1px solid var(--line); margin-left: 0.3rem; }
+.timeline li { position: relative; padding: 0 0 0.6rem 1.3rem; }
+.timeline li::before {
+  content: ""; position: absolute; left: -4.5px; top: 0.55em; width: 8px; height: 8px;
+  border-radius: 50%; background: var(--teal);
+}
+.timeline .when { font-family: var(--mono); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--teal); display: block; margin-bottom: 0.15rem; }
+
+.contact-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.contact-card { background: var(--paper-raised); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.1rem 1.2rem; }
+.contact-card h3 { font-size: 1rem; margin-bottom: 0.2rem; }
+.contact-card .addr { font-family: var(--mono); font-size: 0.88rem; display: inline-block; margin-bottom: 0.5rem; }
+.contact-card p { font-size: 0.9rem; color: var(--ink-soft); margin: 0; }
+
+.facts { display: grid; grid-template-columns: max-content 1fr; gap: 0.45rem 1.5rem; font-size: 0.95rem; }
+.facts dt { font-family: var(--mono); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft); padding-top: 0.2em; }
+
+.home .disclaimer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--line); }
+.home .disclaimer p { font-size: 0.84rem; color: var(--ink-soft); }
+
+@media (max-width: 560px) {
+  .contact-cards { grid-template-columns: 1fr; }
+  .facts { grid-template-columns: 1fr; gap: 0.1rem; }
+  .facts dd { margin-bottom: 0.6rem; }
+  .app { padding: 1.2rem 1.1rem; }
+}
