@@ -1,6 +1,6 @@
 # STATE — martinapps-site (martinapps.dev)
 
-**Last updated:** 2026-10-01
+**Last updated:** 2026-10-12
 **Branch:** `main`. Static site (plain HTML) served by GitHub Pages from `main`, custom domain via `CNAME`.
 The repo is PUBLIC and Pages serves every non-underscore directory, so anything under `ai/` would be
 fetchable at martinapps.dev/ai/STATE.md. Keep this file free of anything not meant to be public.
@@ -15,6 +15,11 @@ fetchable at martinapps.dev/ai/STATE.md. Keep this file free of anything not mea
   resubmission.
 - LICENSE conformed to Martin Apps LLC (`0b35f04`); copy corrections for unsubstantiated claims
   (`519ba47`, `a5e4394`, `393dc56`) and an FDA-position privacy fix (`72acf2a`).
+
+- Site refresh 2026-10-12 (`4b5f07b`): one shared stylesheet (`assets/site.css`) for every page, shared
+  header/footer and per-product sub-nav, official store badges and app icons, BoardBound marked live,
+  Wilderness Google Play link, OG/canonical tags, 404 page. Compliance page text and URLs unchanged.
+  New pages should link `/assets/site.css` and copy the header/footer markup from an existing page.
 
 ## Next
 
