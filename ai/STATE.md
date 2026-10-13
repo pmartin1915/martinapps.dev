@@ -25,6 +25,17 @@ fetchable at martinapps.dev/ai/STATE.md. Keep this file free of anything not mea
   `assets/site.css`; reduced-motion visitors and Safari (no CSS `d`) see the static mark. Source of truth
   for the geometry is `Brand/martin-apps-mark-build.svg` in the LLC records repo.
 
+- Professional pass 2026-10-12 (from the Gemini web-design benchmark; verdict lives in the LLC repo at
+  `Brand/research/WEB_DESIGN_VERDICT_2026-10-12.md`): self-hosted Newsreader + Atkinson Hyperlegible Next
+  (`assets/fonts/`, OFL, latin subset, preloaded on every page); per-app OG cards (`assets/og-*.png`);
+  `MobileApplication` JSON-LD for all five apps; 24px minimum on standalone text links; phone screenshot
+  strips (`assets/shots/`) for BoardBound and Scrollometer.
+- Screenshots deliberately NOT shown: Wilderness (only old TestFlight captures), Shortless (v2.1.0 shots
+  show a DNS/VPN filter the current listing doesn't describe), Burn Wizard (web-build captures only).
+  Add them when current store screenshots exist. BoardBound's rationale screens are excluded on purpose:
+  the app labels rationales "EXPERT-VERIFIED", which contradicts this site's "not reviewed by a licensed
+  clinician" disclosure.
+
 ## Next
 
 - Keep each app's privacy/support pages in step with the shipped binary: when an app version changes

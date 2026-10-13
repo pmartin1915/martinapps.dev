@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Martin Apps LLC &mdash; Education and reference software for healthcare and the outdoors</title>
 <meta name="description" content="Martin Apps LLC builds focused education and reference software for healthcare professionals and outdoor users. Alabama-based, founded by a DNP-prepared nurse practitioner.">
+<link rel="preload" href="/assets/fonts/newsreader.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/atkinson-next.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/site.css">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="any">
@@ -23,11 +25,115 @@
 {
   "@context": "https://schema.org",
   "@type": "Organization",
+  "@id": "https://martinapps.dev/#org",
   "name": "Martin Apps LLC",
   "url": "https://martinapps.dev/",
   "logo": "https://martinapps.dev/assets/apple-touch-icon.png",
   "email": "support@martinapps.dev",
   "address": { "@type": "PostalAddress", "addressRegion": "AL", "addressCountry": "US" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "MobileApplication",
+      "name": "BoardBound",
+      "url": "https://martinapps.dev/boardbound/",
+      "description": "AI Tutor for FNP Board Exams.",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "iOS",
+      "installUrl": "https://apps.apple.com/us/app/boardbound-prep/id6761675393",
+      "publisher": {
+        "@id": "https://martinapps.dev/#org"
+      },
+      "sameAs": [
+        "https://apps.apple.com/us/app/boardbound-prep/id6761675393"
+      ]
+    },
+    {
+      "@type": "MobileApplication",
+      "name": "Burn Wizard",
+      "url": "https://martinapps.dev/#burn-wizard",
+      "description": "Pediatric burn assessment and fluid resuscitation, taught offline.",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "iOS",
+      "installUrl": "https://apps.apple.com/us/app/burn-wizard/id6760600512",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "publisher": {
+        "@id": "https://martinapps.dev/#org"
+      },
+      "sameAs": [
+        "https://apps.apple.com/us/app/burn-wizard/id6760600512"
+      ]
+    },
+    {
+      "@type": "MobileApplication",
+      "name": "Wilderness Survival Companion",
+      "url": "https://martinapps.dev/#wilderness",
+      "description": "Offline reference and field tools for the backcountry.",
+      "applicationCategory": "ReferenceApplication",
+      "operatingSystem": "iOS, Android",
+      "installUrl": "https://apps.apple.com/us/app/wilderness-survival-companion/id6760920427",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "publisher": {
+        "@id": "https://martinapps.dev/#org"
+      },
+      "sameAs": [
+        "https://apps.apple.com/us/app/wilderness-survival-companion/id6760920427",
+        "https://play.google.com/store/apps/details?id=dev.martinapps.wilderness"
+      ]
+    },
+    {
+      "@type": "MobileApplication",
+      "name": "Shortless",
+      "url": "https://martinapps.dev/#shortless",
+      "description": "Short-form video feed blocker for Safari.",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "iOS",
+      "installUrl": "https://apps.apple.com/us/app/shortless/id6760598863",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "publisher": {
+        "@id": "https://martinapps.dev/#org"
+      },
+      "sameAs": [
+        "https://apps.apple.com/us/app/shortless/id6760598863"
+      ]
+    },
+    {
+      "@type": "MobileApplication",
+      "name": "Scrollometer",
+      "url": "https://martinapps.dev/#scrollometer",
+      "description": "Your screen time, measured as a distance.",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "iOS 17",
+      "installUrl": "https://apps.apple.com/us/app/scrollometer/id6805609511",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "publisher": {
+        "@id": "https://martinapps.dev/#org"
+      },
+      "sameAs": [
+        "https://apps.apple.com/us/app/scrollometer/id6805609511"
+      ]
+    }
+  ]
 }
 </script>
 </head>
@@ -113,6 +219,11 @@
         <p class="tagline">AI Tutor for FNP Board Exams.</p>
       </div>
     </div>
+    <div class="shots">
+      <img src="/assets/shots/boardbound-today.webp" alt="BoardBound Today screen: estimated readiness score and the topics to study next" width="440" height="956" loading="lazy" decoding="async">
+      <img src="/assets/shots/boardbound-tutor.webp" alt="BoardBound AI Tutor explaining why an answer is correct" width="440" height="956" loading="lazy" decoding="async">
+      <img src="/assets/shots/boardbound-stats.webp" alt="BoardBound Stats screen: readiness trend and domain breakdown" width="440" height="956" loading="lazy" decoding="async">
+    </div>
     <p>An AI-powered study companion for nurse practitioner students preparing for AANP and ANCC FNP board certification. A live AI tutor explains clinical reasoning the way a real NP preceptor would. It is constrained to the stored rationale attached to each question, so it explains that reasoning rather than generating clinical facts of its own. Questions and rationales are AI-generated and machine-audited; they have not been reviewed by a licensed clinician. Includes a 500+ question bank tagged to both exam blueprints, spaced repetition, Deep Dive mode for complex multi-system reasoning, and a readiness dashboard. Free tier included.</p>
     <p>Pricing: $29.99 per month or $79.99 for a 3-month sprint.</p>
     <div class="store-badges">
@@ -154,6 +265,11 @@
         <h3>Scrollometer</h3>
         <p class="tagline">Your screen time, measured as a distance.</p>
       </div>
+    </div>
+    <div class="shots">
+      <img src="/assets/shots/scrollometer-today.webp" alt="Scrollometer Today screen: today's estimated scroll distance and a to-scale comparison" width="440" height="956" loading="lazy" decoding="async">
+      <img src="/assets/shots/scrollometer-record.webp" alt="Scrollometer Record screen: thirteen weeks of daily distance" width="440" height="956" loading="lazy" decoding="async">
+      <img src="/assets/shots/scrollometer-methodology.webp" alt="Scrollometer Methodology screen: the formula behind every estimate" width="440" height="956" loading="lazy" decoding="async">
     </div>
     <p>Scrollometer takes the time you spend in the apps you choose and turns it into how far you've scrolled: feet, then miles, then landmarks. It shows today's distance, your history, and a weekly recap you can share if you want to. A Methodology screen shows the exact arithmetic behind every number. The figures are estimates, and the app says so wherever it shows one: iOS reports time spent, not scrolling, so Scrollometer multiplies that time by typical scroll speed for each app and the height of your screen. No streaks, no badges, no leaderboards. Requires iOS 17 and Screen Time access.</p>
     <p>Free. Contains no networking code: no account, no server, no analytics, no advertising.</p>
