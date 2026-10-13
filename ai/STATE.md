@@ -20,6 +20,10 @@ fetchable at martinapps.dev/ai/STATE.md. Keep this file free of anything not mea
   header/footer and per-product sub-nav, official store badges and app icons, BoardBound marked live,
   Wilderness Google Play link, OG/canonical tags, 404 page. Compliance page text and URLs unchanged.
   New pages should link `/assets/site.css` and copy the header/footer markup from an existing page.
+- Logo build animation 2026-10-12: the staircase fills in and resolves into the mark. Plays once in the
+  home masthead (`.mark-build`), loops on the 404 page (`.mark-build.loop`). CSS `d` keyframes in
+  `assets/site.css`; reduced-motion visitors and Safari (no CSS `d`) see the static mark. Source of truth
+  for the geometry is `Brand/martin-apps-mark-build.svg` in the LLC records repo.
 
 ## Next
 

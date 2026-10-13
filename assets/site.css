@@ -80,6 +80,25 @@ strong { font-weight: 650; }
 .brand:hover { text-decoration: none; }
 .brand svg { width: 28px; height: 28px; flex: none; }
 .brand span { font-family: var(--serif); font-weight: 600; font-size: 1.2rem; letter-spacing: -0.01em; }
+
+/* Build animation: the staircase fills in square by square and resolves into the mark.
+   Plays once in the home masthead, loops on the 404 page. Final frame is the static mark.
+   Browsers without CSS `d` support (Safari) and reduced-motion visitors see the static mark.
+   Source of truth: Brand/martin-apps-mark-build.svg in the LLC records repo. */
+.mark-404 { width: 96px; height: 96px; display: block; margin-bottom: 1.25rem; }
+@media (prefers-reduced-motion: no-preference) {
+  .mark-build path { animation: mark-build 3.1s 1; }
+  .mark-build.loop path { animation-iteration-count: infinite; }
+}
+@keyframes mark-build {
+  0.0%, 19.4% { d: path("M0,0 H100 L140,50 L180,0 H280 V280 H0 Z M40,40 H80 L140,110 L200,40 H240 V80 H200 V120 H160 V160 H120 V200 H80 V240 H40 Z M120,240 V200 H160 V160 H200 V120 H240 V240 Z"); }
+  19.5%, 29.0% { d: path("M0,0 H100 L140,50 L180,0 H280 V280 H0 Z M40,40 H80 L140,110 L200,40 H240 V80 H200 V120 H160 V160 H120 V200 H80 V240 H40 Z M160,240 V160 H200 V120 H240 V240 Z"); }
+  29.1%, 38.7% { d: path("M0,0 H100 L140,50 L180,0 H280 V280 H0 Z M40,40 H80 L140,110 L200,40 H240 V80 H200 V120 H160 V160 H120 V200 H80 V240 H40 Z M160,160 H200 V120 H240 V240 H200 V200 H160 Z"); }
+  38.8%, 48.4% { d: path("M0,0 H100 L140,50 L180,0 H280 V280 H0 Z M40,40 H80 L140,110 L200,40 H240 V80 H200 V120 H160 V160 H120 V200 H80 V240 H40 Z M200,120 H240 V240 H200 Z"); }
+  48.5%, 58.1% { d: path("M0,0 H100 L140,50 L180,0 H280 V280 H0 Z M40,40 H80 L140,110 L200,40 H240 V80 H200 V120 H160 V160 H120 V200 H80 V240 H40 Z M200,120 H240 V200 H200 Z"); }
+  58.2%, 67.7% { d: path("M0,0 H100 L140,50 L180,0 H280 V280 H0 Z M40,40 H80 L140,110 L200,40 H240 V80 H200 V120 H160 V160 H120 V200 H80 V240 H40 Z M200,120 H240 V160 H200 Z"); }
+  67.8%, 100% { d: path("M0,0 H100 L140,50 L180,0 H280 V280 H0 Z M40,40 H80 L140,110 L200,40 H240 V80 H200 V120 H160 V160 H120 V200 H80 V240 H40 Z"); }
+}
 .site-nav { display: flex; gap: 1.4rem; font-size: 0.92rem; }
 .site-nav a { color: var(--ink-soft); }
 .site-nav a:hover, .site-nav a[aria-current] { color: var(--teal); }
