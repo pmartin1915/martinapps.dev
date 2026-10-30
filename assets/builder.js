@@ -193,7 +193,7 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
   }
 
   /* ================= main thread: measure the letter, ask for a plan early, draw the hammer ================= */
-  var asked = '', sc0 = .3, P = null, el = null, anim = null, done = false, finT = 0, shift = null, loc = null, worker = null, planInline = null;
+  var asked = '', off = [0, 0], sc0 = .3, P = null, el = null, anim = null, done = false, finT = 0, shift = null, loc = null, worker = null, planInline = null;
 
   function metrics() {   // where the first glyph is on the page (cheap; no pixels)
     var tg = target(), ch = tg.node.data.charAt(tg.idx), cs = getComputedStyle(tg.el), r = document.createRange();
@@ -225,17 +225,29 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
     var msg = { sig: sig, W: W, H: H, ink: ink, ox: ox, oy: oy, top: oy + top, bot: oy + bot, left: ox + left, right: ox + right, mid: ox + (left + right) / 2,
                 lmin: q.lmin, far: (oy + rty) - (mr.top + scrollY + TOSS.y * mr.height / 280) > 250, cl: ox + cl, cr: ox + cr, rtx: ox + rtx, rty: oy + rty, ang: TOSS.ang, style: STYLE, seed: SEED, vw: document.documentElement.clientWidth,
                 x0: mr.left + scrollX + TOSS.x * mr.width / 280, y0: mr.top + scrollY + TOSS.y * mr.height / 280 };
-    if (worker) worker.postMessage(msg); else setTimeout(function () { accept(planInline(msg)); }, 0);
+    if (worker) {
+      if (pending) { worker.terminate(); worker = makeWorker(); }   // the layout moved again: drop the stale search, start fresh
+      if (worker) { pending = sig; worker.postMessage(msg); return; }
+    }
+    if (!planInline) planInline = core();
+    setTimeout(function () { accept(planInline(msg)); }, 0);
     if (/hammerdebug/.test(location.search)) debugMask(msg);
   }
-  try {
-    worker = new Worker(URL.createObjectURL(new Blob(['var plan=(' + core.toString() + ')();onmessage=function(e){postMessage(plan(e.data))};'], { type: 'text/javascript' })));
-    worker.onmessage = function (e) { accept(e.data); };
-    worker.onerror = function () { worker = null; planInline = core(); asked = ''; request(); };
-  } catch (err) { worker = null; planInline = core(); }
+  var workerUrl = null, pending = null;
+  function makeWorker() {
+    try {
+      workerUrl = workerUrl || URL.createObjectURL(new Blob(['var plan=(' + core.toString() + ')();onmessage=function(e){postMessage(plan(e.data))};'], { type: 'text/javascript' }));
+      var w = new Worker(workerUrl);
+      w.onmessage = function (e) { if (w === worker) { pending = null; accept(e.data); } };
+      w.onerror = function () { if (w === worker) { worker = null; planInline = core(); pending = null; asked = ''; request(); } };
+      return w;
+    } catch (err) { planInline = core(); return null; }
+  }
+  worker = makeWorker();
 
   function accept(r) {
     if (!r || r.sig !== asked) return;
+    if (P && shift !== null) return;                      // already flying (or landed): keep this take
     if (/hammerdebug/.test(location.search)) window.__hammerPlan = r;
     var old = el; P = r; el = build(P.b); if (old) old.remove(); done = false; put(0, 0, 0, 1, false);
   }
@@ -261,15 +273,18 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
         if (shift === null) shift = Math.max(0, t);   // plan arrived late: start now instead of jumping
         var tp = t - shift, fr = P.frames, k = Math.min(fr.length - 1, Math.max(0, tp) * PLAY / REC), i = Math.floor(k), f = k - i, A = fr[i], B = fr[Math.min(i + 1, fr.length - 1)];
         var sc = sc0 + (1 - sc0) * ss(tp / .55);
-        put(A[0] + (B[0] - A[0]) * f, A[1] + (B[1] - A[1]) * f, A[2] + (B[2] - A[2]) * f, sc, true);
+        put(off[0] + A[0] + (B[0] - A[0]) * f, off[1] + A[1] + (B[1] - A[1]) * f, A[2] + (B[2] - A[2]) * f, sc, true);
         if (k >= fr.length - 1 && !done) { done = true; var rest = fr[fr.length - 1]; loc = [rest[0] - P.ox, rest[1] - P.oy, rest[2]]; }
       }
     }
     if (anim.playState !== 'finished' || !done) requestAnimationFrame(frame);
   }
   function relocate() {   // layout changed: keep a settled hammer in the bowl, and re-plan if it has not flown yet
-    if (done && el) { var q = metrics(); if (q) put(q.ox + loc[0], q.oy + loc[1], loc[2], 1, true); }
-    else if (!done) request();
+    var q = metrics(); if (!q) return;
+    if (P && shift !== null) {                            // in flight or landed: slide the whole take with the letter
+      off = [q.ox - P.ox, q.oy - P.oy];
+      if (done) put(q.ox + loc[0], q.oy + loc[1], loc[2], 1, true);
+    } else request();                                      // not thrown yet: plan again for the new layout
   }
   addEventListener('resize', function () { setTimeout(relocate, 120); });
   function debugMask(m) {
@@ -278,8 +293,14 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
     c.style.cssText = 'position:absolute;left:' + m.ox + 'px;top:' + m.oy + 'px;pointer-events:none;z-index:49;outline:1px solid #0a0'; document.body.appendChild(c);
   }
   // plan early: once fonts and layout have settled, well before the scene reaches the toss
-  function start() { requestAnimationFrame(function () { setTimeout(request, 250); }); }
-  if (document.readyState === 'complete') start(); else addEventListener('load', start);
+  var started = false;
+  function start() { if (started) return; started = true; requestAnimationFrame(function () { setTimeout(request, 120); }); }
+  function early() {
+    var gate = document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise(function (r) { setTimeout(r, 2500); })]) : Promise.resolve();
+    gate.then(start);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', early); else early();
+  addEventListener('load', start);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { setTimeout(relocate, 100); });
   requestAnimationFrame(frame);
 })();

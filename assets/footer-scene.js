@@ -9,7 +9,7 @@
     var s = box.querySelector('svg');
     if (!s || !s.pauseAnimations) return;
     s.pauseAnimations();                       // nothing moves until we say so
-    if (reduce) { s.setCurrentTime(33.5); return; }
+    if (reduce) { s.setCurrentTime(14.6); return; }
     new IntersectionObserver(function (e) { if (e[0].isIntersecting) s.unpauseAnimations(); else s.pauseAnimations(); }, { threshold: .3 }).observe(s);
   }
   new IntersectionObserver(function (e, o) {
