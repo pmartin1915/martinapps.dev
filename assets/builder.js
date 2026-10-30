@@ -23,6 +23,10 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
  */
 (function () {
   'use strict';
+  // The M's staircase build (SMIL, for Safari, which cannot animate CSS `d`): start it unless reduced motion is on.
+  if (window.matchMedia && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    [].forEach.call(document.querySelectorAll('.mark-build animate.mb'), function (a) { try { a.beginElement(); } catch (e) {} });
+  }
   if (!window.matchMedia || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   // First visit: the skate slide. Every later visit: a random style and a fresh random take. The only thing
   // stored is a "seen" flag in localStorage (never sent anywhere). ?toss=classic|skate|random forces one.
