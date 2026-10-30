@@ -13,10 +13,11 @@
 .builder .nail-at { transform: translate(-54px, 132px); opacity: 0; }
 .builder .cube-b { transform: translate(-20px, 132px); opacity: 0; }
 .builder .cube-a { transform: translate(28px, -98px); }
-.builder .sockbg, .builder .halo, .builder .shadow { opacity: 0; }
-.builder .bx, .builder .frame, .builder .edge, .builder .spark, .builder .ring { opacity: 0; }
+.builder .sockbg, .builder .shadow { opacity: 0; }
+.builder .bx, .builder .frame, .builder .edge, .builder .spark { opacity: 0; }
 .builder .lean { transform-origin: 0 -85px; } .builder .head { transform-origin: 0 -153px; }
-.builder .ring { transform-origin: 0 132px; } .builder .spark { transform-box: fill-box; }
+.builder .spark { transform-box: fill-box; }
+.builder .puff { opacity: 0; transform-box: fill-box; transform-origin: center; }
 .door-hole { transform-origin: 0 240px; transform: scaleY(0); }
 .sock-hole { transform-origin: 0 132px; transform: scaleY(0); }
 .builder .thigh-a { transform: rotate(5deg); } .builder .thigh-b { transform: rotate(-5deg); }
@@ -34,14 +35,14 @@
   .builder .cube-a { animation: cube-a 18s linear both; } .builder .cube-a-in { animation: cube-a-vis 18s linear both; }
   .builder .cube-b { animation: cube-b-vis 18s linear both, jolt 18s linear both; }
   .builder .cube-slide { animation: slide 18s linear both; }
-  .builder .cube-b .sq { animation: paint 18s linear both; }
-  .builder .halo { animation: halo 18s linear both; } .builder .sockbg { animation: sockbg 18s linear both; }
+  .builder .cube-b .led { animation: paint 18s linear both; }
+  .builder .sockbg { animation: sockbg 18s linear both; }
   .builder .nail-at { animation: nail-vis 18s linear both; } .builder .nail-in { animation: drive 18s linear both; }
   .door-hole { animation: door 18s ease-in-out both; } .sock-hole { animation: sock 18s ease-out both; }
   .builder .frame { animation: frame 18s linear both; }
   .builder .edge { animation: edge 18s ease-in-out both; }
   .builder .spark { animation: spark 18s linear both; }
-  .builder .ring-1 { animation: ring 18s ease-out both; } .builder .ring-2 { animation: ring 18s ease-out .22s both; }
+  .builder .puff { animation: puff var(--d) cubic-bezier(.15,.7,.3,1) var(--t) both; }
 }
 @keyframes bx-move {
   0.000% { transform: translate(-330.00px, 0.00px); opacity: 0.000; }
@@ -1470,13 +1471,21 @@
   19.444% { rotate: 5.06deg; }
   19.722% { rotate: 5.74deg; }
   20.000% { rotate: 6.00deg; }
-  26.944% { rotate: 5.94deg; }
-  28.889% { rotate: 4.21deg; }
-  29.444% { rotate: 4.00deg; }
-  38.389% { rotate: 3.99deg; }
-  38.889% { rotate: 3.38deg; }
-  40.111% { rotate: 0.42deg; }
-  40.556% { rotate: 0.00deg; }
+  26.667% { rotate: 6.00deg; }
+  27.222% { rotate: 5.79deg; }
+  29.167% { rotate: 4.06deg; }
+  38.389% { rotate: 4.00deg; }
+  38.889% { rotate: 3.69deg; }
+  40.333% { rotate: 2.06deg; }
+  42.778% { rotate: 2.00deg; }
+  42.889% { rotate: 1.71deg; }
+  43.000% { rotate: 0.95deg; }
+  43.444% { rotate: -3.38deg; }
+  43.556% { rotate: -3.92deg; }
+  43.667% { rotate: -4.00deg; }
+  44.444% { rotate: -3.46deg; }
+  46.111% { rotate: -0.90deg; }
+  46.944% { rotate: -0.07deg; }
   55.556% { rotate: 0.00deg; }
   55.833% { rotate: 0.26deg; }
   56.111% { rotate: 0.94deg; }
@@ -1515,26 +1524,35 @@
   37.389% { rotate: 4.39deg; }
   38.056% { rotate: 0.84deg; }
   38.333% { rotate: 0.03deg; }
-  44.444% { rotate: 0.00deg; }
-  44.778% { rotate: -0.29deg; }
-  45.278% { rotate: -1.65deg; }
-  45.556% { rotate: -2.78deg; }
-  46.944% { rotate: -9.92deg; }
-  47.500% { rotate: -12.35deg; }
-  47.778% { rotate: -13.22deg; }
-  48.056% { rotate: -13.80deg; }
-  48.333% { rotate: -14.00deg; }
-  56.111% { rotate: -14.00deg; }
-  56.389% { rotate: -13.31deg; }
-  56.667% { rotate: -11.50deg; }
-  56.944% { rotate: -8.94deg; }
-  57.500% { rotate: -3.06deg; }
-  57.778% { rotate: -0.50deg; }
-  58.056% { rotate: 1.31deg; }
-  58.333% { rotate: 2.00deg; }
-  58.889% { rotate: 1.79deg; }
-  60.556% { rotate: 0.21deg; }
-  61.111% { rotate: 0.00deg; }
+  42.778% { rotate: 0.00deg; }
+  42.889% { rotate: -0.34deg; }
+  43.000% { rotate: -1.23deg; }
+  43.333% { rotate: -5.19deg; }
+  43.444% { rotate: -6.27deg; }
+  43.556% { rotate: -6.91deg; }
+  43.611% { rotate: -7.00deg; }
+  43.889% { rotate: -6.83deg; }
+  44.222% { rotate: -6.25deg; }
+  45.556% { rotate: -2.63deg; }
+  46.111% { rotate: -2.00deg; }
+  46.389% { rotate: -2.17deg; }
+  46.667% { rotate: -2.66deg; }
+  47.222% { rotate: -4.38deg; }
+  48.611% { rotate: -10.50deg; }
+  49.167% { rotate: -12.58deg; }
+  49.722% { rotate: -13.83deg; }
+  50.000% { rotate: -14.00deg; }
+  57.222% { rotate: -14.00deg; }
+  57.500% { rotate: -13.31deg; }
+  57.778% { rotate: -11.50deg; }
+  58.056% { rotate: -8.94deg; }
+  58.611% { rotate: -3.06deg; }
+  58.889% { rotate: -0.50deg; }
+  59.167% { rotate: 1.31deg; }
+  59.444% { rotate: 2.00deg; }
+  60.000% { rotate: 1.79deg; }
+  61.389% { rotate: 0.43deg; }
+  62.222% { rotate: 0.00deg; }
   100.000% { rotate: 0.00deg; }
 }
 @keyframes cube-a {
@@ -1601,20 +1619,17 @@
   45.889% { opacity: 0; }
   100.000% { opacity: 0; }
 }
+@keyframes puff {
+  0% { opacity: 0; transform: translate(0, 0) scale(.3); }
+  12% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(var(--s)); }
+}
 @keyframes sockbg {
   0.000% { opacity: 0; }
   37.778% { opacity: 0; }
   38.056% { opacity: 1; }
   45.833% { opacity: 1; }
   45.889% { opacity: 0; }
-  100.000% { opacity: 0; }
-}
-@keyframes halo {
-  0.000% { opacity: 0; }
-  37.000% { opacity: 0; }
-  37.778% { opacity: .9; }
-  43.333% { opacity: .9; }
-  45.000% { opacity: 0; }
   100.000% { opacity: 0; }
 }
 @keyframes nail-vis {
@@ -1679,8 +1694,8 @@
 }
 @keyframes door {
   0.000% { transform: scaleY(0); }
-  48.889% { transform: scaleY(0); }
-  58.889% { transform: scaleY(1); }
+  49.444% { transform: scaleY(0); }
+  59.444% { transform: scaleY(1); }
   68.889% { transform: scaleY(1); }
   73.333% { transform: scaleY(0); }
   100.000% { transform: scaleY(0); }
@@ -1704,17 +1719,15 @@
   100.000% { opacity: 0; }
 }
 @keyframes edge {
-  0.000% { opacity: 0; transform: translateY(132px); }
-  43.611% { opacity: 0; transform: translateY(132px); }
-  43.889% { opacity: 1; transform: translateY(132px); }
-  47.778% { opacity: 1; transform: translateY(240px); }
-  48.889% { opacity: 1; transform: translateY(240px); }
-  58.889% { opacity: 1; transform: translateY(40px); }
+  0.000% { opacity: 0; transform: translateY(240px); }
+  49.333% { opacity: 0; transform: translateY(240px); }
+  49.444% { opacity: 1; transform: translateY(240px); }
+  59.444% { opacity: 1; transform: translateY(40px); }
   60.556% { opacity: 0; transform: translateY(40px); }
   68.889% { opacity: 0; transform: translateY(40px); }
-  69.167% { opacity: 1; transform: translateY(40px); }
+  69.000% { opacity: 1; transform: translateY(40px); }
   73.333% { opacity: 1; transform: translateY(240px); }
-  74.444% { opacity: 0; transform: translateY(240px); }
+  73.889% { opacity: 0; transform: translateY(240px); }
   100.000% { opacity: 0; transform: translateY(240px); }
 }
 @keyframes spark {
@@ -1729,11 +1742,4 @@
   37.000% { opacity: 1; scale: 1; }
   37.667% { opacity: 0; scale: 1.5; }
   100.000% { opacity: 0; }
-}
-@keyframes ring {
-  0.000% { opacity: 0; scale: .3; }
-  43.333% { opacity: 0; scale: .3; }
-  43.611% { opacity: 1; scale: .4; }
-  47.222% { opacity: 0; scale: 5; }
-  100.000% { opacity: 0; scale: 5; }
 }
