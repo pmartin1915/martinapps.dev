@@ -64,7 +64,7 @@ a { color: var(--accent); }
 .app-wide { flex-basis: 100%; }
 .app-top { display: flex; gap: 18px; align-items: center; }
 .icon { width: 72px; height: 72px; border-radius: 18px; flex: none; }
-.app h4, .project h4 { font-size: 25px; margin: 0; line-height: 1.2; }
+.app h3, .project h4 { font-size: 25px; margin: 0; line-height: 1.2; }
 .chips { margin: 6px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
 .chip, .pill { font-size: 14px; font-weight: 700; background: var(--pill); color: var(--ink-tag); padding: 4px 12px; border-radius: 999px; }
 .pill { align-self: flex-start; }
