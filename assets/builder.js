@@ -1,4 +1,4 @@
-const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2};
+const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
 /* The Builder's hammer toss (body of assets/builder.js; gen.py prepends `const TOSS = {...}`).
  *
  * As the figure climbs, he flicks his hammer out of the icon. It falls onto the "U" of the hero headline,
@@ -15,12 +15,17 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2};
  * for seconds right after the cube went in, so ALL of it runs in a Web Worker, started at page load, never
  * during the scene. The main thread only draws one element per frame. If the plan is not ready at release
  * time the hammer simply starts late; it never blocks and never jumps.
+ * Two toss styles (TOSS.style, or ?toss=classic|skate in the URL):
+ *   classic - a high lob, light head, wedges and rocks in the bowl (saved at git tag builder-v1-classic-toss).
+ *   skate   - a low sideways flick, heavy head, slippery: hits the right stem, bounces, then slides down the U
+ *             like a skateboard in a half-pipe, head down, rocks across and settles in the middle (default).
  * Debug: add ?hammerdebug to the URL to see the glyph mask the physics uses.
  */
 (function () {
   'use strict';
   if (!window.matchMedia || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  var PLAY = .5, REC = 1 / 120;
+  var STYLE = (/[?&]toss=(classic|skate)/.exec(location.search) || [])[1] || TOSS.style || 'skate';
+  var PLAY = STYLE === 'skate' ? .6 : .5, REC = 1 / 120;
   var mark = document.querySelector('.mark-wrap');
   var h1 = document.querySelector('.hero h1') || document.querySelector('h1');
   if (!mark || !h1 || !h1.firstChild || h1.firstChild.nodeType !== 3) return;
@@ -28,7 +33,7 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2};
 
   /* ================= core: pure computation, no DOM. Runs in a Worker (or inline as a fallback). ================= */
   function core() {
-    var G = 2300, DT = 1 / 480, REC = 1 / 120, TRIALS = 200, MAXT = 9;
+    var G = 2300, DT = 1 / 480, REC = 1 / 120, TRIALS = 260, MAXT = 9;
     function rng(seed) {
       var a = seed >>> 0;
       return function () { a = (a + 0x6D2B79F5) | 0; var t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
@@ -55,45 +60,51 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2};
       var i = Math.floor(u), j = Math.floor(v), fu = u - i, fv = v - j;
       return (at(g, i, j) * (1 - fu) + at(g, i + 1, j) * fu) * (1 - fv) + (at(g, i, j + 1) * (1 - fu) + at(g, i + 1, j + 1) * fu) * fv;
     }
-    function hammer(g) {   // weighted contact points around a handle and a head
+    var STY = {
+      classic: { headW: 1.4, mu: .35, e: .5, T0: .55, T1: 1.15, vyMin: -1500, spin: 15 },
+      skate:   { headW: 3.2, mu: .1,  e: .42, T0: .26, T1: .5,   vyMin: -650,  spin: 7 }
+    };
+    function hammer(g, st) {   // weighted contact points around a handle and a head
       var gap = Math.max(10, g.cr - g.cl), L = Math.max(11, Math.min(70, gap * .72));
       var Lh = L / 1.1, th = .2 * Lh, hh = .62 * Lh, rh = Math.max(1.1, .05 * Lh), pts = [], u;
       for (u = 0; u <= .76 * Lh; u += .25 * Lh) pts.push([u, 0, rh, .5]);
-      [[Lh - th / 2, -hh / 2], [Lh - th / 2, hh / 2], [Lh + th / 2, -hh / 2], [Lh + th / 2, hh / 2], [Lh + th / 2, 0], [Lh, -hh / 2], [Lh, hh / 2]].forEach(function (p) { pts.push([p[0], p[1], 1.2, 1.4]); });
+      [[Lh - th / 2, -hh / 2], [Lh - th / 2, hh / 2], [Lh + th / 2, -hh / 2], [Lh + th / 2, hh / 2], [Lh + th / 2, 0], [Lh, -hh / 2], [Lh, hh / 2]].forEach(function (p) { pts.push([p[0], p[1], 1.2, st.headW]); });
       var M = 0, cx = 0; pts.forEach(function (p) { M += p[3]; cx += p[0] * p[3]; }); cx /= M;
       var I = 0; pts.forEach(function (p) { p[0] -= cx; I += p[3] * (p[0] * p[0] + p[1] * p[1]); });
       return { L: L, Lh: Lh, th: th, hh: hh, rh: rh, pts: pts, M: M, I: I, cx: cx };
     }
-    function simulate(g, b, s) {   // rigid body with impulses + friction; returns the recorded run
-      var x = s.x, y = s.y, a = s.a, vx = s.vx, vy = s.vy, w = s.w, frames = [], events = [], still = 0, steps = MAXT / DT, n, i, it, cs, sn, t;
+    function simulate(g, b, s, st) {   // rigid body with impulses + friction; returns the recorded run
+      var x = s.x, y = s.y, a = s.a, vx = s.vx, vy = s.vy, w = s.w, frames = [], events = [], still = 0, slide = 0, hit, steps = MAXT / DT, n, i, it, cs, sn, t;
       for (n = 0; n < steps; n++) {
         t = n * DT;
         vy += G * DT; var dr = 1 - .05 * DT, ar = 1 - .3 * DT; vx *= dr; vy *= dr; w *= ar;
-        x += vx * DT; y += vy * DT; a += w * DT;
+        x += vx * DT; y += vy * DT; a += w * DT; hit = false;
         for (it = 0; it < 4; it++) {
           cs = Math.cos(a); sn = Math.sin(a);
           for (i = 0; i < b.pts.length; i++) {
             var p = b.pts[i], rx = cs * p[0] - sn * p[1], ry = sn * p[0] + cs * p[1], px = x + rx, py = y + ry, d = dist(g, px, py) - p[2];
             if (d >= 0) continue;
+            hit = true;
             var gx = dist(g, px + 1, py) - dist(g, px - 1, py), gy = dist(g, px, py + 1) - dist(g, px, py - 1), gl = Math.hypot(gx, gy) || 1, nx = gx / gl, ny = gy / gl;
             x += nx * -d * .55; y += ny * -d * .55;
             var vcx = vx - w * ry, vcy = vy + w * rx, vn = vcx * nx + vcy * ny;
             if (vn >= 0) continue;
-            var e = -vn > 140 ? .5 : 0, rn = rx * ny - ry * nx, j = -(1 + e) * vn / (1 / b.M + rn * rn / b.I);
+            var e = -vn > 140 ? st.e : 0, rn = rx * ny - ry * nx, j = -(1 + e) * vn / (1 / b.M + rn * rn / b.I);
             vx += j * nx / b.M; vy += j * ny / b.M; w += j * rn / b.I;
             if (-vn > 90 && it === 0) events.push({ t: t, x: px, y: py, vn: -vn });
             vcx = vx - w * ry; vcy = vy + w * rx;
-            var tx = -ny, ty = nx, vt = vcx * tx + vcy * ty, rt = rx * ty - ry * tx, jt = -vt / (1 / b.M + rt * rt / b.I), lim = .35 * j;
+            var tx = -ny, ty = nx, vt = vcx * tx + vcy * ty, rt = rx * ty - ry * tx, jt = -vt / (1 / b.M + rt * rt / b.I), lim = st.mu * j;
             jt = jt > lim ? lim : jt < -lim ? -lim : jt;
             vx += jt * tx / b.M; vy += jt * ty / b.M; w += jt * rt / b.I;
           }
         }
+        if (hit && Math.hypot(vx, vy) > 60 && y > g.top + .4 * (g.bot - g.top)) slide += DT;   // time spent sliding along the bowl
         if (n % Math.round(REC / DT) === 0) frames.push([x, y, a]);
-        if (Math.hypot(vx, vy) < 9 && Math.abs(w) < .35 && t > .3 && dist(g, x, y) < 3 * b.L) { still += DT; if (still > .45) return { frames: frames, events: events, slept: t, rest: [x, y, a] }; } else still = 0;
+        if (Math.hypot(vx, vy) < 9 && Math.abs(w) < .35 && t > .3 && dist(g, x, y) < 3 * b.L) { still += DT; if (still > .45) return { frames: frames, events: events, slept: t, rest: [x, y, a], slide: slide }; } else still = 0;
       }
-      return { frames: frames, events: events, slept: null, rest: [x, y, a] };
+      return { frames: frames, events: events, slept: null, rest: [x, y, a], slide: slide };
     }
-    function judge(g, r) {   // right stem first, ends in the bowl, crosses it, livelier and longer is better
+    function judge(g, b, r, style) {   // right stem first, ends in the bowl, crosses it, livelier and longer is better
       if (r.slept === null) return -1;
       var h = g.bot - g.top, first = null, i;
       for (i = 0; i < r.events.length; i++) if (r.events[i].vn > 100) { first = r.events[i]; break; }
@@ -102,17 +113,23 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2};
       if (rx < g.cl + 1 || rx > g.cr - 1 || ry < g.top + .45 * h || ry > g.bot) return -1;
       var cross = 0, side = 0, f, sd;
       for (i = 0; i < r.frames.length; i++) { f = r.frames[i]; if (f[1] < g.top + .35 * h) continue; sd = f[0] > g.mid ? 1 : -1; if (side && sd !== side) cross++; side = sd; }
+      if (style === 'skate') {   // a real slide, head (the heavy end) down, settled in the middle
+        var a = r.rest[2], headY = ry + Math.sin(a) * (b.Lh - b.cx), tailY = ry - Math.sin(a) * b.cx, gap = g.cr - g.cl;
+        if (cross < 2 || r.slide < .45 || headY < tailY - .5 || Math.abs(rx - (g.cl + g.cr) / 2) > .2 * gap || r.slept > 8.5) return -1;
+        return r.slide * 5 + cross * 2 + Math.min(r.events.length, 10) * .3 - r.slept * .2;
+      }
       if (cross < 3 || r.events.length < 3 || r.slept > 8) return -1;
       return cross * 3 + Math.min(r.slept, 4.5) + Math.min(r.events.length, 12) * .4;
     }
     return function plan(m) {
-      field(m); var b = hammer(m), rnd = rng(20261030), best = null, bs = -1e9, k;
+      var st = STY[m.style] || STY.skate;
+      field(m); var b = hammer(m, st), rnd = rng(20261030), best = null, bs = -1e9, k;
       var tx = m.rtx - .12 * b.L, ty = m.rty - .28 * b.L;
       for (k = 0; k < TRIALS; k++) {
-        var T = .55 + rnd() * .6, w0 = (rnd() * 2 - 1) * 15 + (rnd() < .5 ? -4 : 4), a0 = m.ang * Math.PI / 180 + (rnd() - .5) * 1.2;
+        var T = st.T0 + rnd() * (st.T1 - st.T0), w0 = (rnd() * 2 - 1) * st.spin + (rnd() < .5 ? -3 : 3), a0 = m.ang * Math.PI / 180 + (rnd() - .5) * 1.2;
         var s = { x: m.x0, y: m.y0, a: a0, vx: (tx - m.x0) / T, vy: (ty - m.y0 - .5 * G * T * T) / T, w: w0 };
-        if (s.vy < -1500 || s.vy > 400) continue;
-        var r = simulate(m, b, s), sc = judge(m, r);
+        if (s.vy < st.vyMin || s.vy > 400) continue;
+        var r = simulate(m, b, s, st), sc = judge(m, b, r, m.style);
         if (sc > bs) { bs = sc; best = r; }
       }
       var ok = !!best && bs > -1e8;
@@ -156,7 +173,7 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2};
     if (sig === asked) return; asked = sig;
     sc0 = Math.min(1, Math.max(.1, .88 * mr.width / 280 * 58 / Math.max(11, (cr - cl) * .72)));
     var msg = { sig: sig, W: W, H: H, ink: ink, ox: ox, oy: oy, top: oy + top, bot: oy + bot, left: ox + left, right: ox + right, mid: ox + (left + right) / 2,
-                cl: ox + cl, cr: ox + cr, rtx: ox + rtx, rty: oy + rty, ang: TOSS.ang,
+                cl: ox + cl, cr: ox + cr, rtx: ox + rtx, rty: oy + rty, ang: TOSS.ang, style: STYLE,
                 x0: mr.left + scrollX + TOSS.x * mr.width / 280, y0: mr.top + scrollY + TOSS.y * mr.height / 280 };
     if (worker) worker.postMessage(msg); else setTimeout(function () { accept(planInline(msg)); }, 0);
     if (/hammerdebug/.test(location.search)) debugMask(msg);
@@ -169,6 +186,7 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2};
 
   function accept(r) {
     if (!r || r.sig !== asked) return;
+    if (/hammerdebug/.test(location.search)) window.__hammerPlan = r;
     var old = el; P = r; el = build(P.b); if (old) old.remove(); done = false; put(0, 0, 0, 1, false);
   }
   function build(b) {
