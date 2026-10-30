@@ -171,23 +171,29 @@ html { scrollbar-gutter: stable; }
 .founder-row p { margin: 0; }
 @media (max-width: 600px) { .founder-row { gap: 16px; align-items: flex-start; } .founder-row img { width: 96px; height: 96px; } }
 
-/* Builder: after the mark finishes building, a stick figure walks up, holds a sign to the left
-   wall and hammers a nail through it, waves, and walks off. The sign stays.
+/* Builder: after the mark finishes building, a hard-hatted stick figure ambles up, holds a sign to the
+   left wall and hammers a nail through it, waves, and ambles off. The sign stays.
    One 10 s master timeline (percent = seconds x 10), home header only, runs once.
    Reduced motion (or no animation support): no figure, the finished sign just sits there. */
 .mark-wrap { position: relative; display: block; width: 38px; height: 38px; flex: none; }
 .mark-wrap .builder { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
-.builder .nail-at { transform: translate(-94px, 132px); }
+.builder .nail-at { transform: translate(-68px, 132px); }
 .builder .sign-b { transform: translate(0, 132px); transform-origin: 0 132px; }
 .builder .nail-in { transform: translateX(14px); }
 .builder .bx { display: none; }
+.builder .lean { transform-origin: 0 -85px; }
+.builder .thigh-a { transform: rotate(7deg); } .builder .thigh-b { transform: rotate(-7deg); }
 @media (prefers-reduced-motion: no-preference) {
   .builder .bx { display: inline; animation: bx-move 10s linear both; }
+  .builder .bob { animation: bob .28s ease-in-out 3.3s 6 alternate, bob .28s ease-in-out 8.35s 6 alternate; }
   .builder .face { animation: face-flip 10s linear both; }
-  .builder .arm-l { animation: arm-l 10s linear both; }
-  .builder .arm-r { animation: arm-r 10s linear both; }
-  .builder .leg-a { animation: stride-a .42s ease-in-out 3.3s 4, stride-a .42s ease-in-out 8.35s 3; }
-  .builder .leg-b { animation: stride-b .42s ease-in-out 3.3s 4, stride-b .42s ease-in-out 8.35s 3; }
+  .builder .lean { animation: lean 10s ease-in-out both; }
+  .builder .uarm-l { animation: uarm-l 10s ease-in-out both; } .builder .farm-l { animation: farm-l 10s ease-in-out both; }
+  .builder .uarm-r { animation: uarm-r 10s ease-in-out both; } .builder .farm-r { animation: farm-r 10s ease-in-out both; }
+  .builder .thigh-a { animation: thigh-a .56s ease-in-out 3.3s 3, thigh-a .56s ease-in-out 8.35s 3; }
+  .builder .thigh-b { animation: thigh-b .56s ease-in-out 3.3s 3, thigh-b .56s ease-in-out 8.35s 3; }
+  .builder .shin-a { animation: shin-a .56s ease-in-out 3.3s 3, shin-a .56s ease-in-out 8.35s 3; }
+  .builder .shin-b { animation: shin-b .56s ease-in-out 3.3s 3, shin-b .56s ease-in-out 8.35s 3; }
   .builder .sign-a-in { animation: carry 10s linear both; }
   .builder .sign-a { animation: gone 10s linear both; }
   .builder .sign-b { animation: show 10s linear both, jolt 10s linear both; }
@@ -195,44 +201,132 @@ html { scrollbar-gutter: stable; }
   .builder .nail-in { animation: drive 10s linear both; }
 }
 @keyframes bx-move {
-  0%, 32.9% { transform: translateX(-490px); opacity: 0; }
-  33% { transform: translateX(-490px); opacity: 0; }
+  0%, 33% { transform: translateX(-490px); opacity: 0; }
   35% { opacity: 1; }
-  50%, 56.5% { transform: translateX(-152px); opacity: 1; }
-  56.6%, 61.5% { transform: translateX(-148.5px); }
-  61.6%, 66.5% { transform: translateX(-145px); }
-  66.6%, 83.4% { transform: translateX(-141.5px); opacity: 1; }
+  50%, 56.5% { transform: translateX(-127px); opacity: 1; }
+  56.6%, 61.5% { transform: translateX(-123.5px); }
+  61.6%, 66.5% { transform: translateX(-120px); }
+  66.6%, 83.4% { transform: translateX(-116.5px); opacity: 1; }
   96% { transform: translateX(-490px); opacity: 1; }
   98%, 100% { transform: translateX(-490px); opacity: 0; }
 }
 @keyframes face-flip { 0%, 83.4% { transform: scaleX(1); } 83.5%, 100% { transform: scaleX(-1); } }
-@keyframes stride-a { 0%, 100% { transform: rotate(-26deg); } 50% { transform: rotate(26deg); } }
-@keyframes stride-b { 0%, 100% { transform: rotate(26deg); } 50% { transform: rotate(-26deg); } }
-@keyframes arm-l {
-  0%, 50% { transform: rotate(100deg); }
-  54%, 72% { transform: rotate(-20deg); }
-  75% { transform: rotate(-125deg); }
-  77% { transform: rotate(-105deg); }
-  79% { transform: rotate(-125deg); }
-  81% { transform: rotate(-105deg); }
-  83% { transform: rotate(-125deg); }
-  85%, 100% { transform: rotate(100deg); }
+@keyframes bob { from { transform: translateY(0); } to { transform: translateY(-3px); } }
+@keyframes thigh-a { 0%, 100% { transform: rotate(-25deg); } 50% { transform: rotate(25deg); } }
+@keyframes thigh-b { 0%, 100% { transform: rotate(25deg); } 50% { transform: rotate(-25deg); } }
+@keyframes shin-a { 0%, 50%, 100% { transform: rotate(10deg); } 25% { transform: rotate(5deg); } 75% { transform: rotate(60deg); } }
+@keyframes shin-b { 0%, 50%, 100% { transform: rotate(10deg); } 25% { transform: rotate(60deg); } 75% { transform: rotate(5deg); } }
+@keyframes uarm-l {
+  0.00% { transform: rotate(100deg); }
+  33.00% { transform: rotate(100deg); }
+  35.80% { transform: rotate(110deg); }
+  38.60% { transform: rotate(88deg); }
+  41.40% { transform: rotate(110deg); }
+  44.20% { transform: rotate(88deg); }
+  47.00% { transform: rotate(110deg); }
+  50.00% { transform: rotate(100deg); }
+  54.00% { transform: rotate(-20deg); }
+  72.00% { transform: rotate(-20deg); }
+  75.00% { transform: rotate(-125deg); }
+  77.00% { transform: rotate(-105deg); }
+  79.00% { transform: rotate(-125deg); }
+  81.00% { transform: rotate(-105deg); }
+  83.00% { transform: rotate(-125deg); }
+  85.00% { transform: rotate(100deg); }
+  87.80% { transform: rotate(88deg); }
+  90.60% { transform: rotate(110deg); }
+  93.40% { transform: rotate(88deg); }
+  96.20% { transform: rotate(100deg); }
+  100.00% { transform: rotate(100deg); }
 }
-@keyframes arm-r {
-  0%, 50% { transform: rotate(75deg); }
-  54%, 56% { transform: rotate(-70deg); }
-  56.6%, 57% { transform: rotate(0deg); }
-  59%, 61% { transform: rotate(-70deg); }
-  61.6%, 62% { transform: rotate(0deg); }
-  64%, 66% { transform: rotate(-70deg); }
-  66.6%, 67% { transform: rotate(0deg); }
-  69%, 71% { transform: rotate(-70deg); }
-  71.6%, 72% { transform: rotate(0deg); }
-  75%, 100% { transform: rotate(75deg); }
+@keyframes farm-l {
+  0.00% { transform: rotate(-10deg); }
+  50.00% { transform: rotate(-10deg); }
+  54.00% { transform: rotate(0deg); }
+  72.00% { transform: rotate(0deg); }
+  75.00% { transform: rotate(-10deg); }
+  77.00% { transform: rotate(30deg); }
+  79.00% { transform: rotate(-10deg); }
+  81.00% { transform: rotate(30deg); }
+  83.00% { transform: rotate(-10deg); }
+  85.00% { transform: rotate(-10deg); }
+  100.00% { transform: rotate(-10deg); }
+}
+@keyframes uarm-r {
+  0.00% { transform: rotate(80deg); }
+  33.00% { transform: rotate(80deg); }
+  35.80% { transform: rotate(62deg); }
+  38.60% { transform: rotate(100deg); }
+  41.40% { transform: rotate(62deg); }
+  44.20% { transform: rotate(100deg); }
+  47.00% { transform: rotate(62deg); }
+  50.00% { transform: rotate(80deg); }
+  54.00% { transform: rotate(-75deg); }
+  54.00% { transform: rotate(-75deg); }
+  56.00% { transform: rotate(-75deg); }
+  56.60% { transform: rotate(-5deg); }
+  57.00% { transform: rotate(-5deg); }
+  59.00% { transform: rotate(-75deg); }
+  61.00% { transform: rotate(-75deg); }
+  61.60% { transform: rotate(-5deg); }
+  62.00% { transform: rotate(-5deg); }
+  64.00% { transform: rotate(-75deg); }
+  66.00% { transform: rotate(-75deg); }
+  66.60% { transform: rotate(-5deg); }
+  67.00% { transform: rotate(-5deg); }
+  69.00% { transform: rotate(-75deg); }
+  71.00% { transform: rotate(-75deg); }
+  71.60% { transform: rotate(-5deg); }
+  72.00% { transform: rotate(-5deg); }
+  72.00% { transform: rotate(-5deg); }
+  75.00% { transform: rotate(80deg); }
+  85.00% { transform: rotate(80deg); }
+  87.80% { transform: rotate(100deg); }
+  90.60% { transform: rotate(62deg); }
+  93.40% { transform: rotate(100deg); }
+  96.20% { transform: rotate(80deg); }
+  100.00% { transform: rotate(80deg); }
+}
+@keyframes farm-r {
+  0.00% { transform: rotate(-25deg); }
+  50.00% { transform: rotate(-25deg); }
+  54.00% { transform: rotate(40deg); }
+  54.00% { transform: rotate(40deg); }
+  56.00% { transform: rotate(40deg); }
+  56.60% { transform: rotate(0deg); }
+  57.00% { transform: rotate(0deg); }
+  59.00% { transform: rotate(40deg); }
+  61.00% { transform: rotate(40deg); }
+  61.60% { transform: rotate(0deg); }
+  62.00% { transform: rotate(0deg); }
+  64.00% { transform: rotate(40deg); }
+  66.00% { transform: rotate(40deg); }
+  66.60% { transform: rotate(0deg); }
+  67.00% { transform: rotate(0deg); }
+  69.00% { transform: rotate(40deg); }
+  71.00% { transform: rotate(40deg); }
+  71.60% { transform: rotate(0deg); }
+  72.00% { transform: rotate(0deg); }
+  72.00% { transform: rotate(0deg); }
+  75.00% { transform: rotate(-25deg); }
+  100.00% { transform: rotate(-25deg); }
+}
+@keyframes lean {
+  0.00% { rotate: 0deg; }
+  32.00% { rotate: 0deg; }
+  34.00% { rotate: 8deg; }
+  50.00% { rotate: 8deg; }
+  54.00% { rotate: 4deg; }
+  72.00% { rotate: 4deg; }
+  75.00% { rotate: 0deg; }
+  83.00% { rotate: 0deg; }
+  84.00% { rotate: 8deg; }
+  96.00% { rotate: 8deg; }
+  100.00% { rotate: 8deg; }
 }
 @keyframes carry {
   0%, 50% { transform: translate(-14px, -109px) rotate(-90deg); }
-  54%, 100% { transform: translate(152px, -148px) rotate(0deg); }
+  54%, 100% { transform: translate(127px, -148px) rotate(0deg); }
 }
 @keyframes gone { 0%, 54% { opacity: 1; } 54.1%, 100% { opacity: 0; } }
 @keyframes show { 0%, 53.9% { opacity: 0; } 54%, 100% { opacity: 1; } }
