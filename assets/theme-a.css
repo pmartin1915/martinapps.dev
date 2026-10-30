@@ -1,0 +1,13 @@
+:root {
+  --ground: #F4F3F0; --surface: #FFFFFF; --surface-soft: #F2F1EE; --tile-bg: #FFFFFF;
+  --panel-bg: #FFFFFF; --panel-ink: #1A1A1A;
+  --ink: #1A1A1A; --ink-soft: #5F5E5A; --ink-tag: #3D3C39; --pill: #EEEDEA; --line: #DAD8D3;
+  --accent: #1F5C54; --accent-hover: #174841; --on-accent: #FFFFFF; --mark: #2A4A6B;
+  --know-bg: #F3F6F4; --know-rule: #1F5C54;
+  --display: "Newsreader", Georgia, serif; --display-weight: 600; --display-track: -0.015em;
+  --hero-align: center; --hero-justify: center; --hero-pad: 72px;
+  --r-btn: 14px; --r-tile: 20px; --r-card: 24px; --r-panel: 28px;
+  --card-border: 1px solid transparent; --btn-border: 1px solid transparent;
+  --shadow-card: 0 10px 40px rgba(26,26,26,.07); --shadow-btn: 0 2px 10px rgba(26,26,26,.06);
+  --section-gap: 96px;
+}

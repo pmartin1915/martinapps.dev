@@ -1,185 +1,101 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-nav="4">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BoardBound — AI Tutor for FNP Board Exams</title>
-  <meta name="description" content="BoardBound is an AI-powered study companion for nurse practitioner students preparing for AANP and ANCC FNP board certification. Built by a DNP-prepared nurse practitioner.">
-  <link rel="preload" href="/assets/fonts/newsreader.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/assets/fonts/atkinson-next.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/assets/site.css">
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="icon" href="/favicon.ico" sizes="any">
-  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-  <link rel="canonical" href="https://martinapps.dev/boardbound/">
-  <meta name="theme-color" content="#EEF0E9" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0E1512" media="(prefers-color-scheme: dark)">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Martin Apps LLC">
-  <meta property="og:title" content="BoardBound — AI Tutor for FNP Board Exams">
-  <meta property="og:url" content="https://martinapps.dev/boardbound/">
-  <meta property="og:image" content="https://martinapps.dev/assets/og-boardbound.png">
-  <meta name="twitter:card" content="summary_large_image">
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "MobileApplication",
-    "name": "BoardBound",
-    "url": "https://martinapps.dev/boardbound/",
-    "description": "AI Tutor for FNP Board Exams.",
-    "applicationCategory": "EducationalApplication",
-    "operatingSystem": "iOS",
-    "installUrl": "https://apps.apple.com/us/app/boardbound-prep/id6761675393",
-    "publisher": {
-      "@type": "Organization",
-      "@id": "https://martinapps.dev/#org",
-      "name": "Martin Apps LLC",
-      "url": "https://martinapps.dev/"
-    },
-    "sameAs": [
-      "https://apps.apple.com/us/app/boardbound-prep/id6761675393"
-    ]
-  }
-  </script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BoardBound - Martin Apps</title>
+<meta name="description" content="Study for the FNP board exam with an AI tutor that explains the reasoning behind each answer, the way a preceptor would.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="canonical" href="https://martinapps.dev/boardbound/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Martin Apps LLC">
+<meta property="og:title" content="BoardBound - Martin Apps">
+<meta property="og:description" content="Study for the FNP board exam with an AI tutor that explains the reasoning behind each answer, the way a preceptor would.">
+<meta property="og:url" content="https://martinapps.dev/boardbound/">
+<meta property="og:image" content="https://martinapps.dev/assets/og-boardbound.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" href="/assets/fonts/atkinson-next.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/newsreader.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/base.css">
+<link rel="stylesheet" href="/assets/theme-a.css">
+<link rel="stylesheet" href="/assets/extra.css">
 </head>
 <body>
-<a class="skip-link" href="#main">Skip to content</a>
+<a class="skip" href="#main">Skip to main content</a>
 <header class="site-header">
-  <div class="inner">
-    <a class="brand" href="/" aria-label="Martin Apps home"><svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="var(--mark)" fill-rule="evenodd" d="M0,0 H100 L140,50 L180,0 H280 V280 H0 Z M40,40 H80 L140,110 L200,40 H240 V80 H200 V120 H160 V160 H120 V200 H80 V240 H40 Z"/></svg><span>Martin Apps</span></a>
-    <nav class="site-nav" aria-label="Site">
-      <a href="/#apps">Apps</a>
-      <a href="/#about">About</a>
-      <a href="/#contact">Contact</a>
-    </nav>
+  <div class="wrap header-row">
+    <a class="brand" href="/" aria-label="Martin Apps home"><svg viewBox="0 0 280 280" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M0,0 H100 L140,50 L180,0 H280 V280 H0 Z M40,40 H80 L140,110 L200,40 H240 V80 H200 V120 H160 V160 H120 V200 H80 V240 H40 Z"/></svg><span>Martin Apps</span></a>
+    <nav class="desk-nav" aria-label="Main"><a href="/apps/" aria-current="page">Apps</a><a href="/about/">About</a><a class="btn btn-primary btn-sm" href="/support/">Get help</a></nav>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="phone-menu">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>
+      <span class="menu-word">Menu</span>
+    </button>
   </div>
+  <nav class="phone-menu wrap" id="phone-menu" aria-label="Main" hidden>
+    <a href="/">Home</a><a href="/apps/" aria-current="page">Apps</a><a href="/about/">About</a><a href="/support/">Get help</a>
+  </nav>
 </header>
-<nav class="product-bar" aria-label="BoardBound">
-  <div class="inner">
-    <span class="product-name">BoardBound</span>
-    <a href="/boardbound/" aria-current="page">Overview</a>
-    <a href="/boardbound/support">Support</a>
-    <a href="/boardbound/privacy">Privacy</a>
-    <a href="/boardbound/terms">Terms</a>
-    <a href="/boardbound/delete-account">Delete account</a>
-  </div>
-</nav>
 <main id="main">
-<div class="page">
 
-<div class="product-hero">
-  <img class="app-icon" src="/assets/icons/boardbound.png" alt="" width="88" height="88">
-  <div>
-    <span class="status-tag">Live &middot; App Store</span>
-    <h1>BoardBound</h1>
-    <p class="subtitle">AI Tutor for FNP Board Exams</p>
+<div class="wrap crumb"><a href="/apps/">&larr; All apps</a></div>
+<section class="wrap" style="padding-top:8px">
+  <div class="prod-hero">
+    <img class="icon" src="/assets/icons/boardbound.png" alt="" width="128" height="128">
+    <div>
+      <h1>BoardBound</h1>
+      <p class="tagline">Study for the FNP board exam with an AI tutor that explains the reasoning behind each answer, the way a preceptor would.</p>
+      <div class="hero-actions" style="justify-content:flex-start"><a class="badge" href="https://apps.apple.com/us/app/boardbound-prep/id6761675393"><img src="/assets/badges/app-store.svg" alt="Download BoardBound on the App Store" height="48"></a><a class="btn btn-secondary" href="#help">Get help</a></div>
+      <p class="meta">iPhone &middot; Free to start &middot; Full access $29.99 a month, or $79.99 for a 3-month sprint</p>
+    </div>
   </div>
-</div>
+</section>
 
-<div class="shots">
-  <img src="/assets/shots/boardbound-today.webp" alt="BoardBound Today screen: estimated readiness score and the topics to study next" width="440" height="956" loading="lazy" decoding="async">
-  <img src="/assets/shots/boardbound-tutor.webp" alt="BoardBound AI Tutor explaining why an answer is correct" width="440" height="956" loading="lazy" decoding="async">
-  <img src="/assets/shots/boardbound-stats.webp" alt="BoardBound Stats screen: readiness trend and domain breakdown" width="440" height="956" loading="lazy" decoding="async">
-</div>
+<section class="wrap section" style="padding-top:64px" aria-labelledby="see-h">
+  <h2 id="see-h">See it in action</h2>
+  <div class="shots" tabindex="0" role="group" aria-label="BoardBound screenshots"><img src="/assets/shots/boardbound-today.webp" alt="BoardBound Today screen: estimated readiness score and the topics to study next" width="240" height="521" loading="lazy" decoding="async"><img src="/assets/shots/boardbound-tutor.webp" alt="BoardBound AI Tutor explaining why an answer is correct" width="240" height="521" loading="lazy" decoding="async"><img src="/assets/shots/boardbound-stats.webp" alt="BoardBound Stats screen: readiness trend and domain breakdown" width="240" height="521" loading="lazy" decoding="async"></div>
+</section>
 
-<div class="store-badges">
-  <a href="https://apps.apple.com/us/app/boardbound-prep/id6761675393"><img src="/assets/badges/app-store.svg" alt="Download BoardBound Prep on the App Store" width="120" height="40"></a>
-</div>
+<section class="wrap section" style="padding-top:64px" aria-labelledby="does-h">
+  <h2 id="does-h">What it does</h2>
+  <div class="feats"><div><h3>Practice questions</h3><p>500+ questions tagged to both the AANP and ANCC exam blueprints.</p></div><div><h3>A tutor that explains why</h3><p>Ask about any answer. The tutor sticks to the rationale stored with the question.</p></div><div><h3>Know when you're ready</h3><p>Spaced review and a readiness dashboard show where to spend your time.</p></div></div>
+</section>
 
-<p>BoardBound is an AI-powered study companion for nurse practitioner students preparing for Family Nurse Practitioner (FNP) board certification &mdash; built by a DNP-prepared nurse practitioner who trained in the same family nurse practitioner track.</p>
+<section class="wrap section" style="padding-top:64px" aria-labelledby="lim-h">
+  <div class="limits">
+    <h2 id="lim-h">Before you download</h2>
+    <ul><li>Questions and rationales are AI-written and machine-checked. A licensed clinician has not reviewed them.</li><li>Not affiliated with AANPCB&reg; or ANCC&reg;.</li><li>Study aid only, not medical advice.</li></ul>
+  </div>
+</section>
 
-<p>Traditional question banks show you a correct answer and a paragraph of text. BoardBound adds a live AI tutor trained to explain clinical reasoning the way a real NP preceptor would &mdash; walking you through why the right answer is right, where your thinking went off, and how to connect it to evidence-based guidelines.</p>
+<section class="wrap section" style="padding-top:64px" id="help" aria-labelledby="h-h">
+  <div class="panel help">
+    <div><h2 id="h-h">Need help with BoardBound?</h2><p>We answer every email.</p></div>
+    <div class="help-actions"><a class="btn btn-primary" href="https://martinapps.dev/boardbound/support.html">Support</a><a class="btn btn-secondary" href="https://martinapps.dev/boardbound/privacy.html">Privacy policy</a><a class="btn btn-secondary" href="https://martinapps.dev/boardbound/terms.html">Terms</a></div>
+  </div>
+</section>
 
-<h2>What you get</h2>
-
-<div class="tier">
-  <h3>Free tier</h3>
-  <ul>
-    <li>30 practice questions per day</li>
-    <li>3 AI tutor conversations per day</li>
-    <li>Core performance tracking by domain</li>
-    <li>Access to both AANP and ANCC blueprints</li>
-  </ul>
-</div>
-
-<div class="tier">
-  <h3>Paid tier <span class="price">&mdash; $29.99/month or $79.99 for a 3-month sprint</span></h3>
-  <ul>
-    <li>Full 500+ question bank, tagged to AANP and ANCC blueprints</li>
-    <li>Unlimited AI tutor conversations (with a monthly fair-use cap)</li>
-    <li>Deep Dive mode (5 per day) for complex multi-system clinical reasoning</li>
-    <li>Spaced repetition scheduler so weak topics surface when you need them</li>
-    <li>Full progress dashboard &mdash; readiness score, domain breakdown, study streaks</li>
-  </ul>
-</div>
-
-<h2>Built for boards</h2>
-
-<p>Every question is tagged to the official exam blueprint you choose:</p>
-<ul>
-  <li><strong>AANP FNP</strong> &mdash; Assess, Diagnose, Plan, Evaluate domains</li>
-  <li><strong>ANCC FNP-BC</strong> &mdash; Assessment, Diagnosis, Planning, Implementation, Evaluation domains</li>
-</ul>
-
-<p>Questions span the full lifespan: pediatrics, adolescents, adults, older adults, and prenatal/perinatal &mdash; in the distribution your exam actually uses.</p>
-
-<h2>AI tutor &mdash; designed for safety</h2>
-
-<p>The AI tutor is constrained to the fixed rationale stored with each question. It explains that rationale &mdash; it does not generate clinical facts of its own, and it does not answer from open-ended general knowledge. It does not replace your clinical judgment, your preceptor, or evidence-based practice guidelines.</p>
-
-<p>Questions and rationales are AI-generated and machine-audited; they have not been reviewed by a licensed clinician.</p>
-
-<p>Every AI response includes a static educational-use disclaimer, and every response has a one-tap "Flag for Clinical Inaccuracy" button. Flagged responses are reviewed and used to improve the tutor.</p>
-
-<h2>Privacy first</h2>
-
-<ul>
-  <li>AI tutor access is opt-in. You see a clear consent screen before your first conversation, naming the AI provider.</li>
-  <li>Never enter personal health information (PHI) into the tutor &mdash; it is for exam reasoning only.</li>
-  <li>Your questions and AI conversations are stored securely and tied only to your account.</li>
-  <li>You can <a href="/boardbound/delete-account">delete your account and all associated data</a> from Settings at any time.</li>
-</ul>
-
-<div class="callout">
-  <strong>Important disclaimer.</strong> BoardBound is an educational exam-preparation tool. It is not medical advice and must never be used for patient care decisions. BoardBound is not affiliated with, endorsed by, or sponsored by the American Academy of Nurse Practitioners Certification Board (AANPCB&reg;) or the American Nurses Credentialing Center (ANCC&reg;). AANPCB&reg; and ANCC&reg; are registered trademarks of their respective owners.
-</div>
-
-<h2>Contact &amp; support</h2>
-
-<p>Questions, bug reports, or feature requests? Email <a href="mailto:support@martinapps.dev">support@martinapps.dev</a>. For privacy-related questions: <a href="mailto:privacy@martinapps.dev">privacy@martinapps.dev</a>. We respond within one business day.</p>
-
-</div>
 </main>
 <footer class="site-footer">
-  <div class="inner">
-    <div class="footer-grid">
-      <div>
-        <a class="brand" href="/" aria-label="Martin Apps home"><svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="var(--mark)" fill-rule="evenodd" d="M0,0 H100 L140,50 L180,0 H280 V280 H0 Z M40,40 H80 L140,110 L200,40 H240 V80 H200 V120 H160 V160 H120 V200 H80 V240 H40 Z"/></svg><span>Martin Apps</span></a>
-        <p>Focused education and reference software for healthcare and the outdoors.</p>
-      </div>
-      <div>
-        <h2>Apps</h2>
-        <ul>
-          <li><a href="/boardbound/">BoardBound</a></li>
-          <li><a href="/#burn-wizard">Burn Wizard</a></li>
-          <li><a href="/#wilderness">Wilderness Survival Companion</a></li>
-          <li><a href="/#shortless">Shortless</a></li>
-          <li><a href="/#scrollometer">Scrollometer</a></li>
-        </ul>
-      </div>
-      <div>
-        <h2>Contact</h2>
-        <ul>
-          <li><a href="mailto:support@martinapps.dev">support@martinapps.dev</a></li>
-          <li><a href="mailto:privacy@martinapps.dev">privacy@martinapps.dev</a></li>
-        </ul>
-      </div>
+  <div class="wrap foot-cols">
+    <div class="foot-brand">
+      <a class="brand" href="/" aria-label="Martin Apps home"><svg viewBox="0 0 280 280" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M0,0 H100 L140,50 L180,0 H280 V280 H0 Z M40,40 H80 L140,110 L200,40 H240 V80 H200 V120 H160 V160 H120 V200 H80 V240 H40 Z"/></svg><span>Martin Apps</span></a>
+      <p>Martin Apps LLC builds focused apps for learning, the outdoors and everyday life.</p>
     </div>
-    <div class="fine-print">
-      <span>&copy; 2026 Martin Apps LLC &middot; Alabama, United States</span>
-      <span>No ads. No data sales.</span>
-    </div>
+    <div class="foot-grp" data-f="apps"><h2><svg class="g-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Apps</span></h2><ul><li><a href="/boardbound/">BoardBound</a></li><li><a href="/burn-wizard/">Burn Wizard</a></li><li><a href="/wilderness/">Wilderness Survival Companion</a></li><li><a href="/shortless/">Shortless</a></li><li><a href="/scrollometer/">Scrollometer</a></li></ul></div>
+    <div class="foot-grp" data-f="company"><h2><svg class="g-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5l8-3v19M12 9h8v12M4 21h17M7 8h2M7 12h2M7 16h2M15 13h2M15 17h2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Company</span></h2><ul><li><a href="/about/">About</a></li></ul></div>
+    <div class="foot-grp" data-f="help"><h2><svg class="g-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17.5h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Help</span></h2><ul><li><a href="/support/">Support</a></li><li><a href="/privacy/">Privacy</a></li><li><a href="mailto:support@martinapps.dev">support@martinapps.dev</a></li></ul></div>
   </div>
+  <div class="wrap legal">&copy; 2026 Martin Apps LLC, an Alabama limited liability company.<br>BoardBound and Burn Wizard are tools for education and are not medical advice; they must not be used for direct patient care, diagnosis, or treatment decisions. Wilderness Survival Companion is a tool for reference and does not replace professional training, search-and-rescue services, or emergency medical care.</div>
 </footer>
+<script>
+(function () {
+  var b = document.querySelector('.menu-btn'), m = document.getElementById('phone-menu');
+  function set(open) { b.setAttribute('aria-expanded', open); m.hidden = !open; b.querySelector('.menu-word').textContent = open ? 'Close' : 'Menu'; }
+  b.addEventListener('click', function () { set(m.hidden); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !m.hidden) { set(false); b.focus(); } });
+})();
+</script>
 </body>
 </html>

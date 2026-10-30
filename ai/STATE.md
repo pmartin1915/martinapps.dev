@@ -1,6 +1,6 @@
 # STATE — martinapps-site (martinapps.dev)
 
-**Last updated:** 2026-10-20
+**Last updated:** 2026-10-29
 **Branch:** `main`. Static site (plain HTML) served by GitHub Pages from `main`, custom domain via `CNAME`.
 The repo is PUBLIC and Pages serves every non-underscore directory, so anything under `ai/` would be
 fetchable at martinapps.dev/ai/STATE.md. Keep this file free of anything not meant to be public.
@@ -40,6 +40,13 @@ fetchable at martinapps.dev/ai/STATE.md. Keep this file free of anything not mea
   Add them when current store screenshots exist. BoardBound's rationale screens are excluded on purpose:
   the app labels rationales "EXPERT-VERIFIED", which contradicts this site's "not reviewed by a licensed
   clinician" disclosure.
+
+- Redesign 2026-10-29 (branch `site-redesign`): warm multi-page site. New pages /apps/, /about/, /support/,
+  /privacy/, /burn-wizard/, /scrollometer/, /wilderness/, /shortless/; /boardbound/ and the home page replaced.
+  Old /#burn-wizard, /#scrollometer (and the other home anchors) forward to the new pages by a small script.
+  Styles: `assets/base.css` + `theme-a.css` + `extra.css`. Support, privacy and terms pages are unchanged and
+  still use `assets/site.css`. These pages are GENERATED from a private source folder; edit there and rebuild,
+  not here. No Engineering section yet.
 
 ## Next
 

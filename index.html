@@ -1,23 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-nav="4">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Martin Apps LLC &mdash; Education and reference software for healthcare and the outdoors</title>
-<meta name="description" content="Martin Apps LLC builds focused education and reference software for healthcare professionals and outdoor users. Alabama-based, founded by a DNP-prepared nurse practitioner.">
-<link rel="preload" href="/assets/fonts/newsreader.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/assets/fonts/atkinson-next.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/site.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Martin Apps LLC</title>
+<script>(function(){var m={"#apps":"/apps/","#boardbound":"/boardbound/","#burn-wizard":"/burn-wizard/","#wilderness":"/wilderness/","#shortless":"/shortless/","#scrollometer":"/scrollometer/","#about":"/about/","#contact":"/support/"},t=m[location.hash];if(t)location.replace(t);})();</script>
+<meta name="description" content="Martin Apps LLC builds focused apps for learning, the outdoors and everyday life. Each one does one job, works the way it says, and keeps your data on your phone.">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="canonical" href="https://martinapps.dev/">
-<meta name="theme-color" content="#EEF0E9" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0E1512" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Martin Apps LLC">
 <meta property="og:title" content="Martin Apps LLC">
-<meta property="og:description" content="Focused education and reference software for healthcare and the outdoors.">
+<meta property="og:description" content="Martin Apps LLC builds focused apps for learning, the outdoors and everyday life. Each one does one job, works the way it says, and keeps your data on your phone.">
 <meta property="og:url" content="https://martinapps.dev/">
 <meta property="og:image" content="https://martinapps.dev/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -55,7 +51,7 @@
     {
       "@type": "MobileApplication",
       "name": "Burn Wizard",
-      "url": "https://martinapps.dev/#burn-wizard",
+      "url": "https://martinapps.dev/burn-wizard/",
       "description": "Pediatric burn assessment and fluid resuscitation, taught offline.",
       "applicationCategory": "EducationalApplication",
       "operatingSystem": "iOS",
@@ -75,7 +71,7 @@
     {
       "@type": "MobileApplication",
       "name": "Wilderness Survival Companion",
-      "url": "https://martinapps.dev/#wilderness",
+      "url": "https://martinapps.dev/wilderness/",
       "description": "Offline reference and field tools for the backcountry.",
       "applicationCategory": "ReferenceApplication",
       "operatingSystem": "iOS, Android",
@@ -96,7 +92,7 @@
     {
       "@type": "MobileApplication",
       "name": "Shortless",
-      "url": "https://martinapps.dev/#shortless",
+      "url": "https://martinapps.dev/shortless/",
       "description": "Short-form video feed blocker for Safari.",
       "applicationCategory": "UtilitiesApplication",
       "operatingSystem": "iOS",
@@ -116,7 +112,7 @@
     {
       "@type": "MobileApplication",
       "name": "Scrollometer",
-      "url": "https://martinapps.dev/#scrollometer",
+      "url": "https://martinapps.dev/scrollometer/",
       "description": "Your screen time, measured as a distance.",
       "applicationCategory": "UtilitiesApplication",
       "operatingSystem": "iOS 17",
@@ -136,280 +132,77 @@
   ]
 }
 </script>
+<link rel="preload" href="/assets/fonts/atkinson-next.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/newsreader.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/base.css">
+<link rel="stylesheet" href="/assets/theme-a.css">
+<link rel="stylesheet" href="/assets/extra.css">
 </head>
 <body>
-<a class="skip-link" href="#main">Skip to content</a>
+<a class="skip" href="#main">Skip to main content</a>
 <header class="site-header">
-  <div class="inner">
-    <a class="brand" href="/" aria-label="Martin Apps home"><svg class="mark-build" viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="var(--mark)" fill-rule="evenodd" d="M0,0 H100 L140,50 L180,0 H280 V280 H0 Z M40,40 H80 L140,110 L200,40 H240 V80 H200 V120 H160 V160 H120 V200 H80 V240 H40 Z"/></svg><span>Martin Apps</span></a>
-    <nav class="site-nav" aria-label="Site">
-      <a href="/#apps">Apps</a>
-      <a href="/#about">About</a>
-      <a href="/#contact">Contact</a>
-    </nav>
+  <div class="wrap header-row">
+    <a class="brand" href="/" aria-label="Martin Apps home"><svg viewBox="0 0 280 280" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M0,0 H100 L140,50 L180,0 H280 V280 H0 Z M40,40 H80 L140,110 L200,40 H240 V80 H200 V120 H160 V160 H120 V200 H80 V240 H40 Z"/></svg><span>Martin Apps</span></a>
+    <nav class="desk-nav" aria-label="Main"><a href="/apps/">Apps</a><a href="/about/">About</a><a class="btn btn-primary btn-sm" href="/support/">Get help</a></nav>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="phone-menu">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>
+      <span class="menu-word">Menu</span>
+    </button>
   </div>
+  <nav class="phone-menu wrap" id="phone-menu" aria-label="Main" hidden>
+    <a href="/" aria-current="page">Home</a><a href="/apps/">Apps</a><a href="/about/">About</a><a href="/support/">Get help</a>
+  </nav>
 </header>
+<main id="main">
 
-<main id="main" class="home">
-
-<section class="hero">
-  <span class="eyebrow">Martin Apps LLC &middot; Alabama</span>
-  <h1>Focused education and reference software for healthcare and the outdoors.</h1>
-  <p class="lede">Alabama-based independent software company. The healthcare products are built by a DNP-prepared nurse practitioner; the outdoor reference is built on published survival doctrine. Every product is validated against its sources and built to perform when it matters &mdash; on a board exam, in the backcountry, or at the bedside.</p>
+<section class="hero wrap">
+  <h1>Useful apps, made with care.</h1>
+  <p class="lede">Martin Apps LLC builds focused apps for learning, the outdoors and everyday life. Each one does one job, works the way it says, and keeps your data on your phone.</p>
   <div class="hero-actions">
-    <a class="button" href="#apps">See the apps</a>
-    <a class="button secondary" href="#contact">Contact</a>
+    <a class="btn btn-primary" href="/apps/">Browse the apps</a>
+    <a class="btn btn-secondary" href="/support/">Get help with an app</a>
   </div>
-  <svg class="signature" viewBox="0 0 800 60" preserveAspectRatio="none" aria-hidden="true">
-    <path d="M0,32 L54,32 L64,32 L72,10 L80,32 L92,32 L100,50 L106,8 L112,54 L120,32 L132,32 L144,20 L156,32 L210,32 C250,32 250,14 290,14 C330,14 330,48 370,48 C410,48 410,20 450,20 C490,20 490,44 530,44 C570,44 570,30 610,30 C650,30 650,38 690,38 C725,38 745,32 800,32"/>
-  </svg>
 </section>
 
-<section id="apps" aria-labelledby="apps-h">
-<h2 id="apps-h">Apps</h2>
-
-<div class="apps">
-
-  <article class="app" id="wilderness">
-    <div class="app-head">
-      <img class="app-icon" src="/assets/icons/wilderness.png" alt="" width="64" height="64">
-      <div>
-        <span class="status-tag">Live &middot; App Store &middot; Google Play</span>
-        <h3>Wilderness Survival Companion</h3>
-        <p class="tagline">Offline reference and field tools for the backcountry.</p>
-      </div>
-    </div>
-    <p>This 100% offline reference and emergency-triage app is for hikers, backpackers, hunters, search-and-rescue volunteers, and outdoor educators. The app has six field calculators (water purification, shelter selection, daylight estimation, pace and distance, wind chill and heat index, triage priority), 63+ reference entries (shelters, fire, water, navigation, knots, plants, wildlife, signals, first aid), and four adaptive color themes, with a tactical-red mode that preserves night vision. It includes the US Army Survival Manual (FM 21-76), SAS Survival Handbook, CDC guidelines, and NOAA solar algorithms.</p>
-    <p>Free. No accounts, no tracking, no advertising, no data collection. Works in airplane mode.</p>
-    <div class="store-badges">
-      <a href="https://apps.apple.com/us/app/wilderness-survival-companion/id6760920427"><img src="/assets/badges/app-store.svg" alt="Download Wilderness Survival Companion on the App Store" width="120" height="40"></a>
-      <a href="https://play.google.com/store/apps/details?id=dev.martinapps.wilderness"><img src="/assets/badges/google-play.png" alt="Get Wilderness Survival Companion on Google Play" width="135" height="40"></a>
-    </div>
-    <div class="links">
-      <a href="/wilderness/privacy-policy.html">Privacy Policy</a>
-      <a href="/wilderness/support.html">Support</a>
-    </div>
-  </article>
-
-  <article class="app" id="burn-wizard">
-    <div class="app-head">
-      <img class="app-icon" src="/assets/icons/burn-wizard.png" alt="" width="64" height="64">
-      <div>
-        <span class="status-tag">Live &middot; App Store</span>
-        <h3>Burn Wizard</h3>
-        <p class="tagline">Pediatric burn assessment and fluid resuscitation, taught offline.</p>
-      </div>
-    </div>
-    <p>This educational app teaches the Lund-Browder method for total body surface area (TBSA) calculation, the Parkland formula for fluid resuscitation, and the Holliday-Segar 4-2-1 method for maintenance fluids. It includes an interactive body diagram with age-adjusted percentages, an 8-chapter curriculum from pathophysiology to long-term management, clinical documentation templates, and full English / Latin-American Spanish translation. It is built for medical students, nursing students, physician assistants, surgical residents, emergency medicine fellows, and first responders preparing for clinical practice.</p>
-    <p>Free. Works fully offline. No accounts, no analytics, no data collection. Local storage is encrypted with AES-256-GCM. Educational tool only &mdash; not a clinical device and not for direct patient care.</p>
-    <div class="store-badges">
-      <a href="https://apps.apple.com/us/app/burn-wizard/id6760600512"><img src="/assets/badges/app-store.svg" alt="Download Burn Wizard on the App Store" width="120" height="40"></a>
-    </div>
-    <div class="links">
-      <a href="https://burn-wizard-web.netlify.app/privacy-policy">Privacy Policy</a>
-    </div>
-  </article>
-
-  <article class="app" id="boardbound">
-    <div class="app-head">
-      <img class="app-icon" src="/assets/icons/boardbound.png" alt="" width="64" height="64">
-      <div>
-        <span class="status-tag">Live &middot; App Store</span>
-        <h3>BoardBound</h3>
-        <p class="tagline">AI Tutor for FNP Board Exams.</p>
-      </div>
-    </div>
-    <div class="shots">
-      <img src="/assets/shots/boardbound-today.webp" alt="BoardBound Today screen: estimated readiness score and the topics to study next" width="440" height="956" loading="lazy" decoding="async">
-      <img src="/assets/shots/boardbound-tutor.webp" alt="BoardBound AI Tutor explaining why an answer is correct" width="440" height="956" loading="lazy" decoding="async">
-      <img src="/assets/shots/boardbound-stats.webp" alt="BoardBound Stats screen: readiness trend and domain breakdown" width="440" height="956" loading="lazy" decoding="async">
-    </div>
-    <p>An AI-powered study companion helps nurse practitioner students prepare for AANP and ANCC FNP board certification. A live AI tutor explains clinical reasoning like a real NP preceptor would. It stays within the stored rationale attached to each question, so it explains that reasoning instead of creating clinical facts of its own. Questions and rationales are AI-generated and machine-audited. They have not been reviewed by a licensed clinician. It includes a 500+ question bank tagged to both exam blueprints, spaced repetition, Deep Dive mode for complex multi-system reasoning, and a readiness dashboard. A free tier is included.</p>
-    <p>Pricing: $29.99 per month or $79.99 for a 3-month sprint.</p>
-    <div class="store-badges">
-      <a href="https://apps.apple.com/us/app/boardbound-prep/id6761675393"><img src="/assets/badges/app-store.svg" alt="Download BoardBound Prep on the App Store" width="120" height="40"></a>
-    </div>
-    <div class="links">
-      <a href="/boardbound/">Product page</a>
-      <a href="/boardbound/privacy">Privacy</a>
-      <a href="/boardbound/terms">Terms</a>
-      <a href="/boardbound/support">Support</a>
-    </div>
-  </article>
-
-  <article class="app" id="shortless">
-    <div class="app-head">
-      <img class="app-icon" src="/assets/icons/shortless.png" alt="" width="64" height="64">
-      <div>
-        <span class="status-tag">Live &middot; App Store</span>
-        <h3>Shortless</h3>
-        <p class="tagline">Short-form video feed blocker for Safari.</p>
-      </div>
-    </div>
-    <p>Shortless removes the infinite-scroll short-form feeds (YouTube Shorts, Instagram Reels, TikTok, and Snapchat Spotlight) out of Safari on iPhone and iPad, and leaves the rest of each site working normally: regular YouTube videos, Instagram photos, and Snapchat messages stay. There is a toggle for each platform. A Time Reclaimed dashboard, a scroll-free streak, and home and lock screen widgets show what you have taken back. It works in Safari only. iOS does not let content blockers change other browsers or native apps.</p>
-    <p>Free. No accounts, no analytics, no servers, no network requests. Everything stays on your device.</p>
-    <div class="store-badges">
-      <a href="https://apps.apple.com/us/app/shortless/id6760598863"><img src="/assets/badges/app-store.svg" alt="Download Shortless on the App Store" width="120" height="40"></a>
-    </div>
-    <div class="links">
-      <a href="/shortless/privacy-policy.html">Privacy Policy</a>
-      <a href="/shortless/support.html">Support</a>
-    </div>
-  </article>
-
-  <article class="app" id="scrollometer">
-    <div class="app-head">
-      <img class="app-icon" src="/assets/icons/scrollometer.png" alt="" width="64" height="64">
-      <div>
-        <span class="status-tag">Live &middot; App Store</span>
-        <h3>Scrollometer</h3>
-        <p class="tagline">Your screen time, measured as a distance.</p>
-      </div>
-    </div>
-    <div class="shots">
-      <img src="/assets/shots/scrollometer-today.webp" alt="Scrollometer Today screen: today's estimated scroll distance and a to-scale comparison" width="440" height="956" loading="lazy" decoding="async">
-      <img src="/assets/shots/scrollometer-record.webp" alt="Scrollometer Record screen: thirteen weeks of daily distance" width="440" height="956" loading="lazy" decoding="async">
-      <img src="/assets/shots/scrollometer-methodology.webp" alt="Scrollometer Methodology screen: the formula behind every estimate" width="440" height="956" loading="lazy" decoding="async">
-    </div>
-    <p>Scrollometer turns the time you spend in the apps you pick into how far you've scrolled: feet, then miles, then landmarks. You can see today's distance, your history, and a weekly recap you can share if you want to. A Methodology screen shows the exact math behind every number. The numbers are estimates, and the app says so wherever it shows one: iOS reports time spent, not scrolling, so Scrollometer multiplies that time by the height of your screen and typical scroll speed for each app. There are no streaks, no badges, or leaderboards. You need iOS 17 and Screen Time access.</p>
-    <p>Free. Contains no networking code: no account, no server, no analytics, no advertising.</p>
-    <div class="store-badges">
-      <a href="https://apps.apple.com/us/app/scrollometer/id6805609511"><img src="/assets/badges/app-store.svg" alt="Download Scrollometer on the App Store" width="120" height="40"></a>
-    </div>
-    <div class="links">
-      <a href="https://pmartin1915.github.io/scrollometer-support/privacy.html">Privacy Policy</a>
-      <a href="https://pmartin1915.github.io/scrollometer-support/">Support</a>
-    </div>
-  </article>
-
-</div>
+<section class="wrap section" style="padding-top:48px" aria-labelledby="apps-h">
+  <h2 id="apps-h">Our apps</h2>
+  <p class="section-sub">Tap one to see what it does.</p>
+  <div class="cards" style="margin-top:20px"><a class="mini" href="/boardbound/"><img class="icon" src="/assets/icons/boardbound.png" alt="" width="64" height="64"><div><strong>BoardBound</strong><span>Study for the FNP board exam with an AI tutor.</span></div></a><a class="mini" href="/burn-wizard/"><img class="icon" src="/assets/icons/burn-wizard.png" alt="" width="64" height="64"><div><strong>Burn Wizard</strong><span>Learn burn sizing and fluid planning for children.</span></div></a><a class="mini" href="/wilderness/"><img class="icon" src="/assets/icons/wilderness.png" alt="" width="64" height="64"><div><strong>Wilderness Survival Companion</strong><span>Survival know-how that works with no signal.</span></div></a><a class="mini" href="/shortless/"><img class="icon" src="/assets/icons/shortless.png" alt="" width="64" height="64"><div><strong>Shortless</strong><span>Hide Shorts, Reels and TikTok feeds in Safari.</span></div></a><a class="mini" href="/scrollometer/"><img class="icon" src="/assets/icons/scrollometer.png" alt="" width="64" height="64"><div><strong>Scrollometer</strong><span>Your screen time, measured as a distance.</span></div></a></div>
+  <div class="more-row"><a class="btn btn-secondary" href="/apps/">See all apps, side by side</a></div>
 </section>
 
-<section id="about" aria-labelledby="about-h">
-<h2 id="about-h">About</h2>
 
-<p>Martin Apps LLC is an Alabama limited liability company with one founder. For two audiences we know well, we build small, focused mobile and reference applications: healthcare learners and clinicians who need accurate teaching tools, and outdoor users operating in environments where connectivity is unreliable and decisions have consequences.</p>
 
-<p>Our products aren't for general use. They are narrow, deep, and meet standards that fit the context: clinical accuracy in healthcare education; sourced and citeable content in the outdoor reference category; offline-first design wherever a user might lose their connection when they need the app most.</p>
-
-<p>We also make two small screen-time tools, Shortless and Scrollometer, for people who want some of their attention back. Like everything else here, they keep your data on your device.</p>
-
-<p>We do not build attention-economy products. Our apps do not contain advertising, do not sell user data, and do not optimize for engagement metrics that are uncorrelated with whether the user actually got the answer they needed.</p>
-</section>
-
-<section aria-labelledby="how-h">
-<h2 id="how-h">How we work</h2>
-
-<p>Three commitments distinguish Martin Apps products from general-purpose alternatives in the same categories:</p>
-
-<div class="pillars">
-  <div class="pillar">
-    <h3>Clinician- or practitioner-designed</h3>
-    <p>Every product is led by someone with active domain experience. BoardBound and Burn Wizard are built by a DNP-prepared nurse practitioner with a clinical background in pediatric critical care and pediatric neuro-oncology. Wilderness Survival Companion was sourced and structured against authoritative survival doctrine, not crowd-sourced advice.</p>
+<section class="wrap section" aria-labelledby="co-h">
+  <div class="panel company">
+    <div>
+      <h2 id="co-h">About the company</h2>
+      <p>Based in Alabama. Founded and run by Perry Martin, DNP, RN, FNP-C, a board-certified family nurse practitioner who writes the code himself.</p>
+    </div>
+    <a class="btn btn-secondary" href="/about/">About Martin Apps</a>
   </div>
-  <div class="pillar">
-    <h3>Sources are explicit</h3>
-    <p>BoardBound's AI tutor bases every clinical explanation on the rationale stored with the question. The model is told to refuse rather than make things up when the rationale doesn't support a claim. AI generates the questions and rationales and they are machine-audited. A licensed clinician hasn't reviewed them. Burn Wizard's calculations (Lund-Browder, Parkland, Holliday-Segar) are established clinical formulas. Their methods are explained transparently in-app. Every field tool and reference page in Wilderness Survival Companion traces back to a citable source (FM 21-76, SAS, CDC, NOAA).</p>
-  </div>
-  <div class="pillar">
-    <h3>Built to work when the network can't</h3>
-    <p>Burn Wizard and Wilderness Survival Companion run fully offline. BoardBound stores its question bank locally so review sessions don't stall on a flaky cell signal at the library or in the hospital basement. Across the portfolio, connectivity-resilient design is a design constraint, not an afterthought.</p>
-  </div>
-</div>
 </section>
-
-<section aria-labelledby="standards-h">
-<h2 id="standards-h">Standards and validation</h2>
-
-<p>We treat content accuracy as a product feature, not a marketing line. Concrete examples:</p>
-
-<ul>
-  <li><strong>BoardBound</strong> ships with an internal evaluation harness ("BoardBound Bench") that grades the AI tutor against a 100-case golden set on every change to the production prompt. Refusal canaries (PHI handling, jailbreak resistance) must pass at 100% or the change is blocked. Fidelity must clear a per-category floor or the change is blocked. The harness runs against a production-mirror of the prompt and uses an LLM-as-judge with rationale-aware grading; we publish the per-category pass rate in our internal release notes for every prompt iteration.</li>
-  <li><strong>Burn Wizard</strong> teaches only well-established clinical methods (Lund-Browder, Parkland, Holliday-Segar) and displays an unambiguous educational-only disclaimer at app launch, on the assessment screen, and on every calculation result. The app is filed under Apple's Education primary category (Medical secondary) precisely because it teaches; it is not a clinical decision-support device and does not market itself as one.</li>
-  <li><strong>Wilderness Survival Companion</strong> sources every reference entry from primary survival doctrine and tags each with the source. Edible-plant entries include explicit toxic-lookalike warnings rather than encouraging field identification by visual similarity alone. Calculators use established NOAA / CDC / National Weather Service algorithms.</li>
-  <li><strong>Across the portfolio</strong>, we include explicit non-medical-advice and non-affiliation language where applicable. We are not affiliated with AANPCB&reg; or ANCC&reg; (BoardBound), with any burn center, professional society, or regulatory body (Burn Wizard), or with any government, military, or rescue agency (Wilderness Survival Companion).</li>
-</ul>
-</section>
-
-<section aria-labelledby="founder-h">
-<h2 id="founder-h">Founder</h2>
-
-<p><strong>Perry Martin, DNP, MSN, RN</strong> founded and develops Martin Apps LLC. He earned his Doctor of Nursing Practice in the family nurse practitioner track at the University of Alabama at Birmingham in 2026, with a clinical background in pediatric critical care and pediatric neuro-oncology nursing before graduate school. He has released multiple iOS apps on his own, writes the code for Martin Apps products himself, and directs their content. The product pages say so where content is model-generated.</p>
-
-<p>Combining an active clinical credential and a working software practice is intentional. It keeps the products honest about what they can and cannot claim, and it makes the founder personally liable for the accuracy of what ships. There is no "growth team" optimizing for retention metrics that diverge from user outcomes.</p>
-</section>
-
-<section aria-labelledby="ahead-h">
-<h2 id="ahead-h">Looking ahead</h2>
-
-<ul class="timeline">
-  <li><span class="when">Into 2027</span>Adjacent NP specialty exams under the BoardBound brand (PMHNP, AGPCNP) and continued expansion of Wilderness Survival Companion's reference library.</li>
-</ul>
-</section>
-
-<section id="contact" aria-labelledby="contact-h">
-<h2 id="contact-h">Contact</h2>
-
-<div class="contact-cards">
-  <div class="contact-card">
-    <h3>Product support</h3>
-    <a class="addr" href="mailto:support@martinapps.dev">support@martinapps.dev</a>
-    <p>Product questions, bug reports, feature requests. We aim to respond within one business day.</p>
-  </div>
-  <div class="contact-card">
-    <h3>Privacy &amp; data requests</h3>
-    <a class="addr" href="mailto:privacy@martinapps.dev">privacy@martinapps.dev</a>
-    <p>Data access, correction, deletion, and other privacy-related questions. We respond within 30 days per applicable law.</p>
-  </div>
-</div>
-
-<h2 id="company-h">Company</h2>
-
-<dl class="facts">
-  <dt>Legal name</dt><dd>Martin Apps LLC</dd>
-  <dt>Entity type</dt><dd>Alabama limited liability company</dd>
-  <dt>Jurisdiction</dt><dd>State of Alabama, United States</dd>
-  <dt>Founded</dt><dd>2026</dd>
-  <dt>Domain</dt><dd>martinapps.dev (operated by Martin Apps LLC)</dd>
-</dl>
-</section>
-
-<div class="disclaimer">
-  <p>BoardBound and Burn Wizard are tools for education and are not medical advice; they must not be used for direct patient care, diagnosis, or treatment decisions. Wilderness Survival Companion is a tool for reference and does not replace professional training, search-and-rescue services, or emergency medical care.</p>
-</div>
 
 </main>
-
 <footer class="site-footer">
-  <div class="inner">
-    <div class="footer-grid">
-      <div>
-        <a class="brand" href="/" aria-label="Martin Apps home"><svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="var(--mark)" fill-rule="evenodd" d="M0,0 H100 L140,50 L180,0 H280 V280 H0 Z M40,40 H80 L140,110 L200,40 H240 V80 H200 V120 H160 V160 H120 V200 H80 V240 H40 Z"/></svg><span>Martin Apps</span></a>
-        <p>Focused education and reference software for healthcare and the outdoors.</p>
-      </div>
-      <div>
-        <h2>Apps</h2>
-        <ul>
-          <li><a href="/boardbound/">BoardBound</a></li>
-          <li><a href="/#burn-wizard">Burn Wizard</a></li>
-          <li><a href="/#wilderness">Wilderness Survival Companion</a></li>
-          <li><a href="/#shortless">Shortless</a></li>
-          <li><a href="/#scrollometer">Scrollometer</a></li>
-        </ul>
-      </div>
-      <div>
-        <h2>Contact</h2>
-        <ul>
-          <li><a href="mailto:support@martinapps.dev">support@martinapps.dev</a></li>
-          <li><a href="mailto:privacy@martinapps.dev">privacy@martinapps.dev</a></li>
-        </ul>
-      </div>
+  <div class="wrap foot-cols">
+    <div class="foot-brand">
+      <a class="brand" href="/" aria-label="Martin Apps home"><svg viewBox="0 0 280 280" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="M0,0 H100 L140,50 L180,0 H280 V280 H0 Z M40,40 H80 L140,110 L200,40 H240 V80 H200 V120 H160 V160 H120 V200 H80 V240 H40 Z"/></svg><span>Martin Apps</span></a>
+      <p>Martin Apps LLC builds focused apps for learning, the outdoors and everyday life.</p>
     </div>
-    <div class="fine-print">
-      <span>&copy; 2026 Martin Apps LLC &middot; Alabama, United States</span>
-      <span>No ads. No data sales.</span>
-    </div>
+    <div class="foot-grp" data-f="apps"><h2><svg class="g-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Apps</span></h2><ul><li><a href="/boardbound/">BoardBound</a></li><li><a href="/burn-wizard/">Burn Wizard</a></li><li><a href="/wilderness/">Wilderness Survival Companion</a></li><li><a href="/shortless/">Shortless</a></li><li><a href="/scrollometer/">Scrollometer</a></li></ul></div>
+    <div class="foot-grp" data-f="company"><h2><svg class="g-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5l8-3v19M12 9h8v12M4 21h17M7 8h2M7 12h2M7 16h2M15 13h2M15 17h2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Company</span></h2><ul><li><a href="/about/">About</a></li></ul></div>
+    <div class="foot-grp" data-f="help"><h2><svg class="g-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17.5h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Help</span></h2><ul><li><a href="/support/">Support</a></li><li><a href="/privacy/">Privacy</a></li><li><a href="mailto:support@martinapps.dev">support@martinapps.dev</a></li></ul></div>
   </div>
+  <div class="wrap legal">&copy; 2026 Martin Apps LLC, an Alabama limited liability company.<br>BoardBound and Burn Wizard are tools for education and are not medical advice; they must not be used for direct patient care, diagnosis, or treatment decisions. Wilderness Survival Companion is a tool for reference and does not replace professional training, search-and-rescue services, or emergency medical care.</div>
 </footer>
+<script>
+(function () {
+  var b = document.querySelector('.menu-btn'), m = document.getElementById('phone-menu');
+  function set(open) { b.setAttribute('aria-expanded', open); m.hidden = !open; b.querySelector('.menu-word').textContent = open ? 'Close' : 'Menu'; }
+  b.addEventListener('click', function () { set(m.hidden); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !m.hidden) { set(false); b.focus(); } });
+})();
+</script>
 </body>
 </html>
