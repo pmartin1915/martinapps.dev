@@ -37,6 +37,17 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
   var mark = document.querySelector('.mark-wrap');
   var h1 = document.querySelector('.hero h1') || document.querySelector('h1');
   if (!mark || !h1 || !h1.firstChild || h1.firstChild.nodeType !== 3) return;
+  /* The target letter. Wide layouts (the header icon sits right above the "Our apps" heading): the "u" of "Our",
+     provided it is on screen without scrolling. Everything else (phones, short windows): the "U" of the headline. */
+  function target() {
+    var h2 = document.getElementById('apps-h');
+    if (innerWidth >= 900 && h2 && h2.firstChild && h2.firstChild.nodeType === 3 && /^.u/.test(h2.firstChild.data)) {
+      var r = document.createRange(); r.setStart(h2.firstChild, 1); r.setEnd(h2.firstChild, 2);
+      var rc = r.getClientRects()[0];
+      if (rc && rc.width && rc.bottom + scrollY < innerHeight - 40) return { node: h2.firstChild, idx: 1, el: h2, lmin: 8.5 };
+    }
+    return { node: h1.firstChild, idx: 0, el: h1, lmin: 11 };
+  }
   function ss(u) { u = Math.max(0, Math.min(1, u)); return u * u * (3 - 2 * u); }
 
   /* ================= core: pure computation, no DOM. Runs in a Worker (or inline as a fallback). ================= */
@@ -73,7 +84,7 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
       skate:   { headW: 3.2, mu: .1,  e: .42, T0: .26, T1: .5,   vyMin: -650,  spin: 7 }
     };
     function hammer(g, st) {   // weighted contact points around a handle and a head
-      var gap = Math.max(10, g.cr - g.cl), L = Math.max(11, Math.min(70, gap * .72));
+      var gap = Math.max(10, g.cr - g.cl), L = Math.max(g.lmin || 11, Math.min(70, gap * .72));
       var Lh = L / 1.1, th = .2 * Lh, hh = .62 * Lh, rh = Math.max(1.1, .05 * Lh), pts = [], u;
       for (u = 0; u <= .76 * Lh; u += .25 * Lh) pts.push([u, 0, rh, .5]);
       [[Lh - th / 2, -hh / 2], [Lh - th / 2, hh / 2], [Lh + th / 2, -hh / 2], [Lh + th / 2, hh / 2], [Lh + th / 2, 0], [Lh, -hh / 2], [Lh, hh / 2]].forEach(function (p) { pts.push([p[0], p[1], 1.2, st.headW]); });
@@ -113,7 +124,7 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
       return { frames: frames, events: events, slept: null, rest: [x, y, a], slide: slide };
     }
     function onscreen(g, r) {   // the hammer must stay in view the whole time (no rocketing off the top or sides)
-      var i, f; for (i = 0; i < r.frames.length; i++) { f = r.frames[i]; if (f[1] < g.top - 150 || f[0] < -30 || f[0] > g.vw + 30) return false; } return true;
+      var i, f; for (i = 0; i < r.frames.length; i++) { f = r.frames[i]; if (f[1] < (g.far ? 6 : Math.min(g.top, g.y0) - 150) || f[0] < -30 || f[0] > g.vw + 30) return false; } return true;
     }
     function judge(g, b, r, style) {   // right stem first, ends in the bowl, crosses it, livelier and longer is better
       if (r.slept === null || !onscreen(g, r)) return -1;
@@ -151,16 +162,18 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
       return Math.min(r.events.length, 10) + Math.min(r.slept, 4);
     }
     function search(m, name, rnd) {   // all three tiers for one style: strict, relaxed, any
-      var st = STY[name], b = hammer(m, st), tx = m.rtx - .12 * b.L, ty = m.rty - .28 * b.L, k;
-      var best = [null, null, null], bs = [0, 0, 0];
+      var st = STY[name]; if (m.far) st = Object.assign({}, st, { vyMin: -120 });
+      var b = hammer(m, st), tx = m.rtx - .12 * b.L, ty = m.rty - .28 * b.L, k;
+      var best = [null, null, null], bs = [0, 0, 0], stat = { skip: 0, sim: 0, slept: 0, off: 0, any: 0 };
       for (k = 0; k < TRIALS; k++) {
-        var T = st.T0 + rnd() * (st.T1 - st.T0), w0 = (rnd() * 2 - 1) * st.spin + (rnd() < .5 ? -3 : 3), a0 = m.ang * Math.PI / 180 + (rnd() - .5) * 1.2;
+        var Tf = m.far ? Math.sqrt(2 * Math.max(0, ty - m.y0) / G) : 0, T = Math.max(st.T0, Tf * .92) + rnd() * (Math.max(st.T1, Tf * 1.5) - Math.max(st.T0, Tf * .92)), w0 = (rnd() * 2 - 1) * st.spin + (rnd() < .5 ? -3 : 3), a0 = m.ang * Math.PI / 180 + (rnd() - .5) * 1.2;
         var s = { x: m.x0, y: m.y0, a: a0, vx: (tx - m.x0) / T, vy: (ty - m.y0 - .5 * G * T * T) / T, w: w0 };
-        if (s.vy < st.vyMin || s.vy > 400) continue;
-        var r = simulate(m, b, s, st), sc = [judge(m, b, r, name), judgeLite(m, b, r), judgeAny(m, b, r)], q;
+        if (s.vy < st.vyMin || s.vy > (m.far ? 400 + 3 * Math.max(0, ty - m.y0) : 400)) { stat.skip++; continue; }
+        var r = simulate(m, b, s, st); stat.sim++; if (r.slept !== null) stat.slept++; if (onscreen(m, r)) stat.off++;
+        var sc = [judge(m, b, r, name), judgeLite(m, b, r), judgeAny(m, b, r)], q;
         for (q = 0; q < 3; q++) if (sc[q] > bs[q]) { bs[q] = sc[q]; best[q] = r; }
       }
-      return { b: b, best: best, tx: tx, ty: ty };
+      return { b: b, best: best, tx: tx, ty: ty, stat: stat };
     }
     return function plan(m) {
       field(m);
@@ -175,7 +188,7 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
         for (n = 0; n <= 180; n++) { u = n / 180; fr.push([m.x0 + (tx - m.x0) * ss(u * 1.6), m.y0 + (ty - m.y0) * ss(Math.min(1, u * 1.6)) + (u > .62 ? (rest[1] - ty) * ss((u - .62) / .38) : 0) - Math.sin(Math.min(1, u * 1.6) * Math.PI) * Math.max(8, Math.min(120, m.y0 - 10)), m.ang * Math.PI / 180 + u * 6]); }
         fr[fr.length - 1] = rest; pick = { frames: fr, slept: 1.5 }; tier = 3;
       }
-      return { sig: m.sig, b: { L: b.L, Lh: b.Lh, th: b.th, hh: b.hh, rh: b.rh, cx: b.cx }, frames: pick.frames, scored: ok, tier: tier, ox: m.ox, oy: m.oy };
+      return { stat: runs.map(function (r) { return r && r.stat; }), sig: m.sig, b: { L: b.L, Lh: b.Lh, th: b.th, hh: b.hh, rh: b.rh, cx: b.cx }, frames: pick.frames, scored: ok, tier: tier, ox: m.ox, oy: m.oy };
     };
   }
 
@@ -183,13 +196,13 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
   var asked = '', sc0 = .3, P = null, el = null, anim = null, done = false, finT = 0, shift = null, loc = null, worker = null, planInline = null;
 
   function metrics() {   // where the first glyph is on the page (cheap; no pixels)
-    var ch = h1.firstChild.data.charAt(0), cs = getComputedStyle(h1), r = document.createRange();
-    r.setStart(h1.firstChild, 0); r.setEnd(h1.firstChild, 1);
+    var tg = target(), ch = tg.node.data.charAt(tg.idx), cs = getComputedStyle(tg.el), r = document.createRange();
+    r.setStart(tg.node, tg.idx); r.setEnd(tg.node, tg.idx + 1);
     var rc = r.getClientRects()[0]; if (!rc || !rc.width) return null;
     var c = document.createElement('canvas').getContext('2d');
     c.font = cs.fontStyle + ' ' + cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
     var m = c.measureText(ch), pad = 26;
-    return { ch: ch, c: c, pad: pad, abl: m.actualBoundingBoxLeft, abr: m.actualBoundingBoxRight, aa: m.actualBoundingBoxAscent, ad: m.actualBoundingBoxDescent,
+    return { ch: ch, c: c, pad: pad, lmin: tg.lmin, abl: m.actualBoundingBoxLeft, abr: m.actualBoundingBoxRight, aa: m.actualBoundingBoxAscent, ad: m.actualBoundingBoxDescent,
              ox: rc.left + scrollX - m.actualBoundingBoxLeft - pad, oy: rc.top + scrollY + m.fontBoundingBoxAscent - m.actualBoundingBoxAscent - pad };
   }
   function request() {   // build the ink mask and the toss geometry, hand the heavy part to the worker
@@ -208,9 +221,9 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
     var mr = mark.getBoundingClientRect(), ox = q.ox, oy = q.oy;
     var sig = [Math.round(ox), Math.round(oy), W, H, Math.round(mr.left), Math.round(mr.top), Math.round(mr.width)].join();
     if (sig === asked) return; asked = sig;
-    sc0 = Math.min(1, Math.max(.1, .88 * mr.width / 280 * 58 / Math.max(11, (cr - cl) * .72)));
+    sc0 = Math.min(1, Math.max(.1, .88 * mr.width / 280 * 58 / Math.max(q.lmin, (cr - cl) * .72)));
     var msg = { sig: sig, W: W, H: H, ink: ink, ox: ox, oy: oy, top: oy + top, bot: oy + bot, left: ox + left, right: ox + right, mid: ox + (left + right) / 2,
-                cl: ox + cl, cr: ox + cr, rtx: ox + rtx, rty: oy + rty, ang: TOSS.ang, style: STYLE, seed: SEED, vw: document.documentElement.clientWidth,
+                lmin: q.lmin, far: (oy + rty) - (mr.top + scrollY + TOSS.y * mr.height / 280) > 250, cl: ox + cl, cr: ox + cr, rtx: ox + rtx, rty: oy + rty, ang: TOSS.ang, style: STYLE, seed: SEED, vw: document.documentElement.clientWidth,
                 x0: mr.left + scrollX + TOSS.x * mr.width / 280, y0: mr.top + scrollY + TOSS.y * mr.height / 280 };
     if (worker) worker.postMessage(msg); else setTimeout(function () { accept(planInline(msg)); }, 0);
     if (/hammerdebug/.test(location.search)) debugMask(msg);
