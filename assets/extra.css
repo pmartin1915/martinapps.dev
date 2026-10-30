@@ -170,3 +170,80 @@ html { scrollbar-gutter: stable; }
 .founder-row img { flex: none; width: 132px; height: 132px; object-fit: cover; border: 3px solid #1A1A1A; border-radius: 14px; box-shadow: var(--shadow-card); }
 .founder-row p { margin: 0; }
 @media (max-width: 600px) { .founder-row { gap: 16px; align-items: flex-start; } .founder-row img { width: 96px; height: 96px; } }
+
+/* Builder: after the mark finishes building, a stick figure walks up, holds a sign to the left
+   wall and hammers a nail through it, waves, and walks off. The sign stays.
+   One 10 s master timeline (percent = seconds x 10), home header only, runs once.
+   Reduced motion (or no animation support): no figure, the finished sign just sits there. */
+.mark-wrap { position: relative; display: block; width: 38px; height: 38px; flex: none; }
+.mark-wrap .builder { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.builder .nail-at { transform: translate(-94px, 132px); }
+.builder .sign-b { transform: translate(0, 132px); transform-origin: 0 132px; }
+.builder .nail-in { transform: translateX(14px); }
+.builder .bx { display: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .builder .bx { display: inline; animation: bx-move 10s linear both; }
+  .builder .face { animation: face-flip 10s linear both; }
+  .builder .arm-l { animation: arm-l 10s linear both; }
+  .builder .arm-r { animation: arm-r 10s linear both; }
+  .builder .leg-a { animation: stride-a .42s ease-in-out 3.3s 4, stride-a .42s ease-in-out 8.35s 3; }
+  .builder .leg-b { animation: stride-b .42s ease-in-out 3.3s 4, stride-b .42s ease-in-out 8.35s 3; }
+  .builder .sign-a-in { animation: carry 10s linear both; }
+  .builder .sign-a { animation: gone 10s linear both; }
+  .builder .sign-b { animation: show 10s linear both, jolt 10s linear both; }
+  .builder .nail-at { animation: show 10s linear both; }
+  .builder .nail-in { animation: drive 10s linear both; }
+}
+@keyframes bx-move {
+  0%, 32.9% { transform: translateX(-490px); opacity: 0; }
+  33% { transform: translateX(-490px); opacity: 0; }
+  35% { opacity: 1; }
+  50%, 56.5% { transform: translateX(-152px); opacity: 1; }
+  56.6%, 61.5% { transform: translateX(-148.5px); }
+  61.6%, 66.5% { transform: translateX(-145px); }
+  66.6%, 83.4% { transform: translateX(-141.5px); opacity: 1; }
+  96% { transform: translateX(-490px); opacity: 1; }
+  98%, 100% { transform: translateX(-490px); opacity: 0; }
+}
+@keyframes face-flip { 0%, 83.4% { transform: scaleX(1); } 83.5%, 100% { transform: scaleX(-1); } }
+@keyframes stride-a { 0%, 100% { transform: rotate(-26deg); } 50% { transform: rotate(26deg); } }
+@keyframes stride-b { 0%, 100% { transform: rotate(26deg); } 50% { transform: rotate(-26deg); } }
+@keyframes arm-l {
+  0%, 50% { transform: rotate(100deg); }
+  54%, 72% { transform: rotate(-20deg); }
+  75% { transform: rotate(-125deg); }
+  77% { transform: rotate(-105deg); }
+  79% { transform: rotate(-125deg); }
+  81% { transform: rotate(-105deg); }
+  83% { transform: rotate(-125deg); }
+  85%, 100% { transform: rotate(100deg); }
+}
+@keyframes arm-r {
+  0%, 50% { transform: rotate(75deg); }
+  54%, 56% { transform: rotate(-70deg); }
+  56.6%, 57% { transform: rotate(0deg); }
+  59%, 61% { transform: rotate(-70deg); }
+  61.6%, 62% { transform: rotate(0deg); }
+  64%, 66% { transform: rotate(-70deg); }
+  66.6%, 67% { transform: rotate(0deg); }
+  69%, 71% { transform: rotate(-70deg); }
+  71.6%, 72% { transform: rotate(0deg); }
+  75%, 100% { transform: rotate(75deg); }
+}
+@keyframes carry {
+  0%, 50% { transform: translate(-14px, -109px) rotate(-90deg); }
+  54%, 100% { transform: translate(152px, -148px) rotate(0deg); }
+}
+@keyframes gone { 0%, 54% { opacity: 1; } 54.1%, 100% { opacity: 0; } }
+@keyframes show { 0%, 53.9% { opacity: 0; } 54%, 100% { opacity: 1; } }
+@keyframes drive {
+  0%, 56.5% { transform: translateX(0); }
+  56.6%, 61.5% { transform: translateX(3.5px); }
+  61.6%, 66.5% { transform: translateX(7px); }
+  66.6%, 71.5% { transform: translateX(10.5px); }
+  71.6%, 100% { transform: translateX(14px); }
+}
+@keyframes jolt {
+  0%, 56.5%, 57.3%, 61.5%, 62.3%, 66.5%, 67.3%, 71.5%, 72.3%, 100% { rotate: 0deg; }
+  56.7%, 61.7%, 66.7%, 71.7% { rotate: -2.5deg; }
+}
