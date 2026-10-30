@@ -163,3 +163,9 @@ html { scrollbar-gutter: stable; }
   58.2%, 67.7% { d: path("M0,0 H100 L140,50 L180,0 H280 V280 H0 Z M40,40 H80 L140,110 L200,40 H240 V80 H200 V120 H160 V160 H120 V200 H80 V240 H40 Z M200,120 H240 V160 H200 Z"); }
   67.8%, 100% { d: path("M0,0 H100 L140,50 L180,0 H280 V280 H0 Z M40,40 H80 L140,110 L200,40 H240 V80 H200 V120 H160 V160 H120 V200 H80 V240 H40 Z"); }
 }
+
+/* About: founder photo beside the text; stacked on phones */
+.founder { display: flex; gap: 28px; align-items: center; margin-top: 32px; }
+.founder img { flex: none; width: 160px; height: 160px; border-radius: 50%; object-fit: cover; box-shadow: var(--shadow-card); }
+.founder h2 { margin-top: 0; }
+@media (max-width: 600px) { .founder { flex-direction: column; align-items: flex-start; gap: 16px; } .founder img { width: 128px; height: 128px; } }
