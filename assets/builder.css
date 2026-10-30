@@ -6,7 +6,12 @@
    Motion comes from a gait model (heel strike, knee flex, toe-off, counter-swinging arms, pelvis bounce);
    keyframes are generated, 18 s master timeline, home header only, runs once.
    Reduced motion (or no animation support): the plain mark, nothing else. */
-.mark-wrap { position: relative; display: block; width: 38px; height: 38px; flex: none; isolation: isolate; }
+/* Hero stage: --u is the size of one logo unit (the mark is 280 units wide), so the whole scene scales with the viewport. */
+.stage { --u: min(1.1px, calc((100vw - 32px) / 640)); position: relative; height: calc(312 * var(--u)); margin: 0 auto 28px; overflow: hidden; }
+.stage::after { content: ""; position: absolute; left: 0; right: 0; top: calc(290 * var(--u)); height: 2px; background: linear-gradient(90deg, transparent, var(--line, #DAD8D3) 16%, var(--line, #DAD8D3) 84%, transparent); }
+.stage .mark-wrap { position: absolute; left: calc(50% - 140 * var(--u)); top: calc(10 * var(--u)); z-index: 1; }
+.mark-wrap { position: relative; display: block; width: calc(280 * var(--u)); height: calc(280 * var(--u)); isolation: isolate; }
+.mark-wrap .mark-build, .mark-wrap .builder { width: 100%; height: 100%; }
 .mark-wrap .builder { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; display: none; }
 .mark-wrap .mark-build { position: relative; z-index: 1; }
 .builder-back { z-index: 0; } .builder-front { z-index: 2; }
