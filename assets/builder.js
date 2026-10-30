@@ -15,7 +15,7 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
  * for seconds right after the cube went in, so ALL of it runs in a Web Worker, started at page load, never
  * during the scene. The main thread only draws one element per frame. If the plan is not ready at release
  * time the hammer simply starts late; it never blocks and never jumps.
- * Two toss styles (TOSS.style, or ?toss=classic|skate in the URL):
+ * Two toss styles (TOSS.style, or ?toss=classic|skate|random in the URL; first visit = skate, later visits = random style + random seed):
  *   classic - a high lob, light head, wedges and rocks in the bowl (saved at git tag builder-v1-classic-toss).
  *   skate   - a low sideways flick, heavy head, slippery: hits the right stem, bounces, then slides down the U
  *             like a skateboard in a half-pipe, head down, rocks across and settles in the middle (default).
@@ -24,7 +24,15 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
 (function () {
   'use strict';
   if (!window.matchMedia || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  var STYLE = (/[?&]toss=(classic|skate)/.exec(location.search) || [])[1] || TOSS.style || 'skate';
+  // First visit: the skate slide. Every later visit: a random style and a fresh random take. The only thing
+  // stored is a "seen" flag in localStorage (never sent anywhere). ?toss=classic|skate|random forces one.
+  var STYLES = ['skate', 'classic'], STYLE, SEED = 20261030;
+  (function () {
+    var q = /[?&]toss=(classic|skate|random)/.exec(location.search), returning = false;
+    try { returning = !!localStorage.getItem('ma-builder-seen'); localStorage.setItem('ma-builder-seen', '1'); } catch (e) {}
+    var want = q ? q[1] : returning ? 'random' : (TOSS.style || 'skate');
+    if (want === 'random') { STYLE = STYLES[Math.floor(Math.random() * STYLES.length)]; SEED = (Math.random() * 4294967296) >>> 0; } else STYLE = want;
+  })();
   var PLAY = STYLE === 'skate' ? .6 : .5, REC = 1 / 120;
   var mark = document.querySelector('.mark-wrap');
   var h1 = document.querySelector('.hero h1') || document.querySelector('h1');
@@ -104,8 +112,11 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
       }
       return { frames: frames, events: events, slept: null, rest: [x, y, a], slide: slide };
     }
+    function onscreen(g, r) {   // the hammer must stay in view the whole time (no rocketing off the top or sides)
+      var i, f; for (i = 0; i < r.frames.length; i++) { f = r.frames[i]; if (f[1] < g.top - 150 || f[0] < -30 || f[0] > g.vw + 30) return false; } return true;
+    }
     function judge(g, b, r, style) {   // right stem first, ends in the bowl, crosses it, livelier and longer is better
-      if (r.slept === null) return -1;
+      if (r.slept === null || !onscreen(g, r)) return -1;
       var h = g.bot - g.top, first = null, i;
       for (i = 0; i < r.events.length; i++) if (r.events[i].vn > 100) { first = r.events[i]; break; }
       if (!first || first.x < g.mid || first.y > g.top + .34 * h) return -1;
@@ -121,24 +132,50 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
       if (cross < 3 || r.events.length < 3 || r.slept > 8) return -1;
       return cross * 3 + Math.min(r.slept, 4.5) + Math.min(r.events.length, 12) * .4;
     }
-    return function plan(m) {
-      var st = STY[m.style] || STY.skate;
-      field(m); var b = hammer(m, st), rnd = rng(20261030), best = null, bs = -1e9, k;
-      var tx = m.rtx - .12 * b.L, ty = m.rty - .28 * b.L;
+    function judgeLite(g, b, r) {   // second choice: still must hit the right side first and END IN THE BOWL
+      if (r.slept === null || !onscreen(g, r)) return -1;
+      var h = g.bot - g.top, first = null, i;
+      for (i = 0; i < r.events.length; i++) if (r.events[i].vn > 100) { first = r.events[i]; break; }
+      if (!first || first.x < g.mid || first.y > g.top + .45 * h) return -1;
+      var rx = r.rest[0], ry = r.rest[1];
+      if (rx < g.cl + 1 || rx > g.cr - 1 || ry < g.top + .45 * h || ry > g.bot) return -1;
+      var cross = 0, side = 0, f, sd;
+      for (i = 0; i < r.frames.length; i++) { f = r.frames[i]; if (f[1] < g.top + .35 * h) continue; sd = f[0] > g.mid ? 1 : -1; if (side && sd !== side) cross++; side = sd; }
+      if (cross < 1 && r.slide < .2) return -1;
+      return r.slide * 3 + cross + Math.min(r.events.length, 10) * .2;
+    }
+    function judgeAny(g, b, r) {   // last physical resort: it still ends in the bowl, in view, after a bounce
+      if (r.slept === null || !onscreen(g, r) || r.events.length < 1) return -1;
+      var rx = r.rest[0], ry = r.rest[1], h = g.bot - g.top;
+      if (rx < g.cl + 1 || rx > g.cr - 1 || ry < g.top + .45 * h || ry > g.bot) return -1;
+      return Math.min(r.events.length, 10) + Math.min(r.slept, 4);
+    }
+    function search(m, name, rnd) {   // all three tiers for one style: strict, relaxed, any
+      var st = STY[name], b = hammer(m, st), tx = m.rtx - .12 * b.L, ty = m.rty - .28 * b.L, k;
+      var best = [null, null, null], bs = [0, 0, 0];
       for (k = 0; k < TRIALS; k++) {
         var T = st.T0 + rnd() * (st.T1 - st.T0), w0 = (rnd() * 2 - 1) * st.spin + (rnd() < .5 ? -3 : 3), a0 = m.ang * Math.PI / 180 + (rnd() - .5) * 1.2;
         var s = { x: m.x0, y: m.y0, a: a0, vx: (tx - m.x0) / T, vy: (ty - m.y0 - .5 * G * T * T) / T, w: w0 };
         if (s.vy < st.vyMin || s.vy > 400) continue;
-        var r = simulate(m, b, s, st), sc = judge(m, b, r, m.style);
-        if (sc > bs) { bs = sc; best = r; }
+        var r = simulate(m, b, s, st), sc = [judge(m, b, r, name), judgeLite(m, b, r), judgeAny(m, b, r)], q;
+        for (q = 0; q < 3; q++) if (sc[q] > bs[q]) { bs[q] = sc[q]; best[q] = r; }
       }
-      var ok = !!best && bs > -1e8;
-      if (!ok) {   // fallback: a short scripted drop into the bowl so the gag still lands
-        var fr = [], rest = [(m.cl + m.cr) / 2, m.bot - 1.2 * b.hh, .12], n, u;
-        for (n = 0; n <= 180; n++) { u = n / 180; fr.push([m.x0 + (tx - m.x0) * ss(u * 1.6), m.y0 + (ty - m.y0) * ss(Math.min(1, u * 1.6)) + (u > .62 ? (rest[1] - ty) * ss((u - .62) / .38) : 0) - Math.sin(Math.min(1, u * 1.6) * Math.PI) * 120, m.ang * Math.PI / 180 + u * 6]); }
-        fr[fr.length - 1] = rest; best = { frames: fr, slept: 1.5 };
+      return { b: b, best: best, tx: tx, ty: ty };
+    }
+    return function plan(m) {
+      field(m);
+      var order = m.style === 'classic' ? ['classic', 'skate'] : ['skate', 'classic'], rnd = rng(m.seed || 20261030), runs = order.map(function (n) { return null; }), pick = null, tier = 0, b = null, q, o, res;
+      // requested style: strict, then relaxed; other style: strict, then relaxed; then any physical take; then script
+      for (o = 0; o < 2 && !pick; o++) { runs[o] = search(m, order[o], rnd); if (runs[o].best[0]) { pick = runs[o].best[0]; b = runs[o].b; tier = 0; } else if (runs[o].best[1] && o === 0) { pick = runs[o].best[1]; b = runs[o].b; tier = 1; } }
+      for (o = 0; o < 2 && !pick; o++) if (runs[o].best[1]) { pick = runs[o].best[1]; b = runs[o].b; tier = 1; }
+      for (o = 0; o < 2 && !pick; o++) if (runs[o].best[2]) { pick = runs[o].best[2]; b = runs[o].b; tier = 2; }
+      var ok = !!pick;
+      if (!ok) {   // last resort: a short scripted drop into the bowl so the gag still lands
+        b = runs[0].b; var tx = runs[0].tx, ty = runs[0].ty, fr = [], rest = [(m.cl + m.cr) / 2, m.bot - 1.2 * b.hh, .12], n, u;
+        for (n = 0; n <= 180; n++) { u = n / 180; fr.push([m.x0 + (tx - m.x0) * ss(u * 1.6), m.y0 + (ty - m.y0) * ss(Math.min(1, u * 1.6)) + (u > .62 ? (rest[1] - ty) * ss((u - .62) / .38) : 0) - Math.sin(Math.min(1, u * 1.6) * Math.PI) * Math.max(8, Math.min(120, m.y0 - 10)), m.ang * Math.PI / 180 + u * 6]); }
+        fr[fr.length - 1] = rest; pick = { frames: fr, slept: 1.5 }; tier = 3;
       }
-      return { sig: m.sig, b: { L: b.L, Lh: b.Lh, th: b.th, hh: b.hh, rh: b.rh, cx: b.cx }, frames: best.frames, scored: ok, ox: m.ox, oy: m.oy };
+      return { sig: m.sig, b: { L: b.L, Lh: b.Lh, th: b.th, hh: b.hh, rh: b.rh, cx: b.cx }, frames: pick.frames, scored: ok, tier: tier, ox: m.ox, oy: m.oy };
     };
   }
 
@@ -173,7 +210,7 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
     if (sig === asked) return; asked = sig;
     sc0 = Math.min(1, Math.max(.1, .88 * mr.width / 280 * 58 / Math.max(11, (cr - cl) * .72)));
     var msg = { sig: sig, W: W, H: H, ink: ink, ox: ox, oy: oy, top: oy + top, bot: oy + bot, left: ox + left, right: ox + right, mid: ox + (left + right) / 2,
-                cl: ox + cl, cr: ox + cr, rtx: ox + rtx, rty: oy + rty, ang: TOSS.ang, style: STYLE,
+                cl: ox + cl, cr: ox + cr, rtx: ox + rtx, rty: oy + rty, ang: TOSS.ang, style: STYLE, seed: SEED, vw: document.documentElement.clientWidth,
                 x0: mr.left + scrollX + TOSS.x * mr.width / 280, y0: mr.top + scrollY + TOSS.y * mr.height / 280 };
     if (worker) worker.postMessage(msg); else setTimeout(function () { accept(planInline(msg)); }, 0);
     if (/hammerdebug/.test(location.search)) debugMask(msg);
