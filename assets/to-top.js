@@ -3,11 +3,11 @@
    Debug: add ?totop=1 to the URL to keep the button visible, and ?totopT=1.2 to freeze the climb at second 1.2 (for review). */
 (function () {
   if (!window.BuilderLite) return;
-  var B = window.BuilderLite, q = new URLSearchParams(location.search), reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var B = window.BuilderLite, q = new URLSearchParams(location.search), reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   var MARK = 'M0,0 H100 L140,50 L180,0 H280 V280 H0 Z M40,40 H80 L140,110 L200,40 H240 V80 H200 V120 H160 V160 H120 V200 H80 V240 H40 Z';
   var css = document.createElement('style');
-  css.textContent = '.to-top{position:fixed;right:18px;bottom:18px;width:60px;height:60px;padding:0;border:0;border-radius:14px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.18),0 0 0 1px rgba(0,0,0,.08);cursor:pointer;opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .25s,transform .25s;z-index:50}'
-    + '.to-top.on{opacity:1;transform:none;pointer-events:auto}.to-top:focus-visible{outline:3px solid #F5B800;outline-offset:2px}.to-top svg{display:block;width:100%;height:100%;overflow:hidden;border-radius:14px}'
+  css.textContent = '.to-top{position:fixed;right:18px;bottom:18px;width:60px;height:60px;padding:0;border:0;border-radius:14px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.18),0 0 0 1px rgba(0,0,0,.08);cursor:pointer;opacity:0;transform:translateY(10px);pointer-events:none;visibility:hidden;transition:opacity .25s,transform .25s,visibility 0s .25s;z-index:50}'
+    + '.to-top.on{opacity:1;transform:none;pointer-events:auto;visibility:visible;transition-delay:0s}.to-top:focus-visible{outline:3px solid #F5B800;outline-offset:2px}.to-top svg{display:block;width:100%;height:100%;overflow:hidden;border-radius:14px}'
     + '@media (max-width:600px){.to-top{right:12px;bottom:12px;width:52px;height:52px}}';
   document.head.appendChild(css);
   var btn = document.createElement('button');
@@ -63,23 +63,27 @@
     who.pose({ hip: hip, sh: sh, head: hc, tilt: 8, ff: f.a, fb: f.b, h1: h1, h2: h2, bow: [-3, 0], shadow: 22, shadowX: (f.a[0] + f.b[0]) / 2, ground: Math.max(f.a[1], f.b[1]) + 1.5 });
   }
   function show(on) { btn.classList.toggle('on', on); }
-  function onScroll() { show(q.get('totop') ? true : window.scrollY > 500); }
+  var busy = false, rafId = 0;
+  function onScroll() { if (!busy) show(q.get('totop') ? true : window.scrollY > 500); }
   addEventListener('scroll', onScroll, { passive: true }); onScroll();
   B.scenes.totop = function (tt) { show(true); draw(tt); };   // for the review harness (brand/mascot/eyes): BuilderLite.scenes.totop(seconds)
   if (q.get('totopT')) { show(true); draw(parseFloat(q.get('totopT'))); return; }
-  var busy = false;
+  function jump(y) { try { window.scrollTo({ top: y, left: 0, behavior: 'instant' }); } catch (e) { window.scrollTo(0, y); } }   // not the page's smooth-scroll setting
+  function finish() { busy = false; cancelAnimationFrame(rafId); removeEventListener('wheel', finish); removeEventListener('touchstart', finish); removeEventListener('keydown', finish); if (fig) fig.innerHTML = ''; who = null; puffs = null; mark.setAttribute('transform', ''); show(window.scrollY > 500); }
   btn.addEventListener('click', function () {
     if (busy) return;
     var y0 = window.scrollY;
-    if (reduce) { window.scrollTo(0, 0); return; }
+    if (reduce) { jump(0); return; }
     busy = true; var t0 = 0;
+    addEventListener('wheel', finish, { passive: true, once: true }); addEventListener('touchstart', finish, { passive: true, once: true }); addEventListener('keydown', finish, { once: true });   // the reader takes over: stop driving the scroll
     function frame(ts) {
+      if (!busy) return;
       if (!t0) t0 = ts; var t = (ts - t0) / 1000;
       draw(t);
       var u = B.ease((t - TIN * .5) / (DUR - TIN * .5 - .4));
-      window.scrollTo(0, y0 * (1 - u));
-      if (t < DUR) requestAnimationFrame(frame); else { busy = false; show(window.scrollY > 500); fig.innerHTML = ''; who = null; puffs = null; mark.setAttribute('transform', ''); }
+      jump(y0 * (1 - u));
+      if (t < DUR) rafId = requestAnimationFrame(frame); else { finish(); btn.blur(); }
     }
-    requestAnimationFrame(frame);
+    rafId = requestAnimationFrame(frame);
   });
 })();

@@ -68,14 +68,16 @@
   // play a pose function only while its element is on screen; reduced motion draws one still frame
   function play(svg, draw, opt) {
     opt = opt || {};
-    var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
     if (/[?&]eyes=1/.test(location.search)) { draw(opt.still == null ? 0 : opt.still); return { stop: function () {} }; }   // review harness: it drives time itself
     if (reduce || !('IntersectionObserver' in window)) { draw(opt.still == null ? 0 : opt.still); return { stop: function () {} }; }
-    var raf = 0, t0 = 0, on = false, loop = opt.loop || 0;
+    var raf = 0, t0 = 0, on = false, loop = opt.loop || 0, io;
     function tick(ts) { if (!on) return; if (!t0) t0 = ts; var t = (ts - t0) / 1000; if (loop) t = t % loop; draw(t); raf = requestAnimationFrame(tick); }
-    new IntersectionObserver(function (e) { on = e[0].isIntersecting; if (on) { t0 = 0; raf = requestAnimationFrame(tick); } else cancelAnimationFrame(raf); }, { threshold: .2 }).observe(svg);
+    // start only on a false -> true change: the observer also fires when the ratio crosses its threshold while still intersecting
+    io = new IntersectionObserver(function (e) { var now = e[0].isIntersecting; if (now === on) return; on = now; if (on) { t0 = 0; raf = requestAnimationFrame(tick); } else cancelAnimationFrame(raf); }, { threshold: 0 });
+    io.observe(svg);
     draw(opt.still == null ? 0 : opt.still);
-    return { stop: function () { on = false; cancelAnimationFrame(raf); } };
+    return { stop: function () { on = false; cancelAnimationFrame(raf); io.disconnect(); } };
   }
   g.BuilderLite = { scenes: {}, probe: function () { return B_last ? B_last.lens : null; }, create: create, ik: ik, reach: reach, ease: ease, win: win, lerp: lerp, lerp2: lerp2, play: play, el: el };
 })(window);
