@@ -170,4 +170,6 @@ html { scrollbar-gutter: stable; }
 .founder-row img { flex: none; width: 132px; height: 132px; object-fit: cover; border: 3px solid #1A1A1A; border-radius: 14px; box-shadow: var(--shadow-card); }
 .founder-row p { margin: 0; }
 @media (max-width: 600px) { .founder-row { gap: 16px; align-items: flex-start; } .founder-row img { width: 96px; height: 96px; } }
-
+/* About: the Builder levels the founder photo (assets/about-frame.js). The stage sits flush under the photo. */
+.founder-row.has-scene img { align-self: flex-end; }
+.frame-stage { width: 300px; max-width: 100%; height: auto; overflow: hidden; margin-top: 0; }
