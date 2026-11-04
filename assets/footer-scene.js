@@ -4,11 +4,75 @@
   var box = document.querySelector('.foot-scene');
   if (!box || !('IntersectionObserver' in window)) return;
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* Easter egg: click the sitter and a pigeon steals his sandwich. Optional (a click or tap, nothing else needs it), no tracking,
+     off for reduced motion. __egg.at(t) draws second t of it without timers, for the review harness. */
+  function egg(s) {
+    var hit = s.querySelector('#o-egg'), sw = s.querySelector('#o-sw');
+    if (!hit || !sw || reduce) return;
+    var NS = 'http://www.w3.org/2000/svg', INK = '#1A1A1A', busy = false, bird = null, bits = null, S0 = null, st = {};
+    function mk(n, a, p) { var e = document.createElementNS(NS, n); for (var k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; }
+    function centre(el) { var r = el.getBoundingClientRect(), p = s.createSVGPoint(); p.x = r.left + r.width / 2; p.y = r.top + r.height / 2; p = p.matrixTransform(s.getScreenCTM().inverse()); return [p.x, p.y]; }
+    function bez(a, c, b, u) { var v = 1 - u; return [v * v * a[0] + 2 * v * u * c[0] + u * u * b[0], v * v * a[1] + 2 * v * u * c[1] + u * u * b[1]]; }
+    var WING = 'M0 0 Q12 -22 40 -20 Q26 -4 10 7 Z';
+    function build() {
+      bird = mk('g', {}, s);
+      var rig = mk('g', {}, bird);
+      st.wfg = mk('g', { transform: 'translate(5 -4)' }, rig); mk('path', { d: WING, fill: '#767D88' }, st.wfg);
+      mk('path', { d: 'M15 -3 L36 -9 L38 2 L15 7 Z', fill: '#656B75' }, rig);
+      mk('line', { x1: -1, y1: 9, x2: 7, y2: 16, stroke: '#C9707A', 'stroke-width': 2.2, 'stroke-linecap': 'round' }, rig);
+      mk('line', { x1: 3, y1: 9, x2: 11, y2: 15, stroke: '#C9707A', 'stroke-width': 2.2, 'stroke-linecap': 'round' }, rig);
+      mk('ellipse', { rx: 19, ry: 11.5, fill: '#A2A8B2' }, rig);
+      mk('ellipse', { cx: -13, cy: -5, rx: 8, ry: 6.5, fill: '#6A9C8C' }, rig);
+      mk('circle', { cx: -21, cy: -10, r: 7.2, fill: '#8F96A1' }, rig);
+      mk('circle', { cx: -23.5, cy: -11.5, r: 2.1, fill: '#E58A2B' }, rig); mk('circle', { cx: -24, cy: -11.5, r: 1, fill: INK }, rig);
+      mk('path', { d: 'M-27.5 -11 L-37 -8.6 L-27.5 -7 Z', fill: '#4A4A4F' }, rig); mk('circle', { cx: -28.2, cy: -10.3, r: 1.4, fill: '#EDEDED' }, rig);
+      st.nw = mk('g', { transform: 'translate(3 -5)' }, rig); mk('path', { d: WING, fill: '#8B929D', stroke: '#5C626C', 'stroke-width': 1 }, st.nw);
+      st.beak = mk('g', { transform: 'translate(-40 -5) rotate(-8) scale(.52)', opacity: 0 }, rig); mk('use', { href: '#o-swart' }, st.beak);
+      bits = [];
+      for (var i = 0; i < 6; i++) bits.push(mk('ellipse', { rx: 4, ry: 1.3, fill: i % 2 ? '#E6E8EC' : '#BFC4CC', opacity: 0 }, s));
+    }
+    var FEA = [[-60, -70], [-30, -95], [20, -80], [50, -50], [-80, -30], [10, -110]];
+    function frame(t) {
+      if (!bird) build();
+      var A0 = [S0[0] + 500, S0[1] - 240], C = [S0[0] + 190, S0[1] + 4], Gp = [S0[0] + 14, S0[1] - 9], Z = [S0[0] - 560, S0[1] - 330], C2 = [S0[0] - 170, S0[1] - 70], p, q;
+      if (t < 1.15) { var u = t / 1.15; p = bez(A0, C, Gp, u); q = bez(A0, C, Gp, Math.min(u + .02, 1)); }
+      else if (t < 1.4) { p = [Gp[0] + 2 * Math.sin((t - 1.15) * 30), Gp[1] + 3 * Math.sin((t - 1.15) * 22)]; q = [p[0] - 1, p[1] - .6]; }
+      else { var v = Math.min((t - 1.4) / 1.6, 1), uu = v * v; p = bez(Gp, C2, Z, uu); q = bez(Gp, C2, Z, Math.min(uu + .01, 1)); }
+      var ang = (t >= 1.15 && t < 1.4) ? 14 : Math.max(-30, Math.min(35, Math.atan2(-(q[1] - p[1]), -(q[0] - p[0])) * 180 / Math.PI));
+      bird.setAttribute('transform', 'translate(' + p[0].toFixed(1) + ' ' + p[1].toFixed(1) + ') rotate(' + ang.toFixed(1) + ')');
+      var fl = Math.sin(t * 2 * Math.PI * (t > 1.1 && t < 1.7 ? 7 : 4.5)), th = -20 + 55 * (.5 + .5 * fl);
+      st.nw.setAttribute('transform', 'translate(3 -5) rotate(' + th.toFixed(1) + ')'); st.wfg.setAttribute('transform', 'translate(5 -4) rotate(' + (th * .8 - 6).toFixed(1) + ')');
+      var got = t >= 1.2; st.beak.setAttribute('opacity', got ? 1 : 0); sw.setAttribute('opacity', got ? 0 : 1);
+      var tau = t - 1.2;
+      for (var i = 0; i < bits.length; i++) {
+        if (tau < 0 || tau > 1.5) { bits[i].setAttribute('opacity', 0); continue; }
+        var f = FEA[i], k = (1 - Math.exp(-3 * tau)) / 3, x = Gp[0] + f[0] * .35 * k * 3 + Math.sin(tau * 6 + i) * 7 * tau, y = Gp[1] + f[1] * .15 * k * 3 + 34 * tau * tau;
+        bits[i].setAttribute('transform', 'translate(' + x.toFixed(1) + ' ' + y.toFixed(1) + ') rotate(' + (i * 40 + tau * 140 * (i % 2 ? 1 : -1)).toFixed(0) + ')');
+        bits[i].setAttribute('opacity', (1 - tau / 1.5).toFixed(2));
+      }
+    }
+    function clean() { if (bird) { bird.remove(); bird = null; } if (bits) bits.forEach(function (b) { b.remove(); }); bits = null; }
+    s.__egg = { at: function (t) { S0 = S0 || centre(sw); frame(t); }, reset: function () { clean(); sw.setAttribute('opacity', 1); S0 = null; } };
+    hit.addEventListener('click', function () {
+      if (busy) return; busy = true; S0 = centre(sw); build();
+      var t0 = performance.now(), froze = false, thawed = false;
+      (function tick(now) {
+        var t = (now - t0) / 1000;
+        if (t >= 1.2 && !froze) { froze = true; s.pauseAnimations(); }                // his surprise: the scene holds for a beat
+        if (t >= 2.05 && !thawed) { thawed = true; s.unpauseAnimations(); }
+        frame(Math.min(t, 3.1));
+        if (t < 3.1) return requestAnimationFrame(tick);
+        clean(); sw.setAttribute('opacity', 0);
+        setTimeout(function () { var b = performance.now(); (function fade(n) { var u = Math.min((n - b) / 500, 1); sw.setAttribute('opacity', u); if (u < 1) requestAnimationFrame(fade); else busy = false; })(b); }, 2200);   // a fresh sandwich
+      })(t0);
+    });
+  }
   function mount(text) {
     box.insertAdjacentHTML('beforeend', text);
     var s = box.querySelector('svg');
     if (!s || !s.pauseAnimations) return;
     s.pauseAnimations();                       // nothing moves until we say so
+    egg(s);
     if (reduce) { s.setCurrentTime(11.2); return; }
     /* skip the walk across the part of a wide page he is not on yet: start with him just off the page's left edge */
     var w = s.getBoundingClientRect().width, k = w / 1000, left = -120 - (box.clientWidth - w) / 2 / k;
