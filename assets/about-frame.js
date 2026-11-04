@@ -6,7 +6,7 @@
   if (!window.BuilderLite) return;
   var B = window.BuilderLite, svg = document.querySelector('svg.frame-stage'), img = document.querySelector('.founder-row.has-scene img');
   if (!svg || !img) return;
-  svg.style.display = 'block';
+  svg.style.visibility = 'visible';
   var K = .62, W = 300, GY = 112, gy = GY / K, XO = W;                       // the figure faces screen-left: group = translate(XO,0) scale(-K,K), local u = (XO - X) / K
   var T_WALK = 3.33, T_CLOSE = .5, T_STAND = T_WALK + T_CLOSE, CYC = 80, A = 20;   // 5 cycles of 80 units; stride half-length 20
   var HIT = [4.75, 5.55], TILT0 = -5, TAPS = [2.8, 2.2];                    // the photo starts 5 deg crooked; each tap swings it back by this much
@@ -103,4 +103,5 @@
   B.scenes.about = draw;
   B.scenes.aboutMeasure = function () { measure(); return { pw: pw, sc: sc }; };
   handle = B.play(svg, draw, { loop: 0, still: 12 });
+  if (!/[?&]eyes=1/.test(location.search) && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) draw(0);   // the photo hangs crooked from the first paint, before he arrives
 })();

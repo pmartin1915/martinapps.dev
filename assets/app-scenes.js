@@ -17,7 +17,7 @@
   }
   // generic stage: ground line, figure group (not mirrored: he faces right), hammer prop
   function stage(svg) {
-    svg.style.display = 'block';
+    svg.style.visibility = 'visible';
     B.el('rect', { x: 0, y: 0, width: W, height: H, fill: 'none' }, svg);
     B.el('line', { x1: 0, x2: W, y1: GY + 1.5, y2: GY + 1.5, stroke: INK, 'stroke-opacity': .14, 'stroke-width': 1.5 }, svg);
     return svg;
