@@ -10,6 +10,9 @@
     if (!s || !s.pauseAnimations) return;
     s.pauseAnimations();                       // nothing moves until we say so
     if (reduce) { s.setCurrentTime(11.2); return; }
+    /* skip the walk across the part of a wide page he is not on yet: start with him just off the page's left edge */
+    var w = s.getBoundingClientRect().width, k = w / 1000, left = -120 - (box.clientWidth - w) / 2 / k;
+    s.setCurrentTime(Math.max(0, (left - 110 - -720.0) / 52.0));
     new IntersectionObserver(function (e) { if (e[0].isIntersecting) s.unpauseAnimations(); else s.pauseAnimations(); }, { threshold: .3 }).observe(s);
   }
   new IntersectionObserver(function (e, o) {
