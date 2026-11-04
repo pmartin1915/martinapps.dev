@@ -21,6 +21,7 @@
   function reach(p, q, r) { var dx = q[0] - p[0], dy = q[1] - p[1], d = Math.hypot(dx, dy); return d <= r ? q : [p[0] + dx * r / d, p[1] + dy * r / d]; }
   function setL(e, a, b) { e.setAttribute('x1', f1(a[0])); e.setAttribute('y1', f1(a[1])); e.setAttribute('x2', f1(b[0])); e.setAttribute('y2', f1(b[1])); }
 
+  var B_last = null;
   function create(parent, opt) {
     // opt.ink / opt.outline recolour him for a dark background (a light body, the hat keeps its yellow)
     var ink = (opt && opt.ink) || INK, outline = (opt && opt.outline) || INK;
@@ -51,6 +52,10 @@
       head.setAttribute('transform', 'translate(' + f1(P.head[0]) + ' ' + f1(P.head[1]) + ') rotate(' + f1(P.tilt || 0) + ')');
       var h1 = reach(sh, P.h1, UA + FA - 1), e1 = ik(sh, h1, UA, FA, 1);
       setL(near[0], sh, e1); setL(near[1], e1, h1);
+      var D = function (a, b) { return Math.hypot(b[0] - a[0], b[1] - a[1]); };
+      api.lens = { ua: D(sh, e1), fa: D(e1, h1), ua2: D(sh, e2), fa2: D(e2, h2), thF: D(hip, kf), shF: D(kf, ff), thB: D(hip, kb), shB: D(kb, fb),
+        reachMissH1: D(h1, P.h1), reachMissH2: D(h2, P.h2), reachMissFF: D(ff, P.ff), reachMissFB: D(fb, P.fb), ffY: ff[1], fbY: fb[1], h1x: h1[0], h1y: h1[1], e1x: e1[0], e1y: e1[1], hipX: hip[0], hipY: hip[1] };
+      B_last = api;
       return { h1: h1, h2: h2, e1: e1, e2: e2 };   // where the hands really are (after the reach limit), for props
     };
     return api;
@@ -64,6 +69,7 @@
   function play(svg, draw, opt) {
     opt = opt || {};
     var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (/[?&]eyes=1/.test(location.search)) { draw(opt.still == null ? 0 : opt.still); return { stop: function () {} }; }   // review harness: it drives time itself
     if (reduce || !('IntersectionObserver' in window)) { draw(opt.still == null ? 0 : opt.still); return { stop: function () {} }; }
     var raf = 0, t0 = 0, on = false, loop = opt.loop || 0;
     function tick(ts) { if (!on) return; if (!t0) t0 = ts; var t = (ts - t0) / 1000; if (loop) t = t % loop; draw(t); raf = requestAnimationFrame(tick); }
@@ -71,5 +77,5 @@
     draw(opt.still == null ? 0 : opt.still);
     return { stop: function () { on = false; cancelAnimationFrame(raf); } };
   }
-  g.BuilderLite = { create: create, ik: ik, reach: reach, ease: ease, win: win, lerp: lerp, lerp2: lerp2, play: play, el: el };
+  g.BuilderLite = { scenes: {}, probe: function () { return B_last ? B_last.lens : null; }, create: create, ik: ik, reach: reach, ease: ease, win: win, lerp: lerp, lerp2: lerp2, play: play, el: el };
 })(window);
