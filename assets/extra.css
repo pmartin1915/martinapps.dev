@@ -173,3 +173,5 @@ html { scrollbar-gutter: stable; }
 /* About: the Builder levels the founder photo (assets/about-frame.js). The stage sits flush under the photo. */
 .founder-row.has-scene img { align-self: flex-end; }
 .frame-stage { width: 300px; max-width: 100%; height: auto; overflow: hidden; margin-top: 0; }
+/* Outdoor-line product pages: a wordless Builder scene under the feature cards (assets/app-scenes.js). */
+.app-stage { width: 360px; max-width: 100%; height: auto; margin-top: 28px; overflow: hidden; }

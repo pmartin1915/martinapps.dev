@@ -60,6 +60,7 @@
 <section class="wrap section" style="padding-top:64px" aria-labelledby="does-h">
   <h2 id="does-h">What it does</h2>
   <div class="feats"><div><h3>Field tools</h3><p>A compass with saved locations, a flashlight that flashes SOS, water treatment amounts, daylight times and a guide to emergency priorities.</p></div><div><h3>A reference you can check</h3><p>128+ entries on first aid, plants, wildlife, knots, shelter and fire. Each comes from a named source such as the Army survival manual, NOLS or the CDC.</p></div><div><h3>Readable in sun or dark</h3><p>Four color modes, including a red mode for use in the dark.</p></div></div>
+  <svg class="app-stage" data-scene="wilderness" viewBox="0 0 360 120" aria-hidden="true" style="display:none"></svg>
 </section>
 
 <section class="wrap section" style="padding-top:64px" aria-labelledby="lim-h">
@@ -97,5 +98,7 @@
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !m.hidden) { set(false); b.focus(); } });
 })();
 </script>
+<script src="/assets/builder-lite.js" defer></script>
+<script src="/assets/app-scenes.js" defer></script>
 </body>
 </html>
