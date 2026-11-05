@@ -74,10 +74,10 @@
     var hit = 0; for (var i = 0; i < HIT.length; i++) if (Math.abs(t - HIT[i]) < .07) hit = 1 - Math.abs(t - HIT[i]) / .07;
     var near = 0; HIT.forEach(function (c) { near = Math.max(near, B.win(t, c - .3, c - .03, c + .03, c + .4)); });
     var lean = inWalk ? 0 : 3.5 * near - 1.2 * hit;
-    var hip = [hu + lean * .5, gy - 67 + bob + 1.2 * near], sh = [hip[0] + 7 + lean + (inWalk ? 2 : 0), hip[1] - 50 + (inWalk ? .4 * Math.cos(4 * Math.PI * p) : 0)];
+    var hip = [hu + lean * .5, gy - 67 + bob + 1.2 * near], sh = [hip[0] + 3 + lean + (inWalk ? 1 : 0), hip[1] - 50 + (inWalk ? .4 * Math.cos(4 * Math.PI * p) : 0)];
     var lookUp = B.win(t, 3.9, 4.3, 6.4, 6.8), lookBack = B.win(t, 6.4, 6.8, 8.3, 8.8), nod = B.win(t, 8.2, 8.5, 8.6, 9);
     var tilt = -12 * lookUp - 6 * lookBack + 5 * nod + (inWalk ? 2 * Math.sin(4 * Math.PI * p) : 0);
-    var hc = [sh[0] + 9 + .8 * near, sh[1] - 11 + 1.5 * hit];
+    var hc = [sh[0] + 6 + .8 * near, sh[1] - 11 + 1.5 * hit];
     // --- arms
     var oa = inWalk ? footOff(p)[0] / A : 0;                         // near arm swings against the near leg
     var walkH1 = [sh[0] - 13 * oa + 4, sh[1] + 42 - 3 * Math.abs(oa)], walkH2 = [sh[0] + 13 * oa + 4, sh[1] + 42 - 3 * (1 - Math.abs(oa))];

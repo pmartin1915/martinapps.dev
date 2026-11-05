@@ -54,7 +54,7 @@
       setL(near[0], sh, e1); setL(near[1], e1, h1);
       var D = function (a, b) { return Math.hypot(b[0] - a[0], b[1] - a[1]); };
       api.lens = { ua: D(sh, e1), fa: D(e1, h1), ua2: D(sh, e2), fa2: D(e2, h2), thF: D(hip, kf), shF: D(kf, ff), thB: D(hip, kb), shB: D(kb, fb),
-        reachMissH1: D(h1, P.h1), reachMissH2: D(h2, P.h2), reachMissFF: D(ff, P.ff), reachMissFB: D(fb, P.fb), ffY: ff[1], fbY: fb[1], h1x: h1[0], h1y: h1[1], e1x: e1[0], e1y: e1[1], hipX: hip[0], hipY: hip[1] };
+        reachMissH1: D(h1, P.h1), reachMissH2: D(h2, P.h2), reachMissFF: D(ff, P.ff), reachMissFB: D(fb, P.fb), ffX: ff[0], fbX: fb[0], ffY: ff[1], fbY: fb[1], lean: Math.atan2(sh[0] - hip[0], hip[1] - sh[1]) * 180 / Math.PI, torso: D(hip, sh), headGap: D(sh, P.head), hipH: Math.max(ff[1], fb[1]) - hip[1], tilt: P.tilt || 0, h1x: h1[0], h1y: h1[1], e1x: e1[0], e1y: e1[1], hipX: hip[0], hipY: hip[1] };
       B_last = api;
       return { h1: h1, h2: h2, e1: e1, e2: e2 };   // where the hands really are (after the reach limit), for props
     };

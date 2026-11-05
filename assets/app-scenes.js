@@ -81,8 +81,8 @@
         fa = [u1 + A, gy]; fb = [B.lerp(u1 - A, u1 - 4, c), gy - 7 * Math.sin(Math.PI * Math.min(c, 1))];
       }
       drop = 24 * work; lean = 12 * work - 2 * hit;
-      var hp = [hip + lean * .35, gy - 67 + bob + drop], sh = [hp[0] + 7 + lean + (w ? 2 : 0), hp[1] - 50 + (w ? .4 * Math.cos(4 * Math.PI * (w.p)) : 0) + 4 * work];
-      var hc = [sh[0] + 9 + 4 * work, sh[1] - 11 + 6 * work + 1.5 * hit];
+      var hp = [hip + lean * .35, gy - 67 + bob + drop], sh = [hp[0] + 3 + lean + (w ? 1 : 0), hp[1] - 50 + (w ? .4 * Math.cos(4 * Math.PI * (w.p)) : 0) + 4 * work];
+      var hc = [sh[0] + 6 + 4 * work, sh[1] - 11 + 6 * work + 1.5 * hit];
       var tap = [PEGX / K, (GY - pegH) / K - 2], aim = hitAim(sh, tap);
       var P = { rest: [1.35, 52], wind: [-1.9, 52], hit: aim, reb: [aim[0] - .75, 56] };
       var walkH1 = [sh[0] - 13 * oa + 4, sh[1] + 42 - 3 * Math.abs(oa)], walkH2 = [sh[0] + 13 * oa + 4, sh[1] + 42 - 3 * (1 - Math.abs(oa))];
@@ -132,8 +132,8 @@
       HITS.forEach(function (c) { near = Math.max(near, B.win(t, c - .35, c - .03, c + .03, c + .45)); hit = Math.max(hit, spikeNear(t, c, .07)); });
       if (w) { hip = w.hu; fa = w.fa; fb = w.fb; bob = w.bob; oa = w.oa; }
       else { hip = u1; var c = B.ease((t - TW) / CLOSE); fa = [u1 + A, gy]; fb = [B.lerp(u1 - A, u1 - 4, c), gy - 7 * Math.sin(Math.PI * Math.min(c, 1))]; }
-      var lean = 5 * near - 1.2 * hit, hp = [hip + lean * .5, gy - 67 + bob + 1.2 * near], sh = [hp[0] + 7 + lean + (w ? 2 : 0), hp[1] - 50 + (w ? .4 * Math.cos(4 * Math.PI * w.p) : 0)];
-      var hc = [sh[0] + 9 + .8 * near, sh[1] - 11 + 1.5 * hit];
+      var lean = 5 * near - 1.2 * hit, hp = [hip + lean * .5, gy - 67 + bob + 1.2 * near], sh = [hp[0] + 3 + lean + (w ? 1 : 0), hp[1] - 50 + (w ? .4 * Math.cos(4 * Math.PI * w.p) : 0)];
+      var hc = [sh[0] + 6 + .8 * near, sh[1] - 11 + 1.5 * hit];
       var cur = t < (HITS[0] + HITS[1]) / 2 ? N1 : N2, aim = hitAim(sh, [cur[0] / K - 3, cur[1] / K]);
       var P = { rest: [1.35, 52], wind: [-1.5 + (cur === N2 ? .5 : 0), 50], hit: aim, reb: [aim[0] - .7, 56] };
       var walkH1 = [sh[0] - 13 * oa + 4, sh[1] + 42 - 3 * Math.abs(oa)], walkH2 = [sh[0] + 13 * oa + 4, sh[1] + 42 - 3 * (1 - Math.abs(oa))];
@@ -172,7 +172,7 @@
       var w = walk(t, u0, u1, N), hip, fa, fb, bob = 0, oa = 0, h1, h2;
       if (w) { hip = w.hu; fa = w.fa; fb = w.fb; bob = w.bob; oa = w.oa; }
       else { hip = u1; var c = B.ease((t - TW) / CLOSE); fa = [u1 + A, gy]; fb = [B.lerp(u1 - A, u1 - 4, c), gy - 7 * Math.sin(Math.PI * Math.min(c, 1))]; }
-      var hp = [hip, gy - 67 + bob], sh = [hp[0] + 7 + 2, hp[1] - 50 + (w ? .4 * Math.cos(4 * Math.PI * w.p) : 0)], hc = [sh[0] + 9, sh[1] - 11];
+      var hp = [hip, gy - 67 + bob], sh = [hp[0] + 3 + 1, hp[1] - 50 + (w ? .4 * Math.cos(4 * Math.PI * w.p) : 0)], hc = [sh[0] + 6, sh[1] - 11];
       var walkH1 = [sh[0] - 13 * oa + 4, sh[1] + 42 - 3 * Math.abs(oa)];
       // the tape is gripped in the far hand, held out low in front of him while he walks
       var grip = [sh[0] + 20, sh[1] + 36 - 3 * Math.abs(oa)];

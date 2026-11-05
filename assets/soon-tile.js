@@ -43,7 +43,7 @@
       for (var s = 0; s < 3; s++) if (Math.abs(t - hitTimes[s]) < .07) hit = 1 - Math.abs(t - hitTimes[s]) / .07;
       var near = 0; hitTimes.forEach(function (c) { near = Math.max(near, B.win(t, c - .35, c - .03, c + .03, c + .45)); });   // leaning into the work
       var lean = 4.5 * near + 1.2 * Math.sin(t * 2.6) - 1.4 * hit;
-      var hip = [58 + lean * .55, gy - 62 + 1.5 * near], sh = [hip[0] + 7 + lean, hip[1] - 50 + .5 * Math.sin(t * 2.6)], hc = [sh[0] + 9 + .8 * near, sh[1] - 11 + 1.8 * hit + 1.2 * near];
+      var hip = [58 + lean * .55, gy - 62 + 1.5 * near], sh = [hip[0] + 3 + lean, hip[1] - 50 + .5 * Math.sin(t * 2.6)], hc = [sh[0] + 6 + .8 * near, sh[1] - 11 + 1.8 * hit + 1.2 * near];
       var tap = [(74 + 4) / K - 8, (G - 41) / K + 2];
       var A = armAt(t, sh, tap);
       var h1 = [sh[0] + A.r * Math.cos(A.a), sh[1] + A.r * Math.sin(A.a)];

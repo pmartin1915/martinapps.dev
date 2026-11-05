@@ -54,7 +54,7 @@
       var pu = (t - (TIN + STEP * (kl + 1))) / .5, pc = puffs[kl];
       if (pu > 0 && pu < 1) { pc.setAttribute('cx', (T[kl][0] + 2 + 5 * pu).toFixed(1)); pc.setAttribute('cy', (T[kl][1] - 3 - 9 * pu).toFixed(1)); pc.setAttribute('r', (2.5 + 6 * pu).toFixed(1)); pc.setAttribute('opacity', (.7 * (1 - pu)).toFixed(2)); } else pc.setAttribute('opacity', 0);
     }
-    var sh = [hip[0] + 7, hip[1] - 50], hc = [sh[0] + 9, sh[1] - 11];
+    var sh = [hip[0] + 3, hip[1] - 50], hc = [sh[0] + 6, sh[1] - 11];
     var ph = (k + u) * Math.PI;
     var h1 = [sh[0] + 14 + 13 * Math.sin(ph), sh[1] + 40 - 5 * Math.cos(ph)], h2 = [sh[0] + 14 - 13 * Math.sin(ph), sh[1] + 40 + 5 * Math.cos(ph)];
     var ex = B.ease((t - TIN - STEP * 4 - .05) / .42);            // after the last tread he steps up and back into the wall, behind the glyph
