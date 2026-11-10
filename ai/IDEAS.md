@@ -1,0 +1,5 @@
+# IDEAS — append-only, not @-imported
+
+_Defer-don't-drop ledger. Sweep at session start; fold into handoffs._
+
+- **2026-11-10 — clip: Video by cooked_dev** (Cooked Dev, instagram, 0:00) — A third-party Instagram reel listing a 20-point legal/compliance checklist for shipped apps (privacy policy, ToS, cookie consent, accessibility, data deletion, age consent, etc.). martinapps-site is the canonical host of the LLC's privacy.html, terms.html, and privacy-policy.html pages, making it the natural reference point for this checklist. Idea: Cross-reference the video's 20-item checklist against the existing privacy/terms/refund pages on martinapps.dev and the app-store listings to produce a gap-analysis note (e.g., is there a cookie-consent banner? a data-deletion request option? age-consent flow?) and file any missing items as tickets on the relevant app repos. Transcript: C:\Users\perry\Documents\Research\clips-library\martinapps-site\2026-11-10-instagram-DfKQKhfIXcB.md Source: https://www.instagram.com/reel/DfKQKhfIXcB/?psln=MWphY3ZpYzRwNG9idQ==
