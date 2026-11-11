@@ -93,3 +93,6 @@ details p { margin-top: 8px !important; }
   .app, .project { padding: 22px; }
   .hero-actions .btn, .help-actions .btn { width: 100%; }
 }
+
+/* trademark notice after the brand name (header + footer) */
+.brand .tm { font-size: 0.5em; font-weight: 600; vertical-align: super; line-height: 0; margin-left: 1px; letter-spacing: 0; }

@@ -348,3 +348,6 @@ main { flex: 1; width: 100%; }
   .facts dd { margin-bottom: 0.6rem; }
   .app { padding: 1.2rem 1.1rem; }
 }
+
+/* trademark notice after the brand name (header + footer) */
+.brand .tm { font-size: 0.5em; font-weight: 600; vertical-align: super; line-height: 0; margin-left: 1px; letter-spacing: 0; }
