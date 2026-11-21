@@ -67,18 +67,22 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
   }
   function scanText(bd) {
     var out = [], hdr = mark.closest('header'), w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT), n, m, re = /\S+/g, fontOf = new Map(), cv = document.createElement('canvas').getContext('2d');
-    while ((n = w.nextNode()) && out.length < 400) {
+    var nodes = 0, tests = 0;   // hard caps keep one scan short whatever the page holds
+    while ((n = w.nextNode()) && out.length < 400 && ++nodes < 3000 && tests < 1500) {
       var pe = n.parentElement; if (!pe || !/\S/.test(n.data)) continue;
       if ((hdr && hdr.contains(pe)) || pe.closest('script,style,noscript,[aria-hidden="true"],svg,button,select,textarea')) continue;
       var pr = pe.getBoundingClientRect(); if (pr.bottom < bd.T || pr.top > bd.B || pr.right < bd.L || pr.left > bd.R) continue;
       var cs = getComputedStyle(pe); if (cs.visibility === 'hidden' || +cs.opacity === 0) continue;
       var font = fontOf.get(pe); if (!font) { font = cs.fontStyle + ' ' + cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily; fontOf.set(pe, font); }
+      var tt = cs.textTransform, ls = cs.letterSpacing === 'normal' ? '0px' : cs.letterSpacing;
       re.lastIndex = 0;
-      while ((m = re.exec(n.data)) && out.length < 400) {
+      while ((m = re.exec(n.data)) && out.length < 400 && ++tests < 1500) {
         var r = document.createRange(); r.setStart(n, m.index); r.setEnd(n, m.index + m[0].length);
-        var rc = r.getClientRects()[0]; if (!rc || !rc.width || rc.top < bd.T || rc.bottom > bd.B || rc.left < bd.L || rc.right > bd.R) continue;   // whole words only: a sliver cut at the band edge is not something to land on
-        cv.font = font; var fm = cv.measureText(m[0]);
-        out.push({ text: m[0], font: font, size: parseFloat(cs.fontSize) || 16, x: rc.left + scrollX, base: rc.top + scrollY + fm.fontBoundingBoxAscent });
+        var rs = r.getClientRects(); if (rs.length !== 1) continue;   // a word broken over two lines (or hidden) is left out
+        var rc = rs[0]; if (!rc || !rc.width || rc.top < bd.T || rc.bottom > bd.B || rc.left < bd.L || rc.right > bd.R) continue;   // whole words only: a sliver cut at the band edge is not something to land on
+        var word = tt === 'uppercase' ? m[0].toUpperCase() : tt === 'lowercase' ? m[0].toLowerCase() : tt === 'capitalize' ? m[0].charAt(0).toUpperCase() + m[0].slice(1) : m[0];
+        cv.font = font; var fm = cv.measureText(word);
+        out.push({ text: word, font: font, ls: ls, size: parseFloat(cs.fontSize) || 16, x: rc.left + scrollX, base: rc.top + scrollY + fm.fontBoundingBoxAscent });
       }
     }
     return out;
@@ -271,7 +275,7 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
         for (n = 0; n <= 180; n++) { u = n / 180; fr.push([m.x0 + (tx - m.x0) * ss(u * 1.6), m.y0 + (ty - m.y0) * ss(Math.min(1, u * 1.6)) + (u > .62 ? (rest[1] - ty) * ss((u - .62) / .38) : 0) - Math.sin(Math.min(1, u * 1.6) * Math.PI) * Math.max(8, Math.min(120, m.y0 - 10)), m.ang * Math.PI / 180 + u * 6]); }
         fr[fr.length - 1] = rest; pick = { frames: fr, slept: 1.5 }; tier = 3;
       }
-      return { stat: runs.map(function (r) { return r && r.stat; }), sig: m.sig, b: { L: b.L, Lh: b.Lh, th: b.th, hh: b.hh, rh: b.rh, cx: b.cx }, frames: pick.frames, scored: ok, tier: tier, ox: m.ox, oy: m.oy };
+      return { stat: runs.map(function (r) { return r && r.stat; }), sig: m.sig, b: { L: b.L, Lh: b.Lh, th: b.th, hh: b.hh, rh: b.rh, cx: b.cx }, frames: pick.frames, scored: ok, tier: tier, ox: m.ox, oy: m.oy, sy: m.sy };
     };
   }
 
@@ -290,13 +294,14 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
   }
   var lettersOnly = false;   // true for one request after text mode found nothing it could land on
   function requestText() {   // text mode: mask the words on screen under the icon; false = nothing usable here
+    if (!worker) return false;   // the text search is too heavy for the main thread: without a worker, the small letter search
     var bd = band(), words = scanText(bd); if (/hammerdebug/.test(location.search)) window.__hammerScan = { band: bd, words: words.length, sy: scrollY, at: Math.round(performance.now()) };
     if (!words.length) return false;
     var ox = Math.floor(bd.L + scrollX), oy = Math.floor(bd.T + scrollY), W = Math.ceil(bd.R - bd.L), H = Math.ceil(bd.B - bd.T);
     if (W < 40 || H < 40) return false;
     var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     var x = cv.getContext('2d'), sizes = [], i, j; x.fillStyle = '#000'; x.textBaseline = 'alphabetic';
-    words.forEach(function (w) { x.font = w.font; x.fillText(w.text, w.x - ox, w.base - oy); sizes.push(w.size); });
+    words.forEach(function (w) { x.font = w.font; if ('letterSpacing' in x) x.letterSpacing = w.ls; x.fillText(w.text, w.x - ox, w.base - oy); sizes.push(w.size); });
     var px = x.getImageData(0, 0, W, H).data, ink = new Uint8Array(W * H), aims = [], first = H;
     for (i = 0; i < W * H; i++) ink[i] = px[i * 4 + 3] > 127 ? 1 : 0;
     for (j = 0; j < H && first === H; j++) for (i = 0; i < W; i++) if (ink[j * W + i]) { first = j; break; }
@@ -305,7 +310,8 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
     var fs = sizes[Math.floor(sizes.length / 2)], L = Math.max(16, Math.min(44, 1.5 * fs)), firstBot = Math.min(H, Math.round(first + 1.6 * fs));
     for (i = 0; i < W; i += 2) for (j = first; j < H; j++) if (ink[j * W + i]) { aims.push([ox + i, oy + j]); break; }   // the top surface of the text in every column
     if (aims.length < 4) return false;
-    var x0 = bd.x0 + scrollX, y0 = bd.y0 + scrollY, sig = ['t', ox, oy, W, H, words.length, Math.round(x0), Math.round(y0)].join();
+    var hsh = 0; words.forEach(function (w) { var k = w.text + Math.round(w.x) + ',' + Math.round(w.base); for (var c = 0; c < k.length; c++) hsh = (hsh * 31 + k.charCodeAt(c)) | 0; });
+    var x0 = bd.x0 + scrollX, y0 = bd.y0 + scrollY, sig = ['t', ox, oy, W, H, words.length, hsh, Math.round(x0), Math.round(y0)].join();
     if (sig === asked) return true; asked = sig;
     var mr = mark.getBoundingClientRect(); sc0 = Math.min(1, Math.max(.1, .88 * mr.width / 280 * 58 / L));
     send({ mode: 'text', sig: sig, W: W, H: H, ink: ink, ox: ox, oy: oy, left: ox, right: ox + W, top: oy + first, bot: oy + H, mid: ox + W / 2, cl: 0, cr: 1, lmin: L,
@@ -357,8 +363,9 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
   }
   worker = makeWorker();
 
+  var dropped = false;   // the toss was cancelled (still scrolling at release, or the text it planned against moved)
   function accept(r) {
-    if (!r || r.sig !== asked) return;
+    if (!r || r.sig !== asked || dropped) return;
     if (r.fail) { if (/hammerdebug/.test(location.search)) window.__hammerTextFail = r; lettersOnly = true; asked = ''; request(); lettersOnly = false; return; }   // nothing to land on in this text: the letter instead
     if (P && shift !== null) return;                      // already flying (or landed): keep this take
     if (/hammerdebug/.test(location.search)) window.__hammerPlan = r;
@@ -380,13 +387,14 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
     var tt = ms / 1000;
     if (anim.playState === 'finished') { finT = finT || performance.now(); tt += (performance.now() - finT) / 1000; }   // keep going past the end of the scene
     var t = tt - TOSS.t;
+    if (dropped) { put(0, 0, 0, 1, false); return; }
     if (P && el) {
       if (t < 0) { shift = null; if (!done) put(0, 0, 0, 1, false); }
       else {
         if (shift === null && Math.abs((P.sy || 0) - scrollY) > 24) {   // the plan was made at another scroll (sticky header: the icon moved on the page)
           put(0, 0, 0, 1, false);
           if (t < 2.5) return requestAnimationFrame(frame);   // the scroll-end re-plan is on its way: start late, never jump
-          P = null; return;                                                   // still scrolling after 2.5 s: skip the toss this time
+          dropped = true; return;                                             // still scrolling after 2.5 s: skip the toss this time
         }
         if (shift === null) shift = Math.max(0, t);   // plan arrived late: start now instead of jumping
         var tp = t - shift, fr = P.frames, k = Math.min(fr.length - 1, Math.max(0, tp) * PLAY / REC), i = Math.floor(k), f = k - i, A = fr[i], B = fr[Math.min(i + 1, fr.length - 1)];
@@ -398,7 +406,7 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
     if (anim.playState !== 'finished' || !done) requestAnimationFrame(frame);
   }
   function relocate() {   // layout changed: keep a settled hammer in the bowl, and re-plan if it has not flown yet
-    if (P && P.mode === 'text') { if (shift === null) { asked = ''; request(); } else if (done && el) el.style.opacity = 0; return; }   // text reflows: re-plan, or quietly drop a landed hammer
+    if (P && P.mode === 'text') { if (shift === null) { asked = ''; request(); } else { dropped = true; put(0, 0, 0, 1, false); } return; }   // text reflowed: re-plan, or drop a thrown hammer for good (its words moved)
     var q = metrics(); if (!q) return;
     if (P && shift !== null) {                            // in flight or landed: slide the whole take with the letter
       off = [q.ox - P.ox, q.oy - P.oy];
