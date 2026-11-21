@@ -1,6 +1,7 @@
 /* About page: the founder's photo hangs a little crooked. The Builder walks in, taps the low corner twice with his hammer, steps back and tips his hat.
    Markup: <div class="founder-row has-scene"><img ...><p>..</p></div> followed by <svg class="frame-stage" viewBox="0 0 300 116" aria-hidden="true"></svg>.
-   The svg's top edge is the photo's bottom edge. Needs builder-lite.js first. Canonical source: brand/mascot/lite/about-frame.js.
+   The svg's top edge is the photo's bottom edge. Needs builder-lite.js first. Canonical source: brand/mascot/lite/about-frame.js (sync.mjs copies it to the site).
+   Arms are joint angles (BuilderLite.fk/solve/mixA): keys blend in angle space, the strike is solved so the hammer face meets the corner.
    Plays once when the stage scrolls into view, then holds. Reduced motion: the photo is simply level and he stands there. */
 (function () {
   if (!window.BuilderLite) return;
@@ -15,7 +16,7 @@
   B.el('line', { x1: 0, x2: W, y1: GY + 1.5, y2: GY + 1.5, stroke: '#1A1A1A', 'stroke-opacity': .12, 'stroke-width': 1.5 }, svg);
   var spark = B.el('path', { d: 'M0 -6 L1.6 -1.6 L6 0 L1.6 1.6 L0 6 L-1.6 1.6 L-6 0 L-1.6 -1.6 Z', fill: '#F5B800', opacity: 0 }, svg);
   var g = B.el('g', { transform: 'translate(' + XO + ' 0) scale(' + (-K) + ' ' + K + ')' }, svg), who = B.create(g);
-  var hammer = B.el('g', {}, g), hh = B.el('line', { stroke: '#7A5A2E', 'stroke-width': 4, 'stroke-linecap': 'round' }, hammer), hd = B.el('rect', { x: -3.5, y: -10, width: 7, height: 20, rx: 2, fill: '#555' }, hammer);
+  var hammer = who.behind(B.el('g', {})), hh = B.el('line', { stroke: '#7A5A2E', 'stroke-width': 4, 'stroke-linecap': 'round' }, hammer), hd = B.el('rect', { x: -3.5, y: -10, width: 7, height: 20, rx: 2, fill: '#555' }, hammer);
 
   var pw = 132, sc = 1;
   function measure() { pw = img.offsetWidth || 132; sc = (svg.getBoundingClientRect().width || W) / W; pw = pw / sc; }   // photo width in stage units
@@ -33,14 +34,21 @@
     var r = th * Math.PI / 180, rx = -pw / 2 + 20, ry = pw / 2 + 1, c = [pw / 2, -pw / 2];
     return [c[0] + rx * Math.cos(r) - ry * Math.sin(r), c[1] + rx * Math.sin(r) + ry * Math.cos(r)];
   }
-  var KEYS = [[0, 'rest'], [T_STAND, 'rest'], [4.55, 'wind'], [HIT[0], 'hit'], [4.97, 'reb'], [5.35, 'wind'], [HIT[1], 'hit'], [5.8, 'reb'], [6.3, 'rest'], [99, 'rest']];
-  function armAt(t, sh, tap) {   // hammer arm as an angle and a reach about the shoulder; into a hit it accelerates, out of it it rebounds
-    var aHit = Math.atan2(tap[1] - sh[1], tap[0] - sh[0]), rHit = Math.min(Math.hypot(tap[0] - sh[0], tap[1] - sh[1]) - 17, 66);
-    var P = { rest: [1.35, 52], wind: [1.7, 48], hit: [aHit, rHit], reb: [aHit + .5, 55] };
+  var KEYS = [[0, 'rest'], [T_STAND, 'rest'], [4.5, 'wind'], [HIT[0], 'hit'], [4.97, 'reb'], [5.3, 'wind'], [HIT[1], 'hit'], [5.8, 'reb'], [6.35, 'rest'], [99, 'rest']];
+  var H_HIT = 120, GRIP = -1, HL = 19, FACE = 10;          // handle angle at contact (deg from down, + forward), grip side, handle length, head half-length
+  var REST = { a: 14, f: 44, w: 40 };                         // hammer hangs loosely, head down and back
+  function strike(sa, tap) {   // the arm that puts the hammer's upper face on the tap point
+    var r = H_HIT * Math.PI / 180, d = [Math.sin(r), Math.cos(r)], up = [d[1], -d[0]];
+    var A = B.solve(sa, [tap[0] - HL * d[0] - FACE * up[0], tap[1] - HL * d[1] - FACE * up[1]]);
+    A.w = H_HIT - (A.a + A.f) - GRIP * 90; A.w -= 360 * Math.round(A.w / 360); return A;
+  }
+  function armAt(t, sa, tap) {   // hammer arm: into a hit it accelerates, out of it it rebounds
+    var hit = strike(sa, tap);
+    var P = { rest: REST, wind: { a: hit.a - 42, f: hit.f + 22, w: hit.w - 30 }, hit: hit, reb: { a: hit.a - 10, f: hit.f + 16, w: hit.w + 18 } };
     var i = 0; while (i < KEYS.length - 2 && t >= KEYS[i + 1][0]) i++;
     var k0 = KEYS[i], k1 = KEYS[i + 1], u = Math.min(Math.max((t - k0[0]) / (k1[0] - k0[0]), 0), 1), e;
     e = k1[1] === 'hit' ? u * u : (k0[1] === 'hit' ? 1 - (1 - u) * (1 - u) : B.ease(u));
-    return { a: B.lerp(P[k0[1]][0], P[k1[1]][0], e), r: B.lerp(P[k0[1]][1], P[k1[1]][1], e) };
+    return B.mixA(P[k0[1]], P[k1[1]], e, (k0[1] === 'rest' || k1[1] === 'rest') ? 30 : 0, k0[1] === 'rest' ? 1.5 : k1[1] === 'rest' ? -1.5 : 0);
   }
   function footOff(q) {
     q = q - Math.floor(q);
@@ -50,7 +58,7 @@
 
   var handle = null;
   function draw(t) {
-    var u1 = (XO - 46) / K, u0 = u1 - 5 * CYC, hu, offA, offB, walkW = 0, fa, fb;
+    var u1 = (XO - 40) / K, u0 = u1 - 5 * CYC, hu, offA, offB, walkW = 0, fa, fb;
     var inWalk = t < T_WALK, p = Math.min(t, T_WALK) / T_WALK * 5;
     // --- where is the hip and where are the feet (local units, world)
     var stepBack = B.win(t, 6.4, 6.85, 99, 100), stepBack2 = B.win(t, 6.85, 7.3, 99, 100);
@@ -78,24 +86,24 @@
     var lookUp = B.win(t, 3.9, 4.3, 6.4, 6.8), lookBack = B.win(t, 6.4, 6.8, 8.3, 8.8), nod = B.win(t, 8.2, 8.5, 8.6, 9);
     var tilt = -12 * lookUp - 6 * lookBack + 5 * nod + (inWalk ? 2 * Math.sin(4 * Math.PI * p) : 0);
     var hc = [sh[0] + 6 + .8 * near, sh[1] - 11 + 1.5 * hit];
-    // --- arms
-    var oa = inWalk ? footOff(p)[0] / A : 0;                         // near arm swings against the near leg
-    var walkH1 = [sh[0] - 13 * oa + 4, sh[1] + 42 - 3 * Math.abs(oa)], walkH2 = [sh[0] + 13 * oa + 4, sh[1] + 42 - 3 * (1 - Math.abs(oa))];
-    var h1, h2;
-    if (t < T_WALK) { h1 = walkH1; h2 = walkH2; }
-    else {
-      var A1 = armAt(t, sh, tap), standH1 = [sh[0] + A1.r * Math.cos(A1.a), sh[1] + A1.r * Math.sin(A1.a)], standH2 = [sh[0] + 5 - 4 * near, sh[1] + 40 - 4 * near];
-      var w = B.ease((t - T_WALK) / T_CLOSE);
-      h1 = [B.lerp(walkH1[0], standH1[0], w), B.lerp(walkH1[1], standH1[1], w)];
-      h2 = [B.lerp(walkH2[0], standH2[0], w), B.lerp(walkH2[1], standH2[1], w)];
-      var tip = B.win(t, 7.6, 8.1, 8.45, 8.95);                      // far hand to the brim of the hat
-      var brim = [hc[0] + 22, hc[1] - 8];
-      h2 = [B.lerp(h2[0], brim[0], tip), B.lerp(h2[1], brim[1], tip)];
+    // --- arms (joint angles; the shoulder joint sits a little below the neck so the arms leave the body under the chin)
+    var sa = [sh[0] - 1, sh[1] + 2];
+    // the hammer is in the FAR hand: raised toward the photo, that arm passes behind his head instead of across his face
+    var A1 = B.swing(p, 16), A2 = B.swing(p + .5, 16);       // each arm swings against its own leg
+    A2.w = REST.w; A2.a += 6; A2.f += 6;
+    if (!inWalk) {
+      var cl = B.ease((t - T_WALK) / T_CLOSE);
+      A2 = B.mixA(A2, armAt(t, sa, tap), cl);
+      A1 = B.mixA(A1, { a: -12 - 10 * near, f: 30 + 12 * near }, cl);   // the free arm counterbalances each tap
+      var tip = B.win(t, 7.4, 8.1, 8.45, 9.05);                      // free hand to the brim of the hat
+      A1 = B.mixA(A1, B.solve(sa, [hc[0] + 20, hc[1] - 6]), tip, 30, .8);
     }
-    var r = who.pose({ hip: hip, sh: sh, head: hc, tilt: tilt, ff: fa, fb: fb, h1: h1, h2: h2, bow: [-2 - near, 0], shadow: 30, ground: gy + 2, shadowX: hu });
-    var ang = Math.atan2(r.h1[1] - r.e1[1], r.h1[0] - r.e1[0]), hx = r.h1[0], hy = r.h1[1], ex = hx + 19 * Math.cos(ang), ey = hy + 19 * Math.sin(ang);
-    hh.setAttribute('x1', hx); hh.setAttribute('y1', hy); hh.setAttribute('x2', ex); hh.setAttribute('y2', ey);
-    hd.setAttribute('transform', 'translate(' + ex + ' ' + ey + ') rotate(' + (ang * 180 / Math.PI) + ')');
+    var r = who.pose({ hip: hip, sh: sh, sa: sa, head: hc, tilt: tilt, ff: fa, fb: fb, A1: A1, A2: A2, bow: [-2 - near, 0], shadow: 30, ground: gy + 2, shadowX: hu });
+    var G = B.grip(r.k2, HL, GRIP), hx = r.h2[0], hy = r.h2[1], ex = G.end[0], ey = G.end[1];
+    hh.setAttribute('x1', hx.toFixed(1)); hh.setAttribute('y1', hy.toFixed(1)); hh.setAttribute('x2', ex.toFixed(1)); hh.setAttribute('y2', ey.toFixed(1));
+    hd.setAttribute('transform', 'translate(' + ex.toFixed(1) + ' ' + ey.toFixed(1) + ') rotate(' + (90 - G.ang).toFixed(1) + ')');
+    var gr = G.ang * Math.PI / 180;
+    B.scenes.aboutProbe = { t: t, arm: r.k2, free: r.k1, face: [ex + FACE * Math.cos(gr), ey - FACE * Math.sin(gr)], tap: tap, hammer: G };
     img.style.transformOrigin = '50% 50%'; img.style.transform = 'rotate(' + th.toFixed(3) + 'deg)';
     spark.setAttribute('transform', 'translate(' + (tapP[0] + 3) + ' ' + (tapP[1] + 4) + ') scale(' + (hit * 1.2) + ')'); spark.setAttribute('opacity', hit > 0 ? 1 : 0);
     if (t > 10 && handle && handle.stop) { handle.stop(); }
