@@ -1,7 +1,7 @@
-/* About page: the founder's photo hangs a little crooked. The Builder walks in, taps the low corner twice with his hammer, steps back and tips his hat.
+/* About page: the founder's photo hangs a little crooked. The Builder walks in, raises his hammer overhead and taps its raised right edge level (two blows), steps back and tips his hat.
    Markup: <div class="founder-row has-scene"><img ...><p>..</p></div> followed by <svg class="frame-stage" viewBox="0 0 300 116" aria-hidden="true"></svg>.
    The svg's top edge is the photo's bottom edge. Needs builder-lite.js first. Canonical source: brand/mascot/lite/about-frame.js (sync.mjs copies it to the site).
-   Arms are joint angles (BuilderLite.fk/solve/mixA): keys blend in angle space, the strike is solved so the hammer face meets the corner.
+   Arms are joint angles (BuilderLite.fk/solve/mixA): keys blend in angle space, the strike is solved so the hammer face meets the photo's edge.
    Plays once when the stage scrolls into view, then holds. Reduced motion: the photo is simply level and he stands there. */
 (function () {
   if (!window.BuilderLite) return;
@@ -30,21 +30,22 @@
     }
     return th;
   }
-  function corner(th) {   // where the tapped spot on the photo's bottom edge is, in stage units
-    var r = th * Math.PI / 180, rx = -pw / 2 + 20, ry = pw / 2 + 1, c = [pw / 2, -pw / 2];
+  function corner(th) {   // the tapped spot: the photo's right edge just above its (raised) lower corner, in stage units
+    var r = th * Math.PI / 180, rx = pw / 2 + 1.5, ry = pw / 2 - 2, c = [pw / 2, -pw / 2];
     return [c[0] + rx * Math.cos(r) - ry * Math.sin(r), c[1] + rx * Math.sin(r) + ry * Math.cos(r)];
   }
   var KEYS = [[0, 'rest'], [T_STAND, 'rest'], [4.5, 'wind'], [HIT[0], 'hit'], [4.97, 'reb'], [5.3, 'wind'], [HIT[1], 'hit'], [5.8, 'reb'], [6.35, 'rest'], [99, 'rest']];
-  var H_HIT = 120, GRIP = -1, HL = 19, FACE = 10;          // handle angle at contact (deg from down, + forward), grip side, handle length, head half-length
-  var REST = { a: 14, f: 44, w: 40 };                         // hammer hangs loosely, head down and back
-  function strike(sa, tap) {   // the arm that puts the hammer's upper face on the tap point
-    var r = H_HIT * Math.PI / 180, d = [Math.sin(r), Math.cos(r)], up = [d[1], -d[0]];
-    var A = B.solve(sa, [tap[0] - HL * d[0] - FACE * up[0], tap[1] - HL * d[1] - FACE * up[1]]);
+  // a normal grip: the handle leaves the thumb side of the fist, so the head is carried forward and rides on top when the arm is up
+  var H_HIT = 200, GRIP = 1, HL = 19, FACE = 10, REACH = 40;   // handle angle at contact (deg from down; 200 = up, tipped back a little), grip side, handle, head half-length, shoulder-to-edge distance
+  var REST = { a: 14, f: 44, w: -20 };                         // hammer carried head forward
+  function strike(sa, tap) {   // the arm that puts the hammer's FRONT face on the photo's edge: a forward blow above his head
+    var r = H_HIT * Math.PI / 180, d = [Math.sin(r), Math.cos(r)], fw = d[1] > 0 ? [d[1], -d[0]] : [-d[1], d[0]];
+    var A = B.solve(sa, [tap[0] - HL * d[0] - FACE * fw[0], tap[1] - HL * d[1] - FACE * fw[1]]);
     A.w = H_HIT - (A.a + A.f) - GRIP * 90; A.w -= 360 * Math.round(A.w / 360); return A;
   }
   function armAt(t, sa, tap) {   // hammer arm: into a hit it accelerates, out of it it rebounds
     var hit = strike(sa, tap);
-    var P = { rest: REST, wind: { a: hit.a - 42, f: hit.f + 22, w: hit.w - 30 }, hit: hit, reb: { a: hit.a - 10, f: hit.f + 16, w: hit.w + 18 } };
+    var P = { rest: REST, wind: { a: hit.a + 8, f: hit.f + 42, w: hit.w + 55 }, hit: hit, reb: { a: hit.a - 6, f: hit.f + 14, w: hit.w + 22 } };   // wind = cocked back over the shoulder
     var i = 0; while (i < KEYS.length - 2 && t >= KEYS[i + 1][0]) i++;
     var k0 = KEYS[i], k1 = KEYS[i + 1], u = Math.min(Math.max((t - k0[0]) / (k1[0] - k0[0]), 0), 1), e;
     e = k1[1] === 'hit' ? u * u : (k0[1] === 'hit' ? 1 - (1 - u) * (1 - u) : B.ease(u));
@@ -59,7 +60,8 @@
 
   var handle = null;
   function draw(t) {
-    var u1 = (XO - 40) / K, u0 = u1 - 5 * CYC, hu, offA, offB, walkW = 0, fa, fb;
+    var c0 = corner(TILT0), u1 = (XO - c0[0]) / K - REACH - 2, u0 = u1 - 5 * CYC,   // he stops one arm's reach from the photo's right edge
+      hu, offA, offB, walkW = 0, fa, fb;
     var inWalk = t < T_WALK, p = Math.min(t, T_WALK) / T_WALK * 5;
     // --- where is the hip and where are the feet (local units, world)
     var stepBack = B.win(t, 6.4, 6.85, 99, 100), stepBack2 = B.win(t, 6.85, 7.3, 99, 100);
