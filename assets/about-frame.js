@@ -58,20 +58,41 @@
     if (q < .5) return [A - 80 * q, 0];                                          // stance: planted on the ground, slides back relative to the hip
     var s = (q - .5) / .5; return [-A + 2 * A * B.ease(s), -9 * Math.sin(Math.PI * s)];   // swing: forward with a lift
   }
+  // The walk from the stickman workshop (brand/mascot/workshop, rounds 2, 5 and 7): heel-to-toe roll, the swing foot leaving and
+  // landing at ground speed, pelvis and shoulders turning against each other, and a head that rides steadier than the body.
+  // footRoll returns [x, y, pitch]; the scene blends it in and out with the walk (rw), so the stops and starts stay as they were.
+  var FL = 11, RA = .16, RB = .58, RHS = -16, RTO = 38;
+  function herm(x0, x1, m0, m1, u) { var u2 = u * u, u3 = u2 * u; return (2 * u3 - 3 * u2 + 1) * x0 + (u3 - 2 * u2 + u) * m0 + (-2 * u3 + 3 * u2) * x1 + (u3 - u2) * m1; }
+  function stanceRoll(u) {
+    var hx = A - 2 * A * u, th;
+    if (u < RA) return [hx, 0, RHS * (1 - B.ease(u / RA))];                     // on the heel, toe coming down
+    if (u < RB) return [hx, 0, 0];                                               // flat
+    th = RTO * B.ease((u - RB) / (1 - RB)) * Math.PI / 180;                      // on the toe, heel rising
+    return [hx + FL - FL * Math.cos(th), -FL * Math.sin(th), th * 180 / Math.PI];
+  }
+  function footRoll(q) {
+    q = q - Math.floor(q);
+    if (q < .5) return stanceRoll(q / .5);
+    var w = (q - .5) / .5, A0 = stanceRoll(1), m = -2 * A, lift = 9;
+    var y = herm(A0[1], 0, -lift * 1.6, lift * 1.4, w) - lift * Math.pow(Math.sin(Math.PI * w), 1.4);
+    return [herm(A0[0], A, m, m, w), Math.min(y, 0), w < .55 ? RHS + (RTO - RHS) * (1 - B.ease(w / .55)) : RHS];
+  }
+  function foot(q, rw) { var a = footOff(q), b = footRoll(q); return [B.lerp(a[0], b[0], rw), B.lerp(a[1], b[1], rw), b[2] * rw]; }
 
   var handle = null;
   function hEnd() { var c0 = corner(TILT0); return (XO - c0[0]) / K - REACH - 2 - 22; }   // where his hips stop after the two steps back
   function draw(t) {
     var c0 = corner(TILT0), u1 = (XO - c0[0]) / K - REACH - 2, u0 = u1 - 5 * CYC,   // he stops one arm's reach from the photo's right edge
-      hu, offA, offB, walkW = 0, fa, fb;
+      hu, offA, offB, walkW = 0, fa, fb, rw = 0, pa = 0, pb = 0;
     var inWalk = t < T_WALK, p = Math.min(t, T_WALK) / T_WALK * 5;
     // --- where is the hip and where are the feet (local units, world)
     var stepBack = B.win(t, 6.4, 6.85, 99, 100), stepBack2 = B.win(t, 6.85, 7.3, 99, 100);
     var out = t > T_OUT, q = out ? Math.min(t - T_OUT, T_END - T_OUT) / (T_WALK / 5) : 0;   // strides walked on the way out
     if (inWalk) {
       hu = B.lerp(u0, u1, t / T_WALK);
-      var oA = footOff(p), oB = footOff(p + .5);
-      fa = [hu + oA[0], gy + oA[1]]; fb = [hu + oB[0], gy + oB[1]];
+      rw = 1 - B.ease((p - 4.5) / .5);                                      // the last half stride settles back to the plain gait for the stop
+      var oA = foot(p, rw), oB = foot(p + .5, rw);
+      fa = [hu + oA[0], gy + oA[1]]; fb = [hu + oB[0], gy + oB[1]]; pa = oA[2]; pb = oB[2];
       walkW = 1;
     } else {
       hu = u1 - 10 * stepBack - 12 * stepBack2;
@@ -81,10 +102,11 @@
       fa = [u1 + A - 22 * sa, gy - 7 * Math.sin(Math.PI * Math.min(Math.max((t - 6.85) / .45, 0), 1))];
       fb = [bx - 22 * sb, gy + by - 7 * Math.sin(Math.PI * Math.min(Math.max((t - 6.4) / .45, 0), 1))];
       if (out) {   // walking out: the front foot is planted where it stands, the back foot eases into the gait's first swing
-        var h0 = hu, oA2 = footOff(q), oB2 = footOff(q + .5), lift = B.ease(q / .5);
+        var lift = B.ease(q / .5); rw = lift;
+        var h0 = hu, oA2 = foot(q, rw), oB2 = foot(q + .5, rw);
         hu = h0 + CYC * q;
-        fa = [hu + oA2[0], gy + oA2[1]];
-        fb = [hu + B.lerp(fb[0] - h0, oB2[0], lift), gy + oB2[1]];
+        fa = [hu + oA2[0], gy + oA2[1]]; pa = oA2[2];
+        fb = [hu + B.lerp(fb[0] - h0, oB2[0], lift), gy + oB2[1]]; pb = oB2[2];
       }
     }
     var walking = inWalk || out, pp = inWalk ? p : q, bob = walking ? 1.5 * Math.cos(4 * Math.PI * pp) * (out ? B.ease(q / .5) : 1) : 0;
@@ -97,9 +119,12 @@
     var hip = [hu + lean * .5, gy - 67 + bob + 1.2 * near], sh = [hip[0] + 3 + lean + (walking ? 1 : 0), hip[1] - 50 + (walking ? .4 * Math.cos(4 * Math.PI * pp) : 0)];
     var lookUp = B.win(t, 3.9, 4.3, 6.4, 6.8), lookBack = B.win(t, 6.4, 6.8, 8.3, 8.8), nod = B.win(t, 8.2, 8.5, 8.6, 9);
     var tilt = -12 * lookUp - 6 * lookBack + 5 * nod + (walking ? 2 * Math.sin(4 * Math.PI * pp) : 0);
-    var hc = [sh[0] + 6 + .8 * near, sh[1] - 11 + 1.5 * hit];
+    var hc = [sh[0] + 6 + .8 * near, sh[1] - 11 + 1.5 * hit - .65 * bob];   // the neck soaks up most of the bob
+    // pelvis turns with the forward leg, shoulders against it; the swing-side hip dips (all scaled by rw: none when standing)
+    var tc = Math.cos(2 * Math.PI * pp) * rw, dip = function (x) { x = x - Math.floor(x); return x < .5 ? 0 : 1.2 * rw * Math.sin(Math.PI * (x - .5) / .5); };
+    var hf = [hip[0] + 2.2 * tc, hip[1] + dip(pp)], hb = [hip[0] - 2.2 * tc, hip[1] + dip(pp + .5)];
     // --- arms (joint angles; the shoulder joint sits a little below the neck so the arms leave the body under the chin)
-    var sa = [sh[0] - 1, sh[1] + 2];
+    var sa = [sh[0] - 1, sh[1] + 2], s1 = [sa[0] - 2.8 * tc, sa[1]], s2 = [sa[0] + 2.8 * tc, sa[1]];
     // the hammer is in the FAR hand: raised toward the photo, that arm passes behind his head instead of across his face
     var A1 = B.swing(p, 16), A2 = B.swing(p + .5, 16);       // each arm swings against its own leg
     A2.w = REST.w; A2.a += 6; A2.f += 6;
@@ -118,7 +143,7 @@
         // facing: screen-left until the turn, then a quick flip about the hips to face screen-right (local +u always points the way he faces)
     var face = -Math.cos(Math.PI * B.ease((t - T_TURN) / (T_OUT - T_TURN))), he = hEnd(), hipX = t > T_TURN ? XO - K * he + K * (hu - he) : XO - K * hu;
     g.setAttribute('transform', 'translate(' + hipX.toFixed(2) + ' 0) scale(' + (face * K).toFixed(4) + ' ' + K + ') translate(' + (-hu).toFixed(2) + ' 0)');
-    var r = who.pose({ hip: hip, sh: sh, sa: sa, head: hc, tilt: tilt, ff: fa, fb: fb, A1: A1, A2: A2, bow: [-2 - near, 0], shadow: 30, ground: gy + 2, shadowX: hu });
+    var r = who.pose({ hip: hip, sh: sh, sa: sa, head: hc, tilt: tilt, ff: fa, fb: fb, ffa: pa, fba: pb, hf: hf, hb: hb, s1: s1, s2: s2, A1: A1, A2: A2, bow: [-2 - near, 0], shadow: 30, ground: gy + 2, shadowX: hu });
     var G = B.grip(r.k2, HL, GRIP), hx = r.h2[0], hy = r.h2[1], ex = G.end[0], ey = G.end[1];
     hh.setAttribute('x1', hx.toFixed(1)); hh.setAttribute('y1', hy.toFixed(1)); hh.setAttribute('x2', ex.toFixed(1)); hh.setAttribute('y2', ey.toFixed(1));
     hd.setAttribute('transform', 'translate(' + ex.toFixed(1) + ' ' + ey.toFixed(1) + ') rotate(' + (90 - G.ang).toFixed(1) + ')');

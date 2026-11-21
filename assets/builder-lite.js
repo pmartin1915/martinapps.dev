@@ -9,6 +9,8 @@
    Elbows bend back-and-down, knees forward (never the other way round); a hand or foot that is out of reach is pulled
    in to the end of the limb, so a limb is never drawn longer than it is.
 
+   Twist (opt-in): pose({ ..., hf, hb, s1, s2 }) give the near/far leg and arm their own roots (pelvis and shoulder rotation).
+   Foot roll (opt-in): pose({ ..., ffa, fba }) pitches each foot about the ankle, + = toe down.
    Arms by joint angle (opt-in): pose({ ..., sa, A1, A2 }) with fk / solve / mixA / swing / grip; see brand/mascot/README.md, "The lite rig". */
 (function (g) {
   var NS = 'http://www.w3.org/2000/svg', S = .88, UA = 37, FA = 33, TH = 37, SH = 35, INK = '#1A1A1A', HAT = '#F5B800';
@@ -72,19 +74,22 @@
       var hip = P.hip, sh = P.sh, bow = P.bow || [0, 0];
       shadow.setAttribute('cx', f1(P.shadowX == null ? (P.ff[0] + P.fb[0]) / 2 : P.shadowX)); shadow.setAttribute('cy', f1(P.ground == null ? Math.max(P.ff[1], P.fb[1]) + 1.5 : P.ground));
       shadow.setAttribute('rx', P.shadow || 36);
-      var s2 = P.sa || sh, K2 = P.A2 && fk(s2, P.A2), h2 = K2 ? K2.h : reach(s2, P.h2, UA + FA - 1), e2 = K2 ? K2.e : ik(s2, h2, UA, FA, 1);
-      setL(far[0], s2, e2); setL(far[1], e2, h2);
-      var fb = reach(hip, P.fb, TH + SH - 1), kb = ik(hip, fb, TH, SH, -1);
-      setL(bleg[0], hip, kb); setL(bleg[1], kb, fb); setL(bleg[2], fb, [fb[0] + 11, fb[1]]);
+      var s2 = P.sa || sh, sF = P.s2 || s2, sN = P.s1 || s2, hF = P.hf || hip, hB = P.hb || hip;   // s1/s2, hf/hb: per-limb roots (opt-in twist)
+      var K2 = P.A2 && fk(sF, P.A2), h2 = K2 ? K2.h : reach(sF, P.h2, UA + FA - 1), e2 = K2 ? K2.e : ik(sF, h2, UA, FA, 1);
+      setL(far[0], sF, e2); setL(far[1], e2, h2);
+      var fb = reach(hB, P.fb, TH + SH - 1), kb = ik(hB, fb, TH, SH, -1);
+      var aB = (P.fba || 0) * RD, tB = [fb[0] + 11 * Math.cos(aB), fb[1] + 11 * Math.sin(aB)];   // fba/ffa: foot pitch in deg, + = toe down (opt-in foot roll)
+      setL(bleg[0], hB, kb); setL(bleg[1], kb, fb); setL(bleg[2], fb, tB);
       spine.setAttribute('d', 'M' + f1(hip[0]) + ' ' + f1(hip[1]) + ' Q' + f1((hip[0] + sh[0]) / 2 + bow[0]) + ' ' + f1((hip[1] + sh[1]) / 2 + bow[1]) + ' ' + f1(sh[0]) + ' ' + f1(sh[1]));
-      var ff = reach(hip, P.ff, TH + SH - 1), kf = ik(hip, ff, TH, SH, -1);
-      setL(fleg[0], hip, kf); setL(fleg[1], kf, ff); setL(fleg[2], ff, [ff[0] + 11, ff[1]]);
+      var ff = reach(hF, P.ff, TH + SH - 1), kf = ik(hF, ff, TH, SH, -1);
+      var aF = (P.ffa || 0) * RD, tF = [ff[0] + 11 * Math.cos(aF), ff[1] + 11 * Math.sin(aF)];
+      setL(fleg[0], hF, kf); setL(fleg[1], kf, ff); setL(fleg[2], ff, tF);
       head.setAttribute('transform', 'translate(' + f1(P.head[0]) + ' ' + f1(P.head[1]) + ') rotate(' + f1(P.tilt || 0) + ')');
-      var K1 = P.A1 && fk(s2, P.A1), h1 = K1 ? K1.h : reach(s2, P.h1, UA + FA - 1), e1 = K1 ? K1.e : ik(s2, h1, UA, FA, 1);
-      setL(near[0], s2, e1); setL(near[1], e1, h1);
+      var K1 = P.A1 && fk(sN, P.A1), h1 = K1 ? K1.h : reach(sN, P.h1, UA + FA - 1), e1 = K1 ? K1.e : ik(sN, h1, UA, FA, 1);
+      setL(near[0], sN, e1); setL(near[1], e1, h1);
       var D = function (a, b) { return Math.hypot(b[0] - a[0], b[1] - a[1]); };
-      api.lens = { ua: D(s2, e1), fa: D(e1, h1), ua2: D(s2, e2), fa2: D(e2, h2), thF: D(hip, kf), shF: D(kf, ff), thB: D(hip, kb), shB: D(kb, fb),
-        reachMissH1: P.h1 ? D(h1, P.h1) : 0, reachMissH2: P.h2 ? D(h2, P.h2) : 0, reachMissFF: D(ff, P.ff), reachMissFB: D(fb, P.fb), ffX: ff[0], fbX: fb[0], ffY: ff[1], fbY: fb[1], lean: Math.atan2(sh[0] - hip[0], hip[1] - sh[1]) * 180 / Math.PI, torso: D(hip, sh), headGap: D(sh, P.head), hipH: Math.max(ff[1], fb[1]) - hip[1], tilt: P.tilt || 0, h1x: h1[0], h1y: h1[1], e1x: e1[0], e1y: e1[1], hipX: hip[0], hipY: hip[1], sx: s2[0], sy: s2[1], e2x: e2[0], e2y: e2[1], h2x: h2[0], h2y: h2[1], headX: P.head[0], headY: P.head[1] };
+      api.lens = { ua: D(sN, e1), fa: D(e1, h1), ua2: D(sF, e2), fa2: D(e2, h2), thF: D(hF, kf), shF: D(kf, ff), thB: D(hB, kb), shB: D(kb, fb),
+        reachMissH1: P.h1 ? D(h1, P.h1) : 0, reachMissH2: P.h2 ? D(h2, P.h2) : 0, reachMissFF: D(ff, P.ff), reachMissFB: D(fb, P.fb), ffX: ff[0], fbX: fb[0], ffY: ff[1], fbY: fb[1], ffTx: tF[0], ffTy: tF[1], fbTx: tB[0], fbTy: tB[1], lean: Math.atan2(sh[0] - hip[0], hip[1] - sh[1]) * 180 / Math.PI, torso: D(hip, sh), headGap: D(sh, P.head), hipH: Math.max(ff[1], fb[1]) - hip[1], tilt: P.tilt || 0, h1x: h1[0], h1y: h1[1], e1x: e1[0], e1y: e1[1], hipX: hip[0], hipY: hip[1], sx: s2[0], sy: s2[1], hfX: hF[0], hbX: hB[0], s1X: sN[0], s2X: sF[0], e2x: e2[0], e2y: e2[1], h2x: h2[0], h2y: h2[1], headX: P.head[0], headY: P.head[1] };
       B_last = api;
       return { h1: h1, h2: h2, e1: e1, e2: e2, k1: K1, k2: K2 };   // where the hands really are (after the reach limit), for props
     };
