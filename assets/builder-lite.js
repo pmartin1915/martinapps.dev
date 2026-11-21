@@ -9,11 +9,7 @@
    Elbows bend back-and-down, knees forward (never the other way round); a hand or foot that is out of reach is pulled
    in to the end of the limb, so a limb is never drawn longer than it is.
 
-   Arms by joint angle (opt-in, for new scenes): an arm is { a, f }: a = upper-arm angle from straight down (deg,
-   + = forward), f = elbow flex (deg, 0 = straight, only ever bends forward). fk(sh, A) gives the elbow and hand,
-   solve(sh, hand) gives the anatomical A that reaches a point, mixA() blends two arms in angle space (hands travel on
-   arcs, the elbow never snaps), swing() is a relaxed walking arm, grip() places a held prop across the fist.
-   Pass the result as pose({ ..., A1: arm, A2: arm }) instead of h1 / h2. */
+   Arms by joint angle (opt-in): pose({ ..., sa, A1, A2 }) with fk / solve / mixA / swing / grip; see brand/mascot/README.md, "The lite rig". */
 (function (g) {
   var NS = 'http://www.w3.org/2000/svg', S = .88, UA = 37, FA = 33, TH = 37, SH = 35, INK = '#1A1A1A', HAT = '#F5B800';
   function el(n, a, p) { var e = document.createElementNS(NS, n); for (var k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; }
@@ -40,22 +36,18 @@
     return { a: base - al, f: 180 - inner, w: w || 0 };
   }
   function wrapD(d) { return d - 360 * Math.round(d / 360); }
-  // tuck (deg) folds the elbow extra in the middle of a blend, so a hand travelling far stays near the body instead of
-  // sweeping out at arm's length (the stiff "zombie reach")
-  // lead > 0 makes the elbow fold early (lifting), lead < 0 makes it unfold late (lowering)
+  // tuck folds the elbow mid-blend (no stiff arm-out reach); lead > 0 folds it early, < 0 unfolds it late
   function mixA(A, Bq, u, tuck, lead) {
     var v = !lead ? u : lead > 0 ? 1 - Math.pow(1 - u, 1 + lead) : Math.pow(u, 1 - lead);
     var f = A.f + (Bq.f - A.f) * v;   // the ends are kept exactly; only the extra tuck is limited (to 160 deg of flex)
     return { a: A.a + wrapD(Bq.a - A.a) * u, f: f + Math.min((tuck || 0) * Math.sin(Math.PI * u), Math.max(0, 160 - f)), w: (A.w || 0) + ((Bq.w || 0) - (A.w || 0)) * u };
   }
-  // relaxed walking arm: ph = leg phase in turns (0 = this arm fully back), amp = swing (deg); the elbow bends a little
-  // more on the way forward and lags the shoulder (follow-through), so the forearm never moves as one stick with the upper arm
+  // relaxed walking arm: ph in turns (0 = fully back), amp in deg; the elbow bends more forward and lags (follow-through)
   function swing(ph, amp, rest) {
     var c = -Math.cos(2 * Math.PI * ph), lag = -Math.cos(2 * Math.PI * (ph - .1));
     return { a: (rest == null ? 4 : rest) + amp * c, f: 24 + 18 * (.5 + .5 * lag), w: 0 };
   }
-  // a prop held across the fist: side = +1 handle out of the thumb side toward the front when the forearm hangs, -1 the other way;
-  // A.w = wrist cock (deg). Returns the handle direction (deg, same convention as a) and the point len along it.
+  // a prop held across the fist (side +1: forward when the arm hangs; A.w = wrist cock): handle angle and its far end
   function grip(K, len, side) { var ang = K.a + K.f + (side || 1) * 90 + (K.w || 0), r = ang * RD; return { ang: ang, end: [K.h[0] + len * Math.sin(r), K.h[1] + len * Math.cos(r)] }; }
 
   var B_last = null;
