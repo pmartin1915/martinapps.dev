@@ -44,6 +44,9 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
   /* The target letter. Wide layouts (the header icon sits right above the "Our apps" heading): the "u" of "Our",
      provided it is on screen without scrolling. Everything else (phones, short windows): the "U" of the headline. */
   function target() {
+    // Other pages name their own letter: data-hammer="<index of the letter in the element's first text>" (pick a bowl: u, U, w...)
+    var own = document.querySelector('[data-hammer]');
+    if (own && own.firstChild && own.firstChild.nodeType === 3) return { node: own.firstChild, idx: +own.getAttribute('data-hammer') || 0, el: own, lmin: +own.getAttribute('data-hammer-lmin') || 11, floor: +own.getAttribute('data-hammer-floor') || 0 };
     var h2 = document.getElementById('apps-h');
     if (innerWidth >= 900 && h2 && h2.firstChild && h2.firstChild.nodeType === 3 && /^.u/.test(h2.firstChild.data)) {
       var r = document.createRange(); r.setStart(h2.firstChild, 1); r.setEnd(h2.firstChild, 2);
@@ -136,7 +139,7 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
       for (i = 0; i < r.events.length; i++) if (r.events[i].vn > 100) { first = r.events[i]; break; }
       if (!first || first.x < g.mid || first.y > g.top + .34 * h) return -1;
       var rx = r.rest[0], ry = r.rest[1];
-      if (rx < g.cl + 1 || rx > g.cr - 1 || ry < g.top + .45 * h || ry > g.bot) return -1;
+      if (rx < g.cl + 1 || rx > g.cr - 1 || ry < g.top + (g.floor || .45) * h || ry > g.bot) return -1;
       var cross = 0, side = 0, f, sd;
       for (i = 0; i < r.frames.length; i++) { f = r.frames[i]; if (f[1] < g.top + .35 * h) continue; sd = f[0] > g.mid ? 1 : -1; if (side && sd !== side) cross++; side = sd; }
       if (style === 'skate') {   // a real slide, head (the heavy end) down, settled in the middle
@@ -153,7 +156,7 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
       for (i = 0; i < r.events.length; i++) if (r.events[i].vn > 100) { first = r.events[i]; break; }
       if (!first || first.x < g.mid || first.y > g.top + .45 * h) return -1;
       var rx = r.rest[0], ry = r.rest[1];
-      if (rx < g.cl + 1 || rx > g.cr - 1 || ry < g.top + .45 * h || ry > g.bot) return -1;
+      if (rx < g.cl + 1 || rx > g.cr - 1 || ry < g.top + (g.floor || .45) * h || ry > g.bot) return -1;
       var cross = 0, side = 0, f, sd;
       for (i = 0; i < r.frames.length; i++) { f = r.frames[i]; if (f[1] < g.top + .35 * h) continue; sd = f[0] > g.mid ? 1 : -1; if (side && sd !== side) cross++; side = sd; }
       if (cross < 1 && r.slide < .2) return -1;
@@ -162,7 +165,7 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
     function judgeAny(g, b, r) {   // last physical resort: it still ends in the bowl, in view, after a bounce
       if (r.slept === null || !onscreen(g, r) || r.events.length < 1) return -1;
       var rx = r.rest[0], ry = r.rest[1], h = g.bot - g.top;
-      if (rx < g.cl + 1 || rx > g.cr - 1 || ry < g.top + .45 * h || ry > g.bot) return -1;
+      if (rx < g.cl + 1 || rx > g.cr - 1 || ry < g.top + (g.floor || .45) * h || ry > g.bot) return -1;
       return Math.min(r.events.length, 10) + Math.min(r.slept, 4);
     }
     function search(m, name, rnd) {   // all three tiers for one style: strict, relaxed, any
@@ -206,7 +209,7 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
     var c = document.createElement('canvas').getContext('2d');
     c.font = cs.fontStyle + ' ' + cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
     var m = c.measureText(ch), pad = 26;
-    return { ch: ch, c: c, pad: pad, lmin: tg.lmin, abl: m.actualBoundingBoxLeft, abr: m.actualBoundingBoxRight, aa: m.actualBoundingBoxAscent, ad: m.actualBoundingBoxDescent,
+    return { ch: ch, c: c, pad: pad, lmin: tg.lmin, floor: tg.floor, abl: m.actualBoundingBoxLeft, abr: m.actualBoundingBoxRight, aa: m.actualBoundingBoxAscent, ad: m.actualBoundingBoxDescent,
              ox: rc.left + scrollX - m.actualBoundingBoxLeft - pad, oy: rc.top + scrollY + m.fontBoundingBoxAscent - m.actualBoundingBoxAscent - pad };
   }
   function request() {   // build the ink mask and the toss geometry, hand the heavy part to the worker
@@ -227,7 +230,7 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
     if (sig === asked) return; asked = sig;
     sc0 = Math.min(1, Math.max(.1, .88 * mr.width / 280 * 58 / Math.max(q.lmin, (cr - cl) * .72)));
     var msg = { sig: sig, W: W, H: H, ink: ink, ox: ox, oy: oy, top: oy + top, bot: oy + bot, left: ox + left, right: ox + right, mid: ox + (left + right) / 2,
-                lmin: q.lmin, far: (oy + rty) - (mr.top + scrollY + TOSS.y * mr.height / 280) > 250, cl: ox + cl, cr: ox + cr, rtx: ox + rtx, rty: oy + rty, ang: TOSS.ang, style: STYLE, seed: SEED, vw: document.documentElement.clientWidth,
+                lmin: q.lmin, floor: q.floor, far: (oy + rty) - (mr.top + scrollY + TOSS.y * mr.height / 280) > 250, cl: ox + cl, cr: ox + cr, rtx: ox + rtx, rty: oy + rty, ang: TOSS.ang, style: STYLE, seed: SEED, vw: document.documentElement.clientWidth,
                 x0: mr.left + scrollX + TOSS.x * mr.width / 280, y0: mr.top + scrollY + TOSS.y * mr.height / 280 };
     if (worker) {
       if (pending) { worker.terminate(); worker = makeWorker(); }   // the layout moved again: drop the stale search, start fresh
