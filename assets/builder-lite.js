@@ -45,7 +45,8 @@
   // lead > 0 makes the elbow fold early (lifting), lead < 0 makes it unfold late (lowering)
   function mixA(A, Bq, u, tuck, lead) {
     var v = !lead ? u : lead > 0 ? 1 - Math.pow(1 - u, 1 + lead) : Math.pow(u, 1 - lead);
-    return { a: A.a + wrapD(Bq.a - A.a) * u, f: Math.min(A.f + (Bq.f - A.f) * v + (tuck || 0) * Math.sin(Math.PI * u), 160), w: (A.w || 0) + ((Bq.w || 0) - (A.w || 0)) * u };
+    var f = A.f + (Bq.f - A.f) * v;   // the ends are kept exactly; only the extra tuck is limited (to 160 deg of flex)
+    return { a: A.a + wrapD(Bq.a - A.a) * u, f: f + Math.min((tuck || 0) * Math.sin(Math.PI * u), Math.max(0, 160 - f)), w: (A.w || 0) + ((Bq.w || 0) - (A.w || 0)) * u };
   }
   // relaxed walking arm: ph = leg phase in turns (0 = this arm fully back), amp = swing (deg); the elbow bends a little
   // more on the way forward and lags the shoulder (follow-through), so the forearm never moves as one stick with the upper arm

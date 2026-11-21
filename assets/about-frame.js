@@ -48,6 +48,7 @@
     var i = 0; while (i < KEYS.length - 2 && t >= KEYS[i + 1][0]) i++;
     var k0 = KEYS[i], k1 = KEYS[i + 1], u = Math.min(Math.max((t - k0[0]) / (k1[0] - k0[0]), 0), 1), e;
     e = k1[1] === 'hit' ? u * u : (k0[1] === 'hit' ? 1 - (1 - u) * (1 - u) : B.ease(u));
+    if (k0[1] === k1[1]) return P[k0[1]];   // holding a pose: no tuck, no drift
     return B.mixA(P[k0[1]], P[k1[1]], e, (k0[1] === 'rest' || k1[1] === 'rest') ? 30 : 0, k0[1] === 'rest' ? 1.5 : k1[1] === 'rest' ? -1.5 : 0);
   }
   function footOff(q) {
