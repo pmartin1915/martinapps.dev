@@ -1,4 +1,4 @@
-/* About page: the founder's photo hangs a little crooked. The Builder walks in, raises his hammer overhead and taps its raised right edge level (two blows), steps back and tips his hat.
+/* About page: the founder's photo hangs a little crooked. The Builder walks in, raises his hammer overhead and taps its raised right edge level (two blows), steps back, tips his hat, turns round and walks back out the way he came.
    Markup: <div class="founder-row has-scene"><img ...><p>..</p></div> followed by <svg class="frame-stage" viewBox="0 0 300 116" aria-hidden="true"></svg>.
    The svg's top edge is the photo's bottom edge. Needs builder-lite.js first. Canonical source: brand/mascot/lite/about-frame.js (sync.mjs copies it to the site).
    Arms are joint angles (BuilderLite.fk/solve/mixA): keys blend in angle space, the strike is solved so the hammer face meets the photo's edge.
@@ -12,6 +12,7 @@
   var T_WALK = 3.33, T_CLOSE = .5, T_STAND = T_WALK + T_CLOSE, CYC = 80, A = 20;   // 5 cycles of 80 units; stride half-length 20
   var HIT = [4.75, 5.55], TILT0 = -5, TAPS = [2.8, 2.2];                    // the photo starts 5 deg crooked; each tap swings it back by this much
   var ZETA = .2, OMEGA = 13;
+  var T_TURN = 9.35, T_OUT = 9.65, OUT_CYC = 4, T_END = T_OUT + OUT_CYC * T_WALK / 5;   // turn round (cartoon flip about the hips), then 4 strides off stage right
 
   B.el('line', { x1: 0, x2: W, y1: GY + 1.5, y2: GY + 1.5, stroke: '#1A1A1A', 'stroke-opacity': .12, 'stroke-width': 1.5 }, svg);
   var spark = B.el('path', { d: 'M0 -6 L1.6 -1.6 L6 0 L1.6 1.6 L0 6 L-1.6 1.6 L-6 0 L-1.6 -1.6 Z', fill: '#F5B800', opacity: 0 }, svg);
@@ -59,12 +60,14 @@
   }
 
   var handle = null;
+  function hEnd() { var c0 = corner(TILT0); return (XO - c0[0]) / K - REACH - 2 - 22; }   // where his hips stop after the two steps back
   function draw(t) {
     var c0 = corner(TILT0), u1 = (XO - c0[0]) / K - REACH - 2, u0 = u1 - 5 * CYC,   // he stops one arm's reach from the photo's right edge
       hu, offA, offB, walkW = 0, fa, fb;
     var inWalk = t < T_WALK, p = Math.min(t, T_WALK) / T_WALK * 5;
     // --- where is the hip and where are the feet (local units, world)
     var stepBack = B.win(t, 6.4, 6.85, 99, 100), stepBack2 = B.win(t, 6.85, 7.3, 99, 100);
+    var out = t > T_OUT, q = out ? Math.min(t - T_OUT, T_END - T_OUT) / (T_WALK / 5) : 0;   // strides walked on the way out
     if (inWalk) {
       hu = B.lerp(u0, u1, t / T_WALK);
       var oA = footOff(p), oB = footOff(p + .5);
@@ -77,17 +80,23 @@
       var sb = B.win(t, 6.4, 6.85, 99, 100), sa = B.win(t, 6.85, 7.3, 99, 100);
       fa = [u1 + A - 22 * sa, gy - 7 * Math.sin(Math.PI * Math.min(Math.max((t - 6.85) / .45, 0), 1))];
       fb = [bx - 22 * sb, gy + by - 7 * Math.sin(Math.PI * Math.min(Math.max((t - 6.4) / .45, 0), 1))];
+      if (out) {   // walking out: the front foot is planted where it stands, the back foot eases into the gait's first swing
+        var h0 = hu, oA2 = footOff(q), oB2 = footOff(q + .5), lift = B.ease(q / .5);
+        hu = h0 + CYC * q;
+        fa = [hu + oA2[0], gy + oA2[1]];
+        fb = [hu + B.lerp(fb[0] - h0, oB2[0], lift), gy + oB2[1]];
+      }
     }
-    var bob = inWalk ? 1.5 * Math.cos(4 * Math.PI * p) : 0;
+    var walking = inWalk || out, pp = inWalk ? p : q, bob = walking ? 1.5 * Math.cos(4 * Math.PI * pp) * (out ? B.ease(q / .5) : 1) : 0;
     var th = theta(t), tapP = corner(th);
     // stage px -> local units
     var tap = [(XO - tapP[0]) / K, tapP[1] / K];
     var hit = 0; for (var i = 0; i < HIT.length; i++) if (Math.abs(t - HIT[i]) < .07) hit = 1 - Math.abs(t - HIT[i]) / .07;
     var near = 0; HIT.forEach(function (c) { near = Math.max(near, B.win(t, c - .3, c - .03, c + .03, c + .4)); });
     var lean = inWalk ? 0 : 3.5 * near - 1.2 * hit;
-    var hip = [hu + lean * .5, gy - 67 + bob + 1.2 * near], sh = [hip[0] + 3 + lean + (inWalk ? 1 : 0), hip[1] - 50 + (inWalk ? .4 * Math.cos(4 * Math.PI * p) : 0)];
+    var hip = [hu + lean * .5, gy - 67 + bob + 1.2 * near], sh = [hip[0] + 3 + lean + (walking ? 1 : 0), hip[1] - 50 + (walking ? .4 * Math.cos(4 * Math.PI * pp) : 0)];
     var lookUp = B.win(t, 3.9, 4.3, 6.4, 6.8), lookBack = B.win(t, 6.4, 6.8, 8.3, 8.8), nod = B.win(t, 8.2, 8.5, 8.6, 9);
-    var tilt = -12 * lookUp - 6 * lookBack + 5 * nod + (inWalk ? 2 * Math.sin(4 * Math.PI * p) : 0);
+    var tilt = -12 * lookUp - 6 * lookBack + 5 * nod + (walking ? 2 * Math.sin(4 * Math.PI * pp) : 0);
     var hc = [sh[0] + 6 + .8 * near, sh[1] - 11 + 1.5 * hit];
     // --- arms (joint angles; the shoulder joint sits a little below the neck so the arms leave the body under the chin)
     var sa = [sh[0] - 1, sh[1] + 2];
@@ -100,7 +109,15 @@
       A1 = B.mixA(A1, { a: -12 - 10 * near, f: 30 + 12 * near }, cl);   // the free arm counterbalances each tap
       var tip = B.win(t, 7.4, 8.1, 8.45, 9.05);                      // free hand to the brim of the hat
       A1 = B.mixA(A1, B.solve(sa, [hc[0] + 20, hc[1] - 6]), tip, 30, .8);
+      if (t > T_TURN) {   // arms fall back into the walking swing on the way out
+        var sw = B.ease((t - T_TURN) / (T_OUT - T_TURN + .35)), W1 = B.swing(q, 16), W2 = B.swing(q + .5, 16);
+        W2.w = REST.w; W2.a += 6; W2.f += 6;
+        A1 = B.mixA(A1, W1, sw); A2 = B.mixA(A2, W2, sw);
+      }
     }
+        // facing: screen-left until the turn, then a quick flip about the hips to face screen-right (local +u always points the way he faces)
+    var face = -Math.cos(Math.PI * B.ease((t - T_TURN) / (T_OUT - T_TURN))), he = hEnd(), hipX = t > T_TURN ? XO - K * he + K * (hu - he) : XO - K * hu;
+    g.setAttribute('transform', 'translate(' + hipX.toFixed(2) + ' 0) scale(' + (face * K).toFixed(4) + ' ' + K + ') translate(' + (-hu).toFixed(2) + ' 0)');
     var r = who.pose({ hip: hip, sh: sh, sa: sa, head: hc, tilt: tilt, ff: fa, fb: fb, A1: A1, A2: A2, bow: [-2 - near, 0], shadow: 30, ground: gy + 2, shadowX: hu });
     var G = B.grip(r.k2, HL, GRIP), hx = r.h2[0], hy = r.h2[1], ex = G.end[0], ey = G.end[1];
     hh.setAttribute('x1', hx.toFixed(1)); hh.setAttribute('y1', hy.toFixed(1)); hh.setAttribute('x2', ex.toFixed(1)); hh.setAttribute('y2', ey.toFixed(1));
@@ -109,10 +126,10 @@
     B.scenes.aboutProbe = { t: t, arm: r.k2, free: r.k1, face: [ex + FACE * Math.cos(gr), ey - FACE * Math.sin(gr)], tap: tap, hammer: G };
     img.style.transformOrigin = '50% 50%'; img.style.transform = 'rotate(' + th.toFixed(3) + 'deg)';
     spark.setAttribute('transform', 'translate(' + (tapP[0] + 3) + ' ' + (tapP[1] + 4) + ') scale(' + (hit * 1.2) + ')'); spark.setAttribute('opacity', hit > 0 ? 1 : 0);
-    if (t > 10 && handle && handle.stop) { handle.stop(); }
+    if (t > T_END + .3 && handle && handle.stop) { handle.stop(); }
   }
   B.scenes.about = draw;
   B.scenes.aboutMeasure = function () { measure(); return { pw: pw, sc: sc }; };
-  handle = B.play(svg, draw, { loop: 0, still: 12 });
+  handle = B.play(svg, draw, { loop: 0, still: 9.25 });   // reduced motion: standing beside the levelled photo
   if (!/[?&]eyes=1/.test(location.search) && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) draw(0);   // the photo hangs crooked from the first paint, before he arrives
 })();
