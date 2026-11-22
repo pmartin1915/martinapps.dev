@@ -117,7 +117,7 @@ const PROBE = `(() => {
   out.titles = document.querySelectorAll('head > title').length; out.title = document.title.trim();
   out.desc = (document.querySelector('meta[name="description"]') || {}).content || '';
   out.viewport = !!document.querySelector('meta[name="viewport"]');
-  out.refresh = !!document.querySelector('meta[http-equiv="refresh" i]');
+  out.refresh = !!document.querySelector('meta[http-equiv="refresh" i]'); out.path = location.pathname;
   out.h1 = document.querySelectorAll('h1').length;
   out.noAlt = [...document.images].filter((i) => !i.hasAttribute('alt')).map((i) => i.getAttribute('src'));
   out.brokenImg = [...document.images].filter((i) => i.complete && i.naturalWidth === 0 && i.getAttribute('src') && i.loading !== 'lazy').map((i) => i.getAttribute('src'));
@@ -163,13 +163,18 @@ async function checkPage(cdp, base, page, width, shotsDir) {
 // ---------- judging ----------
 export function judge(page, width, res, ctx) {
   const f = [], add = (kind, msg) => f.push({ page, width: width.name, kind, msg });
+  // a page that forwarded (the old storycue/ stubs) is judged only on where it landed; that page is crawled on its own
+  if (res.probe && res.probe.path !== new URL(ctx.base + page).pathname) {
+    if (width.name === 'phone' && !resolveFile(ctx.root, res.probe.path)) add('link', `forwards to ${res.probe.path}, which does not exist`);
+    return f;
+  }
   for (const e of res.errors) add('page error', e);
   for (const b of new Set(res.bad)) add('bad request', b);
   const p = res.probe; if (!p) return f;
   if (p.scrollW > p.clientW + 1) add('sideways scroll', `page is ${p.scrollW}px wide on a ${p.clientW}px screen` + (p.wide.length ? '; sticking out: ' + p.wide.join(', ') : ''));
   for (const s of p.brokenImg) add('broken image', s);
   if (width.name !== 'phone') return f;   // the rest does not depend on width: check once
-  if (p.refresh) return f;                 // a redirect stub (old storycue/ pages): only errors and requests matter
+  if (p.refresh) return f;   // a slow redirect stub: only errors and requests matter
   if (p.titles !== 1 || !p.title) add('basics', p.titles === 0 || !p.title ? 'no <title>' : `${p.titles} <title> tags`);
   if (!p.desc.trim()) add('note', 'no meta description (search results show a scrap of page text instead)');
   if (!p.viewport) add('basics', 'no viewport meta (phones will zoom out)');
@@ -253,7 +258,7 @@ async function selfTest() {
     [has('/', 'basics', /no alt attribute/), 'finds an image with no alt'],
     [has('/', 'note', /no meta description/), 'notes a missing meta description (a note, not a failure)'],
     [has('/good/', 'basics', /./) === false && !findings.some((x) => x.page === '/good/'), 'a clean page has no findings'],
-    [!findings.some((x) => x.page === '/redirect.html' && x.kind === 'basics'), 'a meta-refresh stub is not held to page basics'],
+    [!findings.some((x) => x.page === '/redirect.html' && x.kind !== 'page error'), 'a meta-refresh stub that forwards is not judged as the page it lands on'],
   ];
   let fails = 0;
   for (const [ok, what] of checks) { console.log(`${ok ? 'PASS' : 'FAIL'}  ${what}`); if (!ok) fails++; }

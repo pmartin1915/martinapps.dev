@@ -55,10 +55,11 @@ fetchable at martinapps.dev/ai/STATE.md. Keep this file free of anything not mea
   broken images, a missing title, viewport, h1 or img alt, and dead internal links or #fragments. A missing meta
   description is a note, not a failure. `--live` checks martinapps.dev after a push; `--shots DIR` saves screenshots;
   `--self-test` proves it on a fault-planted mini site in `_test/fixtures/`. Exit 0 clear, 1 failures, 2 could not run.
-- It lives in `_test/` because GitHub Pages does not publish underscore folders (this repo has no .nojekyll).
+- It lives in `_test/` because GitHub Pages does not publish underscore folders. `_config.yml` also excludes `ai/`
+  and `_test/` from the website (2026-11-21; before that these notes were readable at martinapps.dev/ai/STATE.md).
 - Store links and store state are Store Watch's job (dev-ops `scripts/store-watch.mjs`, every morning).
-- First run 2026-11-21: 26 pages, all clear locally and live; 14 notes (the support, privacy and terms pages and
-  the 404 page have no meta description).
+- First run 2026-11-21: 26 pages, all clear locally and live; the 12 support, privacy and terms pages and the 404
+  page then got a one-sentence meta description, so the run has no notes either.
 
 ## Next
 
