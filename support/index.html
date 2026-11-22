@@ -46,7 +46,7 @@
 <section class="wrap section" style="padding-top:40px">
   <div class="panel help">
     <div><h2>Email us</h2><p>Questions, problems or ideas.</p></div>
-    <div class="help-actions"><a class="btn btn-primary" href="mailto:support@martinapps.dev">support@martinapps.dev</a></div>
+    <div class="help-actions"><a class="btn btn-primary" href="mailto:support@martinapps.dev">support@martinapps.dev</a><button type="button" class="btn btn-secondary" id="copy-email" hidden>Copy address</button><span id="copy-email-status" role="status" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)"></span></div>
   </div>
 </section>
 <section class="wrap section" style="padding-top:48px" id="privacy" aria-labelledby="pick-h">
@@ -73,6 +73,33 @@
   function set(open) { b.setAttribute('aria-expanded', open); m.hidden = !open; b.querySelector('.menu-word').textContent = open ? 'Close' : 'Menu'; }
   b.addEventListener('click', function () { set(m.hidden); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !m.hidden) { set(false); b.focus(); } });
+})();
+// The email button is a mailto link, which does nothing useful on a computer with no mail app set up.
+// So offer the address itself. The button only appears where copying works.
+(function () {
+  var c = document.getElementById('copy-email'), s = document.getElementById('copy-email-status');
+  if (!c) return;
+  var ADDR = 'support@martinapps.dev';
+  function say(label, status) {
+    c.textContent = label; s.textContent = status;
+    setTimeout(function () { c.textContent = 'Copy address'; s.textContent = ''; }, 2500);
+  }
+  // Older way of copying, for browsers or pages where the clipboard API refuses.
+  function oldCopy() {
+    var t = document.createElement('textarea');
+    t.value = ADDR; t.setAttribute('readonly', ''); t.style.position = 'fixed'; t.style.opacity = '0';
+    document.body.appendChild(t); t.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(t); c.focus();
+    if (ok) say('Copied', 'Email address copied'); else say('Could not copy', 'Could not copy. The address is ' + ADDR);
+  }
+  c.hidden = false;
+  c.addEventListener('click', function () {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(ADDR).then(function () { say('Copied', 'Email address copied'); }, oldCopy);
+    } else { oldCopy(); }
+  });
 })();
 </script>
 <script defer src="/assets/builder.js"></script>
