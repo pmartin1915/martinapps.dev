@@ -294,8 +294,9 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
      Its place is kept relative to the letter, so a resize carries it along. Nothing is stored. */
   var drag = null, hooked = false, ease = null, G = 2400, DAMP = 3.2;
   function base() { return [P.ox + off[0], P.oy + off[1]]; }
+  function edge() { return Math.max(P.b.L, .7 * P.b.Lh, 10); }   // how close the centre may come to the page's edges
   function place(c, a) {                                   // c in page coordinates; kept on the page so it never widens it
-    var R = Math.max(P.b.L, .7 * P.b.Lh, 10), cw = document.documentElement.clientWidth, dh = document.documentElement.scrollHeight, o = base();
+    var R = edge(), cw = document.documentElement.clientWidth, dh = document.documentElement.scrollHeight, o = base();
     c = [Math.max(R, Math.min(cw - R, c[0])), Math.max(R, Math.min(dh - R, c[1]))];
     loc = [c[0] - o[0], c[1] - o[1], a]; put(c[0], c[1], a, 1, true); return c;
   }
@@ -309,7 +310,7 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
   }
   function down(e) {
     if (drag || e.button > 0) return;
-    e.preventDefault(); ease = null;
+    e.preventDefault(); ease = null; sim = null; clearTimeout(fallT);   // caught: no fall
     var tg = e.currentTarget; try { tg.setPointerCapture(e.pointerId); } catch (x) {}
     var o = base(), c = [o[0] + loc[0], o[1] + loc[1]], p = [e.pageX, e.pageY], psi = Math.atan2(c[1] - p[1], c[0] - p[0]);
     drag = { id: e.pointerId, tg: tg, l: Math.hypot(c[0] - p[0], c[1] - p[1]), psi: psi, psi0: psi, a0: loc[2], w: 0, p: p, np: p, v: [0, 0], A: [0, 0], t: performance.now() };
@@ -339,7 +340,85 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
     d.tg.style.cursor = 'grab'; document.documentElement.style.cursor = '';
     var near = Math.hypot(loc[0] - home[0], loc[1] - home[1]) < Math.max(36, .8 * P.b.Lh);
     settle(near ? home : [loc[0], loc[1], Math.round(loc[2] / Math.PI) * Math.PI], near ? 420 : 260);   // home into the bowl, or down flat
+    if (!near) fallT = setTimeout(function () { if (!drag) fall(); }, WAIT);   // then, unless something holds it up, gravity
   }
+
+  /* Gravity (2026-11-21). A moment after it is let go anywhere but its letter, the hammer falls onto whatever is beneath
+     it: the tops of lines of text, buttons, cards, pictures, or the bottom of the page. A small rigid body: the handle is
+     wood, the head is steel and carries most of the weight (the balance point is the drawing's rotation centre, so the
+     head's share follows from it); impulses with friction, a little bounce, rocking, then sleep. Every ledge is one-way
+     (it only stops something coming down from above), so the hammer never wedges inside a paragraph. */
+  var WAIT = 1000, VMAX = 1300, BOUNCE = 5, WMAX = 12, fallT = null, sim = null;   // ms, px/s, hammer lengths/s, rad/s
+  function ledges() {   // page-coordinate tops the hammer can land on, measured when the fall starts
+    var out = [], sx = scrollX, sy = scrollY, cw = document.documentElement.clientWidth, n, rg = document.createRange();
+    function pinned(e) { for (; e && e !== document.body; e = e.parentElement) { var p = getComputedStyle(e).position; if (p === 'fixed' || p === 'sticky') return true; } return false; }
+    function hidden(cs) { return cs.visibility === 'hidden' || cs.display === 'none' || +cs.opacity === 0; }
+    function add(r, inset) { if (r.width >= 4 && r.height >= 2) out.push([r.left + sx, r.right + sx, r.top + sy + inset * r.height]); }
+    var tw = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    while ((n = tw.nextNode())) {                          // text: one ledge per line, at about the top of the lowercase letters
+      if (!/\S/.test(n.data) || !n.parentElement || el.contains(n.parentElement) || hidden(getComputedStyle(n.parentElement)) || pinned(n.parentElement)) continue;
+      rg.selectNodeContents(n); [].forEach.call(rg.getClientRects(), function (r) { add(r, .22); });
+    }
+    [].forEach.call(document.body.querySelectorAll('*'), function (e) {   // boxes you can see the edge of
+      if (e === el || el.contains(e) || (e.parentElement && e.parentElement.closest('svg'))) return;
+      var cs = getComputedStyle(e), r;
+      var solid = /^(IMG|svg|VIDEO|CANVAS|BUTTON|INPUT|SELECT|TEXTAREA|HR|IFRAME|PICTURE)$/.test(e.tagName) ||
+        !/rgba\(\d+, \d+, \d+, 0\)|transparent/.test(cs.backgroundColor) || parseFloat(cs.borderTopWidth) > 0 || cs.boxShadow !== 'none';
+      if (!solid || hidden(cs) || pinned(e)) return;
+      r = e.getBoundingClientRect();
+      if (r.width > .95 * cw) return;                      // full-width bands are background, not a shelf
+      add(r, 0);
+    });
+    var dh = document.documentElement.scrollHeight; out.push([0, cw, dh - edge()]);   // the floor: just above the bottom of the page (it must not stretch the page)
+    if (/hammerdebug/.test(location.search)) out.forEach(function (q) { var d = document.createElement('div'); d.style.cssText = 'position:absolute;z-index:49;pointer-events:none;height:0;border-top:1px solid rgba(220,0,0,.6);left:' + q[0] + 'px;top:' + q[2] + 'px;width:' + (q[1] - q[0]) + 'px'; document.body.appendChild(d); });
+    return out;
+  }
+  function fall() {
+    var b = P.b, u0 = -b.cx, o = base(), pts = [], i, mH = 1;
+    var mHd = Math.max(.25, mH * (b.cx - b.Lh / 2) / Math.max(1, b.Lh - b.cx));   // head mass that puts the balance point where the drawing has it
+    var dc = b.Lh / 2 - b.cx, M = mH + mHd, I = mH * (b.Lh * b.Lh / 12 + dc * dc) + mHd * (b.Lh - b.cx) * (b.Lh - b.cx) + mHd * b.hh * b.hh / 12;
+    for (i = 0; i <= 6; i++) { var x = u0 + (b.Lh - b.th / 2) * i / 6; pts.push([x, -b.rh, .18], [x, b.rh, .18]); }   // wooden handle
+    pts.push([u0 - b.rh, 0, .18]);
+    [[-1, -1], [1, -1], [-1, 1], [1, 1], [1, 0]].forEach(function (s) { pts.push([u0 + b.Lh + s[0] * b.th / 2, s[1] * b.hh / 2, .32]); });   // steel head
+    sim = { c: [o[0] + loc[0], o[1] + loc[1]], a: loc[2], v: [0, 0], w: 0, pts: pts, M: M, I: I, S: ledges(), still: 0, t: 0, last: performance.now() };
+    requestAnimationFrame(tick);
+  }
+  function tick(now) {
+    var s = sim; if (!s || drag) { sim = null; return; }
+    var dt = Math.min(.05, (now - s.last) / 1000), h = 1 / 240, k; s.last = now;
+    for (k = 0; k < Math.round(dt / h); k++) stepBody(s, h);
+    var c = place(s.c, s.a); if (c[0] !== s.c[0]) s.v[0] *= -.3; s.c = c;      // the page sides stop it too
+    var calm = Math.hypot(s.v[0], s.v[1]) < 8 && Math.abs(s.w) < .4;
+    s.still = calm ? s.still + dt : 0; s.t += dt;
+    if (s.still > .35 || s.t > 8) { sim = null; return; }
+    requestAnimationFrame(tick);
+  }
+  function stepBody(s, h) {   // one step: gravity, find the points touching a ledge, solve them together, move
+    var ca = Math.cos(s.a), sa = Math.sin(s.a), C = [], i, k, it, q, c;
+    s.v[1] = Math.min(VMAX, s.v[1] + G * h);                // air drag: a top speed, so a long drop is not a cannon shot
+    for (i = 0; i < s.pts.length; i++) {
+      var r = s.pts[i], rx = ca * r[0] - sa * r[1], ry = sa * r[0] + ca * r[1], px = s.c[0] + rx, py = s.c[1] + ry, vy = s.v[1] + s.w * rx;
+      for (k = 0; k < s.S.length; k++) {
+        q = s.S[k];
+        if (px < q[0] || px > q[1] || py > q[2] + 3 || py + vy * h < q[2] - .3) continue;   // only from above: about to cross (or resting on) this top
+        if (s.c[1] > q[2] + 1) continue;                    // its balance point has gone below this ledge: it is tipping off, not resting on it
+        var e = vy > 60 ? Math.min(r[2], BOUNCE * P.b.Lh / vy) : 0;   // a slight bounce for its size, never a trampoline; none when resting
+        C.push({ rx: rx, ry: ry, go: -Math.max(e * vy, .2 * Math.max(0, py - q[2] - .2) / h), kn: 1 / (1 / s.M + rx * rx / s.I), kt: 1 / (1 / s.M + ry * ry / s.I), jn: 0, jt: 0 });
+        break;
+      }
+    }
+    for (it = 0; it < 8; it++) for (i = 0; i < C.length; i++) {   // sequential impulses, accumulated and clamped (contacts push, never pull)
+      c = C[i];
+      var dn = (s.v[1] + s.w * c.rx - c.go) * c.kn, jn = Math.max(0, c.jn + dn); dn = jn - c.jn; c.jn = jn;
+      s.v[1] -= dn / s.M; s.w -= dn * c.rx / s.I;
+      var dt = -(s.v[0] - s.w * c.ry) * c.kt, jt = Math.max(-.45 * c.jn, Math.min(.45 * c.jn, c.jt + dt)); dt = jt - c.jt; c.jt = jt;   // friction, wood and steel on paint
+      s.v[0] += dt / s.M; s.w -= dt * c.ry / s.I;
+    }
+    if (C.length) s.w *= 1 - 4 * h;                         // rolling on a surface loses spin
+    s.w = Math.max(-WMAX, Math.min(WMAX, s.w));
+    s.c[0] += s.v[0] * h; s.c[1] += s.v[1] * h; s.a += s.w * h;
+  }
+
   function settle(to, ms) {
     var from = loc.slice(), da = to[2] - from[2], t0 = performance.now();
     da -= 2 * Math.PI * Math.round(da / (2 * Math.PI));     // the short way round
