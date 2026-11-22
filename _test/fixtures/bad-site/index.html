@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Planted faults</title>
+<link rel="stylesheet" href="/missing.css">
+</head><body>
+<!-- A known-bad page for site-check.mjs --self-test. Every fault here is planted on purpose. -->
+<h1>Planted faults</h1>
+<div class="too-wide" style="width:600px;height:10px;background:#c00"></div>
+<p><a href="/nowhere/">dead link</a> <a href="#nope">dead fragment</a> <a href="/good/#absent">dead fragment elsewhere</a>
+<a href="/good/">good link</a> <a href="/good/#here">good fragment elsewhere</a> <a href="https://example.com/">external</a> <a href="mailto:x@example.com">mail</a></p>
+<img src="/missing.png" alt="broken on purpose">
+<img src="/good/dot.svg">
+<script>throw new Error('boom');</script>
+</body></html>

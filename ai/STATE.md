@@ -48,6 +48,18 @@ fetchable at martinapps.dev/ai/STATE.md. Keep this file free of anything not mea
   still use `assets/site.css`. These pages are GENERATED from a private source folder; edit there and rebuild,
   not here. No Engineering section yet.
 
+## Self-test (any model can run it)
+
+- `node _test/site-check.mjs` serves this folder and opens every page in headless Chrome at phone (390 px) and
+  desktop (1280 px) width. It fails on page errors, failed same-site requests, sideways scroll (naming the element),
+  broken images, a missing title, viewport, h1 or img alt, and dead internal links or #fragments. A missing meta
+  description is a note, not a failure. `--live` checks martinapps.dev after a push; `--shots DIR` saves screenshots;
+  `--self-test` proves it on a fault-planted mini site in `_test/fixtures/`. Exit 0 clear, 1 failures, 2 could not run.
+- It lives in `_test/` because GitHub Pages does not publish underscore folders (this repo has no .nojekyll).
+- Store links and store state are Store Watch's job (dev-ops `scripts/store-watch.mjs`, every morning).
+- First run 2026-11-21: 26 pages, all clear locally and live; 14 notes (the support, privacy and terms pages and
+  the 404 page have no meta description).
+
 ## Next
 
 - Keep each app's privacy/support pages in step with the shipped binary: when an app version changes
