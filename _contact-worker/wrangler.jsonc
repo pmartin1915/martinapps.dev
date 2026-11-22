@@ -5,7 +5,9 @@
   "name": "martinapps-contact",
   "main": "worker.mjs",
   "compatibility_date": "2026-11-21",
-  "workers_dev": true,
+  // Served at its own subdomain; Cloudflare creates the DNS record. The account has no workers.dev address.
+  "workers_dev": false,
+  "routes": [{ "pattern": "contact.martinapps.dev", "custom_domain": true }],
   "send_email": [{ "name": "EMAIL" }],
   "observability": { "enabled": true }
 }

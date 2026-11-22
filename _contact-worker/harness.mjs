@@ -40,7 +40,7 @@ createServer(async (req, res) => {
     if (p.includes("..")) { res.writeHead(400); return res.end(); }
     if (p === "" || p.endsWith("/") || p.endsWith("\\")) p = join(p, "index.html");
     let body = await readFile(join(root, p));
-    if (p.replace(/\\/g, "/") === "support/index.html") body = Buffer.from(String(body).replace('data-endpoint=""', 'data-endpoint="/contact"'));
+    if (p.replace(/\\/g, "/") === "support/index.html") body = Buffer.from(String(body).replace(/data-endpoint="[^"]*"/, 'data-endpoint="/contact"'));
     res.writeHead(200, { "Content-Type": types[extname(p)] || "application/octet-stream", "Cache-Control": "no-store" }); res.end(body);
   } catch { res.writeHead(404); res.end("not found"); }
 }).listen(port, "127.0.0.1", () => console.log(`harness on http://127.0.0.1:${port}/support/`));
