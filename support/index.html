@@ -46,7 +46,20 @@
 <section class="wrap section" style="padding-top:40px">
   <div class="panel help">
     <div><h2>Email us</h2><p>Questions, problems or ideas.</p></div>
-    <div class="help-actions"><a class="btn btn-primary" href="mailto:support@martinapps.dev">support@martinapps.dev</a><button type="button" class="btn btn-secondary" id="copy-email" hidden>Copy address</button><span id="copy-email-status" role="status" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)"></span></div>
+    <div class="help-actions"><a class="btn btn-primary" href="mailto:support@martinapps.dev">support@martinapps.dev</a><button type="button" class="btn btn-secondary" id="copy-email" hidden>Copy address</button><button type="button" class="btn btn-secondary" id="msg-open" aria-expanded="false" aria-controls="msg-form" hidden>Write a message</button><span id="copy-email-status" role="status" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)"></span></div>
+    <form class="msg-form" id="msg-form" data-endpoint="" novalidate hidden>
+      <label for="mf-email">Your email, so we can reply</label>
+      <input id="mf-email" name="email" type="email" autocomplete="email" maxlength="200" required>
+      <label for="mf-app">Which app is it about?</label>
+      <select id="mf-app" name="app"><option>General</option><option>BoardBound</option><option>Burn Wizard</option><option>Wilderness</option><option>Shortless</option><option>Scrollometer</option><option>Retold</option><option>StoryCue</option><option>Tellfolk</option></select>
+      <label for="mf-message">Your message</label>
+      <textarea id="mf-message" name="message" rows="6" maxlength="4000" required></textarea>
+      <div class="msg-trap" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
+      <p class="msg-note">We use your email only to reply, and we keep the message only in our inbox. Please leave out patient or health details.</p>
+      <div class="help-actions"><button type="submit" class="btn btn-primary" id="msg-send">Send message</button><button type="button" class="btn btn-secondary" id="msg-cancel">Cancel</button></div>
+      <p class="msg-status" id="msg-status" role="status"></p>
+    </form>
+    <p class="msg-done" id="msg-done" tabindex="-1" hidden>Thank you. Your message is on its way, and we will reply by email.</p>
   </div>
 </section>
 <section class="wrap section" style="padding-top:48px" id="privacy" aria-labelledby="pick-h">
@@ -99,6 +112,40 @@
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(ADDR).then(function () { say('Copied', 'Email address copied'); }, oldCopy);
     } else { oldCopy(); }
+  });
+})();
+// The message box. It shows only when a sending address is set on the form (data-endpoint),
+// so the page is safe to publish before the relay exists. Without JavaScript the email
+// button above is still there.
+(function () {
+  var open = document.getElementById('msg-open'), f = document.getElementById('msg-form');
+  if (!open || !f || !f.getAttribute('data-endpoint') || !window.fetch) return;
+  var done = document.getElementById('msg-done'), st = document.getElementById('msg-status'),
+      send = document.getElementById('msg-send'), shownAt = 0;
+  var FALLBACK = 'That did not send. Please email support@martinapps.dev instead.';
+  function show(on) {
+    f.hidden = !on; open.setAttribute('aria-expanded', on);
+    if (on) { shownAt = Date.now(); done.hidden = true; f.elements.email.focus(); } else { open.focus(); }
+  }
+  open.hidden = false;
+  open.addEventListener('click', function () { show(f.hidden); });
+  document.getElementById('msg-cancel').addEventListener('click', function () { show(false); });
+  f.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var email = f.elements.email.value.trim(), message = f.elements.message.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { st.textContent = 'Please check your email address.'; f.elements.email.focus(); return; }
+    if (message.length < 10) { st.textContent = 'Please write a little more so we can help.'; f.elements.message.focus(); return; }
+    send.disabled = true; send.textContent = 'Sending'; st.textContent = '';
+    fetch(f.getAttribute('data-endpoint'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, app: f.elements.app.value, message: message, website: f.elements.website.value, elapsed_ms: Date.now() - shownAt })
+    }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok && j && j.ok, error: j && j.error }; }); })
+      .then(function (r) {
+        if (!r.ok) { st.textContent = r.error || FALLBACK; return; }
+        f.reset(); f.hidden = true; open.setAttribute('aria-expanded', 'false'); done.hidden = false; done.focus();
+      })
+      .catch(function () { st.textContent = FALLBACK; })
+      .then(function () { send.disabled = false; send.textContent = 'Send message'; });
   });
 })();
 </script>
