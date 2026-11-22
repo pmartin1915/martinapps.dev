@@ -39,11 +39,22 @@
     return { a: a, b: bb, sw: sw };
   }
   function planted(k) { var f = feetAt(k, 0); return (k % 2 === 0) ? f.a : f.b; }   // the foot that carries him during step k
+  // The workshop's walk, ported (about-frame.js has the level-ground version): the foot rolls heel to toe, the rear foot rises onto its toe as
+  // the body moves over the stance foot and keeps that roll through the lift-off, the swing foot flexes up to clear the tread and lands flat;
+  // pelvis and shoulders turn against each other, the swing-side hip is hiked for the step up, and the neck soaks up most of the hip's give.
+  var FL = 11, RO = 28;   // foot length to the toe, and how far the rear heel rises (deg)
+  function roll(th) { var r = th * Math.PI / 180; return [FL - FL * Math.cos(r), -FL * Math.sin(r)]; }   // where the ankle goes when the foot rolls over its toe
+  function shift(p, th) { var o = roll(th); return [p[0] + o[0], p[1] + o[1]]; }
   function draw(t) {
     if (!who) { who = B.create(fig); puffs = []; for (var i = 0; i < 4; i++) puffs.push(B.el('circle', { r: 0, fill: '#B9C6D8', opacity: 0 }, fig)); }
     var k = Math.max(0, Math.min(Math.floor((t - TIN) / STEP), 4)), u = t < TIN ? 0 : Math.min((t - TIN) / STEP - k, 1);
     if (t >= TIN + STEP * 4) { k = 4; u = 0; }
-    var f = feetAt(k, u), hipY;
+    var f = feetAt(k, u), hipY, swA = k < 4 && k % 2 === 1, swB = k < 4 && k % 2 === 0;   // which foot is in the air this step
+    var thS = k < 4 ? RO * B.ease((u - .5) / .5) : RO;   // the rear foot: heel rising over the second half of the step, and held up after the last
+    var thW = k < 4 ? (k === 0 ? 0 : RO) * (1 - B.ease(u / .45)) - 10 * Math.sin(Math.PI * u) : 0;   // the swing foot: toe leaving, then flexed up to land flat
+    var tha = k === 4 ? 0 : (swA ? thW : thS), thb = k === 4 ? RO : (swB ? thW : thS);
+    if (t < TIN) { tha = 0; thb = 0; }   // standing at the foot of the stairs: flat
+    var ra = tha > 0 ? shift(f.a, tha) : f.a, rb = thb > 0 ? shift(f.b, thb) : f.b;
     if (k < 4) { var p0 = k === 0 ? planted(0) : planted(k - 1), p1 = planted(k); hipY = B.lerp(p0[1], p1[1], B.ease(u)) - 69; }
     else { hipY = T[2][1] - 69; }
     var land = 0, kl;
@@ -54,13 +65,16 @@
       var pu = (t - (TIN + STEP * (kl + 1))) / .5, pc = puffs[kl];
       if (pu > 0 && pu < 1) { pc.setAttribute('cx', (T[kl][0] + 2 + 5 * pu).toFixed(1)); pc.setAttribute('cy', (T[kl][1] - 3 - 9 * pu).toFixed(1)); pc.setAttribute('r', (2.5 + 6 * pu).toFixed(1)); pc.setAttribute('opacity', (.7 * (1 - pu)).toFixed(2)); } else pc.setAttribute('opacity', 0);
     }
-    var sh = [hip[0] + 3, hip[1] - 50], hc = [sh[0] + 6, sh[1] - 11];
+    var rw = B.ease((t - TIN) / .2) - B.ease((t - TIN - STEP * 4) / .2), tc = Math.cos(Math.PI * (k + u)) * rw;   // 1 while he climbs, 0 standing
+    var give = (f.sw ? 2.5 * Math.sin(Math.PI * u) : 0) + 2.4 * land, hike = f.sw ? 1 * rw * Math.sin(Math.PI * u) : 0;
+    var sh = [hip[0] + 3, hip[1] - 50], hc = [sh[0] + 6, sh[1] - 11 - .65 * give];
+    var hA = [hip[0] + 2.2 * tc, hip[1] - (swA ? hike : 0)], hB = [hip[0] - 2.2 * tc, hip[1] - (swB ? hike : 0)];
     var ph = (k + u) * Math.PI;
     var h1 = [sh[0] + 14 + 13 * Math.sin(ph), sh[1] + 40 - 5 * Math.cos(ph)], h2 = [sh[0] + 14 - 13 * Math.sin(ph), sh[1] + 40 + 5 * Math.cos(ph)];
     var ex = B.ease((t - TIN - STEP * 4 - .05) / .42);            // after the last tread he steps up and back into the wall, behind the glyph
     var enter = t < TIN ? B.ease(t / TIN) : 1;
     who.root.setAttribute('transform', 'translate(' + (-46 * (1 - enter) + 34 * ex).toFixed(1) + ' ' + (-26 * ex).toFixed(1) + ') scale(' + K + ')');
-    who.pose({ hip: hip, sh: sh, head: hc, tilt: 8, ff: f.a, fb: f.b, h1: h1, h2: h2, bow: [-3, 0], shadow: 22, shadowX: (f.a[0] + f.b[0]) / 2, ground: Math.max(f.a[1], f.b[1]) + 1.5 });
+    who.pose({ hip: hip, sh: sh, head: hc, tilt: 8, ff: ra, fb: rb, ffa: tha, fba: thb, hf: hA, hb: hB, s1: [sh[0] - 2.8 * tc, sh[1]], s2: [sh[0] + 2.8 * tc, sh[1]], h1: h1, h2: h2, bow: [-3, 0], shadow: 22, shadowX: (f.a[0] + f.b[0]) / 2, ground: Math.max(f.a[1], f.b[1]) + 1.5 });
   }
   function show(on) { btn.classList.toggle('on', on); }
   var busy = false, rafId = 0;
