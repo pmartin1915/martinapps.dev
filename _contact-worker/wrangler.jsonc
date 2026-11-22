@@ -8,6 +8,11 @@
   // Served at its own subdomain; Cloudflare creates the DNS record. The account has no workers.dev address.
   "workers_dev": false,
   "routes": [{ "pattern": "contact.martinapps.dev", "custom_domain": true }],
-  "send_email": [{ "name": "EMAIL" }],
+  // The From address is pinned here. The recipient is pinned in code (env.CONTACT_TO), not here:
+  // this repo is public and destination_address would publish a private inbox address.
+  // shortcut: recipient not pinned at the binding, fine while no sending domain is onboarded
+  // (until then Cloudflare only delivers to verified destinations); pin it in a private config
+  // if Email Sending is ever turned on for this account.
+  "send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["website@martinapps.dev"] }],
   "observability": { "enabled": true }
 }

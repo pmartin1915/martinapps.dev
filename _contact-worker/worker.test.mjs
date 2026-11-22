@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import worker, { validate, buildEmail, FROM } from "./worker.mjs";
 
 const ORIGIN = "https://martinapps.dev";
-const GOOD = { email: "pat@example.com", name: "Pat", app: "Wilderness", message: "The knots page will not open on my phone.", website: "", elapsed_ms: 20000 };
+const GOOD = { email: "pat@example.com", name: "Pat", app: "Wilderness", message: "The knots page will not open on my phone.", website: "" };
 const fakeEnv = (opts = {}) => {
   const sent = [];
   return { sent, EMAIL: { send: async (m) => { if (opts.fail) { const e = new Error("no"); e.code = "E_RECIPIENT_NOT_ALLOWED"; throw e; } sent.push(m); return { messageId: "x" }; } }, CONTACT_TO: "owner@example.net" };
@@ -48,19 +48,36 @@ test("preflight answers 204 with CORS; GET is refused", async () => {
   assert.equal(get.status, 405);
 });
 
-test("bots are answered ok but nothing is sent (hidden field filled, or filled in too fast)", async () => {
-  for (const body of [{ ...GOOD, website: "http://spam" }, { ...GOOD, elapsed_ms: 400 }]) {
-    const env = fakeEnv();
-    const res = await worker.fetch(post(body), env);
-    assert.equal(res.status, 200);
-    assert.equal(env.sent.length, 0);
-  }
+test("a filled hidden field is answered ok but nothing is sent", async () => {
+  const env = fakeEnv();
+  const res = await worker.fetch(post({ ...GOOD, website: "http://spam" }), env);
+  assert.equal(res.status, 200);
+  assert.equal(env.sent.length, 0);
+});
+
+test("a fast real visitor (autofill and paste) is still delivered", async () => {
+  const env = fakeEnv();
+  const res = await worker.fetch(post({ ...GOOD, elapsed_ms: 300 }), env);
+  assert.equal(res.status, 200);
+  assert.equal(env.sent.length, 1);
+});
+
+test("the recipient never comes from the request", async () => {
+  const env = fakeEnv();
+  await worker.fetch(post({ ...GOOD, to: "victim@example.org", cc: "victim@example.org", bcc: "victim@example.org", from: "ceo@example.org", replyTo: "x@example.org", subject: "Free money" }), env);
+  assert.equal(env.sent.length, 1);
+  assert.deepEqual(Object.keys(env.sent[0]).sort(), ["from", "replyTo", "subject", "text", "to"]);
+  assert.equal(env.sent[0].to, "owner@example.net");
+  assert.equal(env.sent[0].from, FROM);
+  assert.equal(env.sent[0].replyTo, "pat@example.com");
+  assert.doesNotMatch(JSON.stringify(env.sent[0]), /victim|Free money|ceo@/);
 });
 
 test("bad input is refused with a sentence, and nothing is sent", async () => {
   const cases = [
     { ...GOOD, email: "" }, { ...GOOD, email: "not-an-address" }, { ...GOOD, email: "a@b.co\nBcc: x@y.z" },
-    { ...GOOD, email: "a b@c.de" }, { ...GOOD, message: "hi" }, { ...GOOD, message: "x".repeat(4001) }, [], "nope",
+    { ...GOOD, email: "a b@c.de" }, { ...GOOD, email: "a\u0000b@c.de" }, { ...GOOD, email: ["a@b.co"] },
+    { ...GOOD, message: "hi" }, { ...GOOD, message: "x".repeat(4001) }, { ...GOOD, message: 12345678901 }, [], "nope",
   ];
   for (const body of cases) {
     const env = fakeEnv();
@@ -71,8 +88,11 @@ test("bad input is refused with a sentence, and nothing is sent", async () => {
     assert.ok(out.error.length > 5);
     assert.equal(env.sent.length, 0);
   }
-  const big = await worker.fetch(post("x".repeat(10001)), fakeEnv());
+  const big = await worker.fetch(post("x".repeat(20001)), fakeEnv());
   assert.equal(big.status, 413);
+  // Size is counted in bytes: 10,001 two-byte letters is over the 20,000-byte cap.
+  const wide = await worker.fetch(post("é".repeat(10001)), fakeEnv());
+  assert.equal(wide.status, 413);
   const junk = await worker.fetch(post("{not json"), fakeEnv());
   assert.equal(junk.status, 400);
 });

@@ -121,31 +121,35 @@
   var open = document.getElementById('msg-open'), f = document.getElementById('msg-form');
   if (!open || !f || !f.getAttribute('data-endpoint') || !window.fetch) return;
   var done = document.getElementById('msg-done'), st = document.getElementById('msg-status'),
-      send = document.getElementById('msg-send'), shownAt = 0;
+      send = document.getElementById('msg-send'), cancel = document.getElementById('msg-cancel');
   var FALLBACK = 'That did not send. Please email support@martinapps.dev instead.';
   function show(on) {
     f.hidden = !on; open.setAttribute('aria-expanded', on);
-    if (on) { shownAt = Date.now(); done.hidden = true; f.elements.email.focus(); } else { open.focus(); }
+    if (on) { done.hidden = true; f.elements.email.focus(); } else { open.focus(); }
   }
   open.hidden = false;
   open.addEventListener('click', function () { show(f.hidden); });
-  document.getElementById('msg-cancel').addEventListener('click', function () { show(false); });
+  cancel.addEventListener('click', function () { show(false); });
+  // While a message is in flight nothing else can be pressed, so a late answer cannot land on a changed form.
+  function busy(on) { send.disabled = cancel.disabled = open.disabled = on; send.textContent = on ? 'Sending' : 'Send message'; }
   f.addEventListener('submit', function (e) {
     e.preventDefault();
     var email = f.elements.email.value.trim(), message = f.elements.message.value.trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { st.textContent = 'Please check your email address.'; f.elements.email.focus(); return; }
     if (message.length < 10) { st.textContent = 'Please write a little more so we can help.'; f.elements.message.focus(); return; }
-    send.disabled = true; send.textContent = 'Sending'; st.textContent = '';
+    busy(true); st.textContent = '';
+    // Give up after 20 seconds so a stalled connection ends in the email fallback, not a stuck button.
+    var ctl = window.AbortController ? new AbortController() : null, timer = setTimeout(function () { if (ctl) ctl.abort(); }, 20000);
     fetch(f.getAttribute('data-endpoint'), {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email, app: f.elements.app.value, message: message, website: f.elements.website.value, elapsed_ms: Date.now() - shownAt })
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: ctl ? ctl.signal : undefined,
+      body: JSON.stringify({ email: email, app: f.elements.app.value, message: message, website: f.elements.website.value })
     }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok && j && j.ok, error: j && j.error }; }); })
       .then(function (r) {
         if (!r.ok) { st.textContent = r.error || FALLBACK; return; }
         f.reset(); f.hidden = true; open.setAttribute('aria-expanded', 'false'); done.hidden = false; done.focus();
       })
       .catch(function () { st.textContent = FALLBACK; })
-      .then(function () { send.disabled = false; send.textContent = 'Send message'; });
+      .then(function () { clearTimeout(timer); busy(false); });
   });
 })();
 </script>
