@@ -200,7 +200,7 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
   }
 
   /* ================= main thread: measure the letter, ask for a plan early, draw the hammer ================= */
-  var asked = '', off = [0, 0], sc0 = .3, P = null, el = null, anim = null, done = false, finT = 0, shift = null, loc = null, worker = null, planInline = null;
+  var asked = '', off = [0, 0], sc0 = .3, P = null, el = null, anim = null, done = false, finT = 0, shift = null, loc = null, home = null, worker = null, planInline = null;
 
   function metrics() {   // where the first glyph is on the page (cheap; no pixels)
     var tg = target(), ch = tg.node.data.charAt(tg.idx), cs = getComputedStyle(tg.el), r = document.createRange();
@@ -263,7 +263,9 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
     s.setAttribute('viewBox', [-L, -L, 2 * L, 2 * L].join(' ')); s.setAttribute('width', 2 * L); s.setAttribute('height', 2 * L); s.setAttribute('aria-hidden', 'true');
     s.style.cssText = 'position:absolute;left:0;top:0;margin:' + (-L) + 'px 0 0 ' + (-L) + 'px;pointer-events:none;z-index:50;opacity:0;will-change:transform';
     s.innerHTML = '<line x1="' + u0 + '" y1="0" x2="' + (u0 + b.Lh) + '" y2="0" stroke="#7A5A2E" stroke-width="' + 2 * b.rh + '" stroke-linecap="round"/>' +
-      '<rect x="' + (u0 + b.Lh - b.th / 2) + '" y="' + (-b.hh / 2) + '" width="' + b.th + '" height="' + b.hh + '" rx="' + Math.max(.8, b.th * .18) + '" fill="#555"/>';
+      '<rect x="' + (u0 + b.Lh - b.th / 2) + '" y="' + (-b.hh / 2) + '" width="' + b.th + '" height="' + b.hh + '" rx="' + Math.max(.8, b.th * .18) + '" fill="#555"/>' +
+      // the finger target: an invisible fat stroke along the whole hammer, live only once it has landed (see grabbable)
+      '<line class="hm-hit" x1="' + (u0 - 4) + '" y1="0" x2="' + (u0 + b.Lh + b.th / 2 + 4) + '" y2="0" stroke="transparent" stroke-width="' + Math.max(30, b.hh + 14) + '" stroke-linecap="round" style="pointer-events:none"/>';
     document.body.appendChild(s); return s;
   }
   function put(x, y, a, sc, vis) { if (!el) return; el.style.opacity = vis ? 1 : 0; el.style.transform = 'translate(' + x + 'px,' + y + 'px) rotate(' + a + 'rad) scale(' + sc + ')'; }
@@ -276,15 +278,79 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
     var t = tt - TOSS.t;
     if (P && el) {
       if (t < 0) { shift = null; if (!done) put(0, 0, 0, 1, false); }
-      else {
+      else if (!done) {                                    // once landed, the hammer is the visitor's (see grabbable): stop drawing the take
         if (shift === null) shift = Math.max(0, t);   // plan arrived late: start now instead of jumping
         var tp = t - shift, fr = P.frames, k = Math.min(fr.length - 1, Math.max(0, tp) * PLAY / REC), i = Math.floor(k), f = k - i, A = fr[i], B = fr[Math.min(i + 1, fr.length - 1)];
         var sc = sc0 + (1 - sc0) * ss(tp / .55);
         put(off[0] + A[0] + (B[0] - A[0]) * f, off[1] + A[1] + (B[1] - A[1]) * f, A[2] + (B[2] - A[2]) * f, sc, true);
-        if (k >= fr.length - 1 && !done) { done = true; var rest = fr[fr.length - 1]; loc = [rest[0] - P.ox, rest[1] - P.oy, rest[2]]; }
+        if (k >= fr.length - 1 && !done) { done = true; var rest = fr[fr.length - 1]; loc = [rest[0] - P.ox, rest[1] - P.oy, rest[2]]; home = loc.slice(); grabbable(); }
       }
     }
     if (anim.playState !== 'finished' || !done) requestAnimationFrame(frame);
+  }
+  /* Pick it up (2026-11-21). Once it has landed, the hammer can be grabbed with a finger or the mouse. It hangs from the
+     spot you hold and swings like a loosely held hammer as you carry it (a pendulum driven by the hand's acceleration).
+     Let go and it lies down flat where it is; let go near where it landed and it slides home into the letter.
+     Its place is kept relative to the letter, so a resize carries it along. Nothing is stored. */
+  var drag = null, hooked = false, ease = null, G = 2400, DAMP = 3.2;
+  function base() { return [P.ox + off[0], P.oy + off[1]]; }
+  function place(c, a) {                                   // c in page coordinates; kept on the page so it never widens it
+    var R = Math.max(P.b.L, .7 * P.b.Lh, 10), cw = document.documentElement.clientWidth, dh = document.documentElement.scrollHeight, o = base();
+    c = [Math.max(R, Math.min(cw - R, c[0])), Math.max(R, Math.min(dh - R, c[1]))];
+    loc = [c[0] - o[0], c[1] - o[1], a]; put(c[0], c[1], a, 1, true); return c;
+  }
+  function grabbable() {
+    if (!el || hooked) return;
+    var hit = el.querySelector('.hm-hit'); if (!hit) return;
+    hooked = true;
+    hit.style.pointerEvents = 'stroke'; hit.style.cursor = 'grab'; hit.style.touchAction = 'none';
+    hit.addEventListener('pointerdown', down);
+    hit.addEventListener('touchstart', function (e) { e.preventDefault(); }, { passive: false });   // a drag on the hammer must not scroll the page (iOS)
+  }
+  function down(e) {
+    if (drag || e.button > 0) return;
+    e.preventDefault(); ease = null;
+    var tg = e.currentTarget; try { tg.setPointerCapture(e.pointerId); } catch (x) {}
+    var o = base(), c = [o[0] + loc[0], o[1] + loc[1]], p = [e.pageX, e.pageY], psi = Math.atan2(c[1] - p[1], c[0] - p[0]);
+    drag = { id: e.pointerId, tg: tg, l: Math.hypot(c[0] - p[0], c[1] - p[1]), psi: psi, psi0: psi, a0: loc[2], w: 0, p: p, np: p, v: [0, 0], A: [0, 0], t: performance.now() };
+    tg.style.cursor = 'grabbing'; document.documentElement.style.cursor = 'grabbing';
+    tg.addEventListener('pointermove', move); tg.addEventListener('pointerup', up); tg.addEventListener('pointercancel', up);
+    requestAnimationFrame(swing);
+  }
+  function move(e) { if (drag && e.pointerId === drag.id) drag.np = [e.pageX, e.pageY]; }
+  function swing(now) {
+    var d = drag; if (!d) return;
+    var dt = Math.min(.05, Math.max(.004, (now - d.t) / 1000)); d.t = now;
+    var np = d.np, v = [(np[0] - d.p[0]) / dt, (np[1] - d.p[1]) / dt], k = Math.min(1, dt * 20);
+    d.A = [d.A[0] + ((v[0] - d.v[0]) / dt - d.A[0]) * k, d.A[1] + ((v[1] - d.v[1]) / dt - d.A[1]) * k];   // the hand's acceleration, smoothed
+    var am = Math.hypot(d.A[0], d.A[1]); if (am > 30000) { d.A[0] *= 30000 / am; d.A[1] *= 30000 / am; }
+    d.v = v; d.p = np;
+    if (d.l > 3) {                                         // held off its balance point: it swings; held at the balance point it just follows
+      var ke = .28 * P.b.Lh, le = d.l + ke * ke / d.l, n = 4, h = dt / n, i;
+      for (i = 0; i < n; i++) { d.w += ((Math.cos(d.psi) * (G - d.A[1]) + Math.sin(d.psi) * d.A[0]) / le - DAMP * d.w) * h; d.psi += d.w * h; }
+    }
+    place([np[0] + d.l * Math.cos(d.psi), np[1] + d.l * Math.sin(d.psi)], d.a0 + d.psi - d.psi0);
+    requestAnimationFrame(swing);
+  }
+  function up(e) {
+    var d = drag; if (!d || e.pointerId !== d.id) return;
+    drag = null;
+    d.tg.removeEventListener('pointermove', move); d.tg.removeEventListener('pointerup', up); d.tg.removeEventListener('pointercancel', up);
+    d.tg.style.cursor = 'grab'; document.documentElement.style.cursor = '';
+    var near = Math.hypot(loc[0] - home[0], loc[1] - home[1]) < Math.max(36, .8 * P.b.Lh);
+    settle(near ? home : [loc[0], loc[1], Math.round(loc[2] / Math.PI) * Math.PI], near ? 420 : 260);   // home into the bowl, or down flat
+  }
+  function settle(to, ms) {
+    var from = loc.slice(), da = to[2] - from[2], t0 = performance.now();
+    da -= 2 * Math.PI * Math.round(da / (2 * Math.PI));     // the short way round
+    var step = function (now) {
+      if (ease !== step || drag) return;
+      var u = ss((now - t0) / ms), o = base();
+      loc = [from[0] + (to[0] - from[0]) * u, from[1] + (to[1] - from[1]) * u, from[2] + da * u];
+      put(o[0] + loc[0], o[1] + loc[1], loc[2], 1, true);
+      if (u < 1) requestAnimationFrame(step);
+    };
+    ease = step; requestAnimationFrame(step);
   }
   function relocate() {   // layout changed: keep a settled hammer in the bowl, and re-plan if it has not flown yet
     var q = metrics(); if (!q) return;
