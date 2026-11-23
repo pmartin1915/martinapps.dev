@@ -90,3 +90,14 @@ fetchable at martinapps.dev/ai/STATE.md. Keep this file free of anything not mea
 - Keep each app's privacy/support pages in step with the shipped binary: when an app version changes
   its data handling, this repo changes in the same release.
 - Credentials wording sweep after Alabama licensure posts (tracked in dev-ops worklist, not here).
+- Engineering section: a design draft exists on the local branch `engineering-design` (commit 471bf00, laptop only, not
+  pushed): `/engineering/`, case-study shaped (results, not code), waterwheel mark, light-theme blue `#2F6296`, noindex
+  and unlinked. One real write-up (site search); two cards are placeholders with unapproved wording. Parked until the
+  employer-policy read (due 2026-11-26); then draft the other two write-ups and add the nav link (Perry, 2026-11-23:
+  direction left to Claude).
+- Tellfolk and Retold have support/privacy pages and /support/ rows, but no product page or app card. Add them when
+  each one clears App Review (`assets/soon-tile.js` is the unused "coming soon" art if a row is wanted earlier).
+- Legal pages gap check (2026-11-22) ran against a stand-in checklist: the reel transcript the IDEAS entry names is not
+  on the laptop (probably on perrypc). Open items: Burn Wizard's and Scrollometer's privacy policies live off this
+  domain (netlify, github.io); no terms page except BoardBound's; no accessibility statement. BoardBound's age wording
+  now matches its terms (18+, Perry 2026-11-23). Burn Wizard is "children and adults" everywhere (Perry 2026-11-23).
