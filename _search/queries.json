@@ -1,0 +1,491 @@
+{
+ "about": "The yardstick for martinapps.dev search. Each query names the page that must come first (top), pages that also count as right answers in the top 3 (alsoOk), pages that must not appear anywhere in the results (never), and for some an FAQ or heading the first result should point into (section). Frozen 2026-11-22 before any scorer was written: fix misses by improving the search, never by editing an expectation without saying why in the commit. category is one of exact, typo, partial, synonym, question, pagetype, empty. A synonym query uses words that are not on the target page.",
+ "excludedAlways": [
+  "/404.html",
+  "/sting/",
+  "/storycue/support.html",
+  "/storycue/privacy-policy.html"
+ ],
+ "queries": [
+  {
+   "q": "boardbound",
+   "category": "exact",
+   "top": "/boardbound/",
+   "never": []
+  },
+  {
+   "q": "burn wizard",
+   "category": "exact",
+   "top": "/burn-wizard/"
+  },
+  {
+   "q": "wilderness",
+   "category": "exact",
+   "top": "/wilderness/"
+  },
+  {
+   "q": "shortless",
+   "category": "exact",
+   "top": "/shortless/"
+  },
+  {
+   "q": "scrollometer",
+   "category": "exact",
+   "top": "/scrollometer/"
+  },
+  {
+   "q": "privacy",
+   "category": "exact",
+   "top": "/privacy/"
+  },
+  {
+   "q": "parkland formula",
+   "category": "exact",
+   "top": "/burn-wizard/"
+  },
+  {
+   "q": "lund-browder",
+   "category": "exact",
+   "top": "/burn-wizard/"
+  },
+  {
+   "q": "restore purchases",
+   "category": "exact",
+   "top": "/boardbound/support.html",
+   "section": "How do I restore a previous purchase?",
+   "alsoOk": [
+    "/boardbound/terms.html"
+   ]
+  },
+  {
+   "q": "time reclaimed",
+   "category": "exact",
+   "top": "/shortless/"
+  },
+  {
+   "q": "bordbound",
+   "category": "typo",
+   "top": "/boardbound/"
+  },
+  {
+   "q": "board bound",
+   "category": "typo",
+   "top": "/boardbound/"
+  },
+  {
+   "q": "burnwizard",
+   "category": "typo",
+   "top": "/burn-wizard/"
+  },
+  {
+   "q": "wildernes",
+   "category": "typo",
+   "top": "/wilderness/"
+  },
+  {
+   "q": "wildreness",
+   "category": "typo",
+   "top": "/wilderness/"
+  },
+  {
+   "q": "shortles",
+   "category": "typo",
+   "top": "/shortless/"
+  },
+  {
+   "q": "scrolometer",
+   "category": "typo",
+   "top": "/scrollometer/"
+  },
+  {
+   "q": "privacey policy",
+   "category": "typo",
+   "top": "/privacy/",
+   "alsoOk": [
+    "/boardbound/privacy.html",
+    "/wilderness/privacy-policy.html",
+    "/shortless/privacy-policy.html"
+   ]
+  },
+  {
+   "q": "subscribtion",
+   "category": "typo",
+   "top": "/boardbound/support.html",
+   "alsoOk": [
+    "/boardbound/terms.html"
+   ]
+  },
+  {
+   "q": "board",
+   "category": "partial",
+   "top": "/boardbound/"
+  },
+  {
+   "q": "scroll",
+   "category": "partial",
+   "top": "/scrollometer/"
+  },
+  {
+   "q": "wild",
+   "category": "partial",
+   "top": "/wilderness/"
+  },
+  {
+   "q": "burn",
+   "category": "partial",
+   "top": "/burn-wizard/"
+  },
+  {
+   "q": "short",
+   "category": "partial",
+   "top": "/shortless/"
+  },
+  {
+   "q": "fnp",
+   "category": "partial",
+   "top": "/boardbound/"
+  },
+  {
+   "q": "refund",
+   "category": "synonym",
+   "top": "/boardbound/support.html",
+   "alsoOk": [
+    "/boardbound/terms.html",
+    "/boardbound/delete-account.html"
+   ]
+  },
+  {
+   "q": "money back",
+   "category": "synonym",
+   "top": "/boardbound/support.html",
+   "alsoOk": [
+    "/boardbound/terms.html",
+    "/boardbound/delete-account.html"
+   ]
+  },
+  {
+   "q": "unsubscribe",
+   "category": "synonym",
+   "top": "/boardbound/support.html",
+   "section": "How do I cancel my subscription?",
+   "alsoOk": [
+    "/boardbound/terms.html"
+   ]
+  },
+  {
+   "q": "stop paying",
+   "category": "synonym",
+   "top": "/boardbound/support.html",
+   "alsoOk": [
+    "/boardbound/terms.html"
+   ]
+  },
+  {
+   "q": "remove my account",
+   "category": "synonym",
+   "top": "/boardbound/delete-account.html",
+   "alsoOk": [
+    "/boardbound/support.html"
+   ]
+  },
+  {
+   "q": "erase my data",
+   "category": "synonym",
+   "top": "/boardbound/delete-account.html",
+   "alsoOk": [
+    "/boardbound/support.html",
+    "/privacy/"
+   ]
+  },
+  {
+   "q": "contact",
+   "category": "synonym",
+   "top": "/support/"
+  },
+  {
+   "q": "phone number",
+   "category": "synonym",
+   "top": "/support/"
+  },
+  {
+   "q": "talk to someone",
+   "category": "synonym",
+   "top": "/support/"
+  },
+  {
+   "q": "android",
+   "category": "synonym",
+   "top": "/apps/",
+   "alsoOk": [
+    "/boardbound/",
+    "/wilderness/"
+   ]
+  },
+  {
+   "q": "google play",
+   "category": "synonym",
+   "top": "/apps/",
+   "alsoOk": [
+    "/boardbound/",
+    "/wilderness/"
+   ]
+  },
+  {
+   "q": "iphone app store",
+   "category": "synonym",
+   "top": "/apps/"
+  },
+  {
+   "q": "nurse practitioner exam",
+   "category": "synonym",
+   "top": "/boardbound/"
+  },
+  {
+   "q": "nclex",
+   "category": "synonym",
+   "top": "/boardbound/",
+   "never": [
+    "/burn-wizard/"
+   ]
+  },
+  {
+   "q": "tiktok blocker",
+   "category": "synonym",
+   "top": "/shortless/"
+  },
+  {
+   "q": "youtube shorts",
+   "category": "exact",
+   "top": "/shortless/"
+  },
+  {
+   "q": "screen time",
+   "category": "exact",
+   "top": "/scrollometer/",
+   "alsoOk": [
+    "/shortless/",
+    "/apps/"
+   ]
+  },
+  {
+   "q": "survival guide",
+   "category": "synonym",
+   "top": "/wilderness/"
+  },
+  {
+   "q": "hiking app offline",
+   "category": "synonym",
+   "top": "/wilderness/"
+  },
+  {
+   "q": "compass",
+   "category": "exact",
+   "top": "/wilderness/"
+  },
+  {
+   "q": "fluid resuscitation",
+   "category": "synonym",
+   "top": "/burn-wizard/"
+  },
+  {
+   "q": "who made this",
+   "category": "synonym",
+   "top": "/about/"
+  },
+  {
+   "q": "founder",
+   "category": "exact",
+   "top": "/about/"
+  },
+  {
+   "q": "company",
+   "category": "exact",
+   "top": "/about/"
+  },
+  {
+   "q": "price",
+   "category": "synonym",
+   "top": "/boardbound/",
+   "alsoOk": [
+    "/shortless/support.html",
+    "/boardbound/terms.html",
+    "/boardbound/support.html",
+    "/apps/"
+   ]
+  },
+  {
+   "q": "free",
+   "category": "exact",
+   "top": "/apps/",
+   "alsoOk": [
+    "/shortless/support.html",
+    "/boardbound/",
+    "/boardbound/terms.html",
+    "/burn-wizard/",
+    "/wilderness/",
+    "/scrollometer/",
+    "/shortless/"
+   ]
+  },
+  {
+   "q": "how do i delete my account",
+   "category": "question",
+   "top": "/boardbound/delete-account.html",
+   "alsoOk": [
+    "/boardbound/support.html"
+   ]
+  },
+  {
+   "q": "how do I cancel",
+   "category": "question",
+   "top": "/boardbound/support.html",
+   "section": "How do I cancel my subscription?",
+   "alsoOk": [
+    "/boardbound/terms.html"
+   ]
+  },
+  {
+   "q": "does it work without internet",
+   "category": "question",
+   "top": "/wilderness/",
+   "alsoOk": [
+    "/wilderness/support.html",
+    "/burn-wizard/"
+   ]
+  },
+  {
+   "q": "why does wilderness want my location",
+   "category": "question",
+   "top": "/wilderness/support.html",
+   "section": "Why does the app ask for my location?",
+   "alsoOk": [
+    "/wilderness/privacy-policy.html"
+   ]
+  },
+  {
+   "q": "shorts still showing",
+   "category": "question",
+   "top": "/shortless/support.html",
+   "section": "Short-form videos still show up. What should I check?"
+  },
+  {
+   "q": "is the ai tutor safe",
+   "category": "question",
+   "top": "/boardbound/support.html",
+   "section": "Is the AI tutor safe to use?",
+   "alsoOk": [
+    "/boardbound/"
+   ]
+  },
+  {
+   "q": "do you sell my data",
+   "category": "question",
+   "top": "/privacy/"
+  },
+  {
+   "q": "can I eat this plant",
+   "category": "question",
+   "top": "/wilderness/support.html",
+   "section": "Can I use the plant entries to decide what is safe to eat?"
+  },
+  {
+   "q": "is boardbound affiliated with aanp",
+   "category": "question",
+   "top": "/boardbound/support.html",
+   "section": "Is BoardBound affiliated with AANPCB or ANCC?"
+  },
+  {
+   "q": "boardbound privacy",
+   "category": "pagetype",
+   "top": "/boardbound/privacy.html",
+   "alsoOk": [
+    "/privacy/"
+   ]
+  },
+  {
+   "q": "boardbound terms",
+   "category": "pagetype",
+   "top": "/boardbound/terms.html"
+  },
+  {
+   "q": "terms of service",
+   "category": "pagetype",
+   "top": "/boardbound/terms.html"
+  },
+  {
+   "q": "shortless support",
+   "category": "pagetype",
+   "top": "/shortless/support.html"
+  },
+  {
+   "q": "wilderness help",
+   "category": "pagetype",
+   "top": "/wilderness/support.html"
+  },
+  {
+   "q": "burn wizard help",
+   "category": "pagetype",
+   "top": "/support/",
+   "alsoOk": [
+    "/burn-wizard/"
+   ]
+  },
+  {
+   "q": "wilderness privacy",
+   "category": "pagetype",
+   "top": "/wilderness/privacy-policy.html",
+   "alsoOk": [
+    "/privacy/"
+   ]
+  },
+  {
+   "q": "anthropic",
+   "category": "pagetype",
+   "top": "/boardbound/privacy.html",
+   "alsoOk": [
+    "/boardbound/support.html",
+    "/boardbound/terms.html",
+    "/privacy/"
+   ]
+  },
+  {
+   "q": "all apps",
+   "category": "pagetype",
+   "top": "/apps/"
+  },
+  {
+   "q": "moved",
+   "category": "pagetype",
+   "top": null,
+   "never": [
+    "/storycue/support.html",
+    "/storycue/privacy-policy.html"
+   ]
+  },
+  {
+   "q": "asdfghjkl",
+   "category": "empty",
+   "top": null
+  },
+  {
+   "q": "pizza delivery",
+   "category": "empty",
+   "top": null
+  },
+  {
+   "q": "xyzzy",
+   "category": "empty",
+   "top": null
+  },
+  {
+   "q": "?!",
+   "category": "empty",
+   "top": null
+  },
+  {
+   "q": "the",
+   "category": "empty",
+   "top": null
+  }
+ ]
+}
