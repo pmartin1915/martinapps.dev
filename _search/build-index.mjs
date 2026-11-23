@@ -1,7 +1,7 @@
 // build-index.mjs: build the site search index (assets/search-index.json) from the pages themselves.
 // No dependencies. Usage:
-//   node _search/build-index.mjs           write assets/search-index.json
-//   node _search/build-index.mjs --check   exit 1 if the committed index is not what a rebuild would write
+//   node _search/build-index.mjs           write assets/search-index.json, the /search/ page list and sitemap.xml
+//   node _search/build-index.mjs --check   exit 1 if any of the three is not what a rebuild would write
 //
 // What is indexed: the <main> of every served .html page, split into sections at each h1, h2, h3 and FAQ question.
 // Left out by rule, never by a list: folders starting with . or _ (not served), ai/, pages with a robots noindex,
@@ -141,6 +141,14 @@ export function directoryHtml(index) {
 const DIR_RE = /(<!-- directory:start[^>]*-->\n)[\s\S]*?(<!-- directory:end -->)/;
 export function withDirectory(html, dir) { return html.replace(/\r\n/g, '\n').replace(DIR_RE, (m, a, b) => `${a}${dir}\n${b}`); }
 
+// sitemap.xml for search engines: the same pages the search indexes, each at its canonical address.
+export const SITEMAP_FILE = 'sitemap.xml';
+export function sitemapXml(root = SITE) {
+  const urls = listContentPages(root).map((p) => (p.html.match(/<link[^>]+rel="canonical"[^>]+href="([^"]+)"/i) || [, 'https://martinapps.dev' + p.url])[1]);
+  return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    + [...new Set(urls)].sort().map((u) => `  <url><loc>${esc(u)}</loc></url>`).join('\n') + '\n</urlset>\n';
+}
+
 export function checkIndex(root = SITE) {
   const idx = buildIndex(root);
   const want = serialize(idx);
@@ -149,7 +157,9 @@ export function checkIndex(root = SITE) {
   const df = path.join(root, DIRECTORY_FILE);
   const page = existsSync(df) ? readFileSync(df, 'utf8').replace(/\r\n/g, '\n') : null;
   const dirFresh = page !== null && DIR_RE.test(page) && withDirectory(page, directoryHtml(idx)) === page;
-  return { fresh: have === want && dirFresh, missing: have === null, indexFresh: have === want, dirFresh };
+  const sf = path.join(root, SITEMAP_FILE);
+  const sitemapFresh = existsSync(sf) && readFileSync(sf, 'utf8').replace(/\r\n/g, '\n') === sitemapXml(root);
+  return { fresh: have === want && dirFresh && sitemapFresh, missing: have === null, indexFresh: have === want, dirFresh, sitemapFresh };
 }
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
@@ -159,6 +169,7 @@ if (isMain) {
     if (r.fresh) { console.log('search index is up to date'); process.exit(0); }
     if (!r.indexFresh) console.error(r.missing ? `${INDEX_FILE} is missing` : `${INDEX_FILE} is stale: the pages changed since it was built`);
     if (!r.dirFresh) console.error(`the page list on ${DIRECTORY_FILE} is stale`);
+    if (!r.sitemapFresh) console.error(`${SITEMAP_FILE} is stale`);
     console.error('fix: node _search/build-index.mjs');
     process.exit(1);
   }
@@ -166,5 +177,6 @@ if (isMain) {
   writeFileSync(path.join(SITE, INDEX_FILE), serialize(idx));
   const df = path.join(SITE, DIRECTORY_FILE);
   if (existsSync(df)) writeFileSync(df, withDirectory(readFileSync(df, 'utf8'), directoryHtml(idx)));
-  console.log(`wrote ${INDEX_FILE}: ${idx.docs.length} sections from ${new Set(idx.docs.map((d) => d.url)).size} pages, and the page list on ${DIRECTORY_FILE}`);
+  writeFileSync(path.join(SITE, SITEMAP_FILE), sitemapXml());
+  console.log(`wrote ${INDEX_FILE}: ${idx.docs.length} sections from ${new Set(idx.docs.map((d) => d.url)).size} pages, the page list on ${DIRECTORY_FILE}, and ${SITEMAP_FILE}`);
 }

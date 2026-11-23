@@ -245,6 +245,7 @@ export async function run({ root = SITE, live = false, only = [], shots = null }
     const r = checkIndex(root);
     if (!r.indexFresh) findings.push({ page: '/assets/search-index.json', width: '-', kind: 'search', msg: (r.missing ? 'missing' : 'stale: pages changed since it was built') + ' (fix: node _search/build-index.mjs)' });
     if (!r.dirFresh) findings.push({ page: '/search/', width: '-', kind: 'search', msg: 'the list of every page is stale (fix: node _search/build-index.mjs)' });
+    if (r.sitemapFresh === false) findings.push({ page: '/sitemap.xml', width: '-', kind: 'search', msg: 'missing or stale (fix: node _search/build-index.mjs)' });
     for (const p of pages) {
       const f = resolveFile(root, p), h = f ? readFileSync(f, 'utf8') : '';
       if (/class="site-header"/.test(h) && !/class="search-link"/.test(h)) findings.push({ page: p, width: '-', kind: 'search', msg: 'the header has no Search link (fix: node _search/add-header-link.mjs)' });
