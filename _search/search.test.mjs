@@ -120,9 +120,10 @@ test('the stale-index check catches a hand edit, a new page and a page turned no
     // the copy's own index and list, built for exactly these pages
     const fresh = () => checkIndex(tmp).fresh;
     const rebuild = async () => {
-      const { buildIndex: b, serialize, directoryHtml, withDirectory } = await import('./build-index.mjs');
+      const { buildIndex: b, serialize, directoryHtml, withDirectory, sitemapXml, SITEMAP_FILE } = await import('./build-index.mjs');
       const idx = b(tmp);
       writeFileSync(path.join(tmp, 'assets/search-index.json'), serialize(idx));
+      writeFileSync(path.join(tmp, SITEMAP_FILE), sitemapXml(tmp));
       const df = path.join(tmp, 'search/index.html');
       writeFileSync(df, withDirectory(readFileSync(df, 'utf8'), directoryHtml(idx)));
     };
