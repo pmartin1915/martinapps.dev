@@ -22,17 +22,20 @@ export const decode = (s) => s.replace(/&(#\d+|#x[0-9a-f]+|[a-z]+);/gi, (m, e) =
 export const plainText = (html) => decode(html
   .replace(/<!--[\s\S]*?-->/g, ' ')
   .replace(/<(script|style|svg|template|noscript|button|form|dialog)\b[\s\S]*?<\/\1>/gi, ' ')
-  .replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, ''))
-  .replace(/\s+/g, ' ').trim();
+  // inline formatting joins (Board<b>Bound</b>); every other tag is a word break (<span>iPhone</span><span>Android</span>)
+  .replace(/<\/?(b|strong|i|em|u|mark|small|sup|sub|abbr|code|s|q|wbr)\b[^>]*>/gi, '')
+  .replace(/<[^>]+>/g, ' '))
+  .replace(/\s+/g, ' ').replace(/ ([,.;:!?)])/g, '$1').replace(/\( /g, '(').trim();
 
 const PRODUCTS = { boardbound: 'BoardBound', 'burn-wizard': 'Burn Wizard', wilderness: 'Wilderness Survival Companion', shortless: 'Shortless',
   scrollometer: 'Scrollometer', retold: 'Retold', tellfolk: 'Tellfolk' };
 
-// legal = policies and terms; help = support and account pages; company = home and about; product = everything else
+// legal = policies and terms; help = support and account pages; company = home and about; hub = the apps list; product = everything else
 export function pageType(url) {
   if (/privacy|terms/.test(url)) return 'legal';
   if (/support|delete-account|\/search\//.test(url)) return 'help';
   if (url === '/' || url === '/about/') return 'company';
+  if (url === '/apps/') return 'hub';
   return 'product';
 }
 
@@ -87,15 +90,19 @@ export function sectionsOf(page) {
     const heading = hm ? plainText(hm[3]) : '';
     const anchor = hm ? ((hm[2] || '').match(/\sid="([^"]+)"/) || [, ''])[1] : '';
     const isH1 = hm && hm[1].toLowerCase() === 'h1';
-    const body = plainText(hm ? part.slice(hm[0].length) : part);
+    const rest = hm ? part.slice(hm[0].length) : part;
+    const body = plainText(rest);
+    // tags: the facts a section states as labels (chips like "iPhone", "Android", "Free") and store badges' alt text
+    const tags = [...[...rest.matchAll(/<span[^>]*class="[^"]*\bchip\b[^"]*"[^>]*>([\s\S]*?)<\/span>/gi)].map((m) => plainText(m[1])),
+      ...[...rest.matchAll(/<img[^>]*\balt="([^"]+)"/gi)].map((m) => decode(m[1])).filter((a) => /App Store|Google Play/i.test(a))].join(' ');
     if (!out.length || isH1) {
       // the page's own section: the h1 and the text before the first h2 belong to it
-      if (!out.length) out.push({ url, anchor: '', title, heading: isH1 ? heading : '', desc, body, product, type, faq: false });
-      else { const s0 = out[0]; s0.heading = s0.heading || heading; s0.body = (s0.body + ' ' + body).trim(); }
+      if (!out.length) out.push({ url, anchor: '', title, heading: isH1 ? heading : '', desc, tags, body, product, type, faq: false });
+      else { const s0 = out[0]; s0.heading = s0.heading || heading; s0.body = (s0.body + ' ' + body).trim(); s0.tags = (s0.tags + ' ' + tags).trim(); }
       continue;
     }
     if (!heading && !body) continue;
-    out.push({ url, anchor, title: '', heading, desc: '', body, product, type, faq: !!hm && hm[1].toLowerCase() === 'p' });
+    out.push({ url, anchor, title: '', heading, desc: '', tags, body, product, type, faq: !!hm && hm[1].toLowerCase() === 'p' });
   }
   return out;
 }
