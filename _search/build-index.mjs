@@ -141,7 +141,9 @@ export function directoryHtml(index) {
 const DIR_RE = /(<!-- directory:start[^>]*-->\n)[\s\S]*?(<!-- directory:end -->)/;
 export function withDirectory(html, dir) { return html.replace(/\r\n/g, '\n').replace(DIR_RE, (m, a, b) => `${a}${dir}\n${b}`); }
 
-// sitemap.xml for search engines: the same pages the search indexes, each at its canonical address.
+// sitemap.xml for search engines: the same pages the search indexes, each at its canonical address. /search/ is left
+// out on purpose (it opts out of the index with site-search skip): it only lists other pages, and search engines
+// should land on those pages, not on a list of them.
 export const SITEMAP_FILE = 'sitemap.xml';
 export function sitemapXml(root = SITE) {
   const urls = listContentPages(root).map((p) => (p.html.match(/<link[^>]+rel="canonical"[^>]+href="([^"]+)"/i) || [, 'https://martinapps.dev' + p.url])[1]);

@@ -78,7 +78,7 @@ export function serve(root) {
 }
 
 const AXE_FILE = path.join(HERE, 'vendor', 'axe-4.10.2.min.js');
-const AXE = existsSync(AXE_FILE) ? readFileSync(AXE_FILE, 'utf8') : null;
+const AXE = existsSync(AXE_FILE) ? readFileSync(AXE_FILE, 'utf8') : null;   // checked in run(): a missing file stops the run, never skips the check quietly
 const AXE_RUN = `axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] } })
   .then((r) => r.violations.map((v) => ({ id: v.id, impact: v.impact, help: v.help, n: v.nodes.length, at: v.nodes[0].target.join(' ') })))`;
 
@@ -227,6 +227,7 @@ function report(findings, ctx, pages, mode) {
 }
 
 export async function run({ root = SITE, live = false, only = [], shots = null } = {}) {
+  if (!AXE) throw new Error('the accessibility checker is missing: ' + AXE_FILE + ' (restore it from git)');
   let server = null, base = LIVE;
   if (!live) { server = await serve(root); base = server.base; }
   let pages = listPages(root);
