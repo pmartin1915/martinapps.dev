@@ -78,6 +78,8 @@ body {
 img, svg { max-width: 100%; }
 a { color: var(--teal); text-decoration: none; text-underline-offset: 0.18em; }
 a:hover { text-decoration: underline; }
+/* links inside running text are underlined, so they never rely on color alone (WCAG 1.4.1) */
+main p a, main li a, main td a, main dd a, main .callout a { text-decoration: underline; }
 a:focus-visible, button:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; border-radius: 2px; }
 /* WCAG 2.5.8: standalone text links get at least a 24px-tall target */
 .links a, .footer-grid li a, .contact-card .addr { display: inline-block; min-height: 24px; }

@@ -35,9 +35,8 @@ fetchable at martinapps.dev/ai/STATE.md. Keep this file free of anything not mea
   (`assets/fonts/`, OFL, latin subset, preloaded on every page); per-app OG cards (`assets/og-*.png`);
   `MobileApplication` JSON-LD for all five apps; 24px minimum on standalone text links; phone screenshot
   strips (`assets/shots/`) for BoardBound and Scrollometer.
-- Screenshots deliberately NOT shown: Wilderness (only old TestFlight captures), Shortless (v2.1.0 shots
-  show a DNS/VPN filter the current listing doesn't describe), Burn Wizard (web-build captures only).
-  Add them when current store screenshots exist. BoardBound's rationale screens are excluded on purpose:
+- Screenshots: since the 2026-10-29 redesign every product page shows three (`assets/shots/`). The 2026-10-12
+  note that Wilderness, Shortless and Burn Wizard show none is out of date (corrected 2026-11-22). BoardBound's rationale screens are excluded on purpose:
   the app labels rationales "EXPERT-VERIFIED", which contradicts this site's "not reviewed by a licensed
   clinician" disclosure.
 
@@ -74,6 +73,15 @@ fetchable at martinapps.dev/ai/STATE.md. Keep this file free of anything not mea
 - It lives in `_test/` because GitHub Pages does not publish underscore folders. `_config.yml` also excludes `ai/`
   and `_test/` from the website (2026-11-21; before that these notes were readable at martinapps.dev/ai/STATE.md).
 - Store links and store state are Store Watch's job (dev-ops `scripts/store-watch.mjs`, every morning).
+- Accessibility (2026-11-22): site-check also runs axe-core 4.10.2 (vendored in `_test/vendor/`, MPL-2.0) on every page
+  at both widths, WCAG 2.1 A/AA rules, light mode; a run takes about 3 minutes. A one-off audit the same day also ran
+  dark mode and axe's best-practice rules. It found links told apart by color alone on the older support and privacy
+  pages (now underlined in running text, `assets/site.css`) and no `<main>` on the Retold and Tellfolk pages (added).
+  After those fixes, nothing is left. Page weight is 200-470 KB a page; the biggest single file is the Newsreader font (129 KB, cached after
+  the first page).
+- Findability (2026-11-22): `sitemap.xml` is written by `node _search/build-index.mjs` from the same page list as the
+  search index (noindex and redirect pages left out, each at its canonical address), and `robots.txt` points to it.
+  site-check fails when the sitemap is stale. Submitting it in Google Search Console is a separate step, not done here.
 - First run 2026-11-21: 26 pages, all clear locally and live; the 12 support, privacy and terms pages and the 404
   page then got a one-sentence meta description, so the run has no notes either.
 

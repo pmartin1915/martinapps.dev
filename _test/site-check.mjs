@@ -18,6 +18,9 @@
 //   basics           exactly one <title>, a meta description, a viewport meta, at least one <h1>,
 //                    alt on every <img> (alt="" is fine: decorative)
 //   links            every same-site href and #fragment resolves (a file here, or the id on the page)
+//   accessibility    axe-core 4.10.2 (vendored in _test/vendor, MPL-2.0), WCAG 2.1 A/AA rules: a serious or critical
+//                    finding fails, a moderate or minor one is a note. Light mode only (dark: the one-off audit in
+//                    ai/STATE.md).
 //
 // Exit 0 all clear (notes allowed), 1 failures, 2 could not run. A missing meta description is a note. Store links (App Store, Play) are Store Watch's job
 // (dev-ops scripts/store-watch.mjs), so external links are listed but not fetched.
@@ -73,6 +76,11 @@ export function serve(root) {
   });
   return new Promise((r) => srv.listen(0, '127.0.0.1', () => r({ srv, base: `http://127.0.0.1:${srv.address().port}` })));
 }
+
+const AXE_FILE = path.join(HERE, 'vendor', 'axe-4.10.2.min.js');
+const AXE = existsSync(AXE_FILE) ? readFileSync(AXE_FILE, 'utf8') : null;
+const AXE_RUN = `axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] } })
+  .then((r) => r.violations.map((v) => ({ id: v.id, impact: v.impact, help: v.help, n: v.nodes.length, at: v.nodes[0].target.join(' ') })))`;
 
 // ---------- Chrome over the DevTools protocol (same approach as brand/mascot/lite/tools/eyes.mjs) ----------
 export async function openChrome() {
@@ -150,13 +158,21 @@ async function checkPage(cdp, base, page, width, shotsDir) {
     const r = await send('Runtime.evaluate', { expression: PROBE, returnByValue: true });
     const probe = r.result.value || null;
     if (!probe) errors.push('probe failed: ' + JSON.stringify(r.exceptionDetails?.text));
+    let axe = null;
+    if (AXE && probe && !probe.refresh) {
+      await sleep(1500);   // entrance animations finish first, so contrast is measured on the settled page
+      await send('Runtime.evaluate', { expression: AXE });
+      const a = await send('Runtime.evaluate', { expression: AXE_RUN, awaitPromise: true, returnByValue: true });
+      axe = a.result.value || null;
+      if (!axe) errors.push('axe failed: ' + JSON.stringify(a.exceptionDetails?.text));
+    }
     if (shotsDir) {
       const m = await send('Page.getLayoutMetrics');
       const s = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true, clip: { x: 0, y: 0, width: Math.ceil(m.cssContentSize.width), height: Math.min(Math.ceil(m.cssContentSize.height), 12000), scale: 1 } });
       const name = (page.replace(/^\/|\/$/g, '').replace(/[\/.]/g, '_') || 'home') + '.' + width.name + '.png';
       writeFileSync(path.join(shotsDir, name), Buffer.from(s.data, 'base64'));
     }
-    return { errors, bad, probe };
+    return { errors, bad, probe, axe };
   } finally { listeners.delete(on); }
 }
 
@@ -173,6 +189,7 @@ export function judge(page, width, res, ctx) {
   const p = res.probe; if (!p) return f;
   if (p.scrollW > p.clientW + 1) add('sideways scroll', `page is ${p.scrollW}px wide on a ${p.clientW}px screen` + (p.wide.length ? '; sticking out: ' + p.wide.join(', ') : ''));
   for (const s of p.brokenImg) add('broken image', s);
+  for (const v of res.axe || []) add(/serious|critical/.test(v.impact) ? 'accessibility' : 'note', `${v.id} (${v.impact}): ${v.help}; ${v.n} element(s), first: ${v.at}`);
   if (width.name !== 'phone') return f;   // the rest does not depend on width: check once
   if (p.refresh) return f;   // a slow redirect stub: only errors and requests matter
   if (p.titles !== 1 || !p.title) add('basics', p.titles === 0 || !p.title ? 'no <title>' : `${p.titles} <title> tags`);
@@ -269,6 +286,7 @@ async function selfTest() {
     [has('/', 'link', /\/good\/#absent -> no id "absent"/), 'finds a dead #fragment on another page'],
     [has('/', 'broken image', /missing\.png/), 'finds a broken image'],
     [has('/', 'basics', /no alt attribute/), 'finds an image with no alt'],
+    [has('/', 'accessibility', /color-contrast \(serious\)/), 'finds text that fails the contrast minimum (axe)'],
     [has('/', 'note', /no meta description/), 'notes a missing meta description (a note, not a failure)'],
     [has('/good/', 'basics', /./) === false && !findings.some((x) => x.page === '/good/'), 'a clean page has no findings'],
     [!findings.some((x) => x.page === '/redirect.html' && x.kind !== 'page error'), 'a meta-refresh stub that forwards is not judged as the page it lands on'],
