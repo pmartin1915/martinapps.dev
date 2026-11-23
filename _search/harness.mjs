@@ -134,8 +134,11 @@ async function main() {
     check(await waitFor(`document.querySelector('[data-search-inline] .sx-input')?.value === 'boardbond'`), 'the 404 page searches the words of the bad address');
     check(await waitFor(`/BoardBound/.test(document.querySelector('[data-search-inline] .sx-opt')?.textContent || '')`), '...and its first result is BoardBound');
     await shot('404-search');
-    await nav('/%E0%A4%A/');
-    check(await waitFor("!!document.querySelector('[data-search-inline] .sx-input')"), 'a 404 with a malformed address still gets a working search box');
+    // local only: for a malformed address GitHub Pages answers with its own 400 page, never this site's 404 page
+    if (!LIVE) {
+      await nav('/%E0%A4%A/');
+      check(await waitFor("!!document.querySelector('[data-search-inline] .sx-input')"), 'a 404 with a malformed address still gets a working search box');
+    }
 
     // ---------- phone widths: no sideways scroll, link visible, dialog fills the screen ----------
     for (const w of [320, 360, 375, 390, 430]) {

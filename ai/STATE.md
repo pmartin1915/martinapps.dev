@@ -1,6 +1,6 @@
 # STATE — martinapps-site (martinapps.dev)
 
-**Last updated:** 2026-10-29
+**Last updated:** 2026-11-22
 **Branch:** `main`. Static site (plain HTML) served by GitHub Pages from `main`, custom domain via `CNAME`.
 The repo is PUBLIC and Pages serves every non-underscore directory, so anything under `ai/` would be
 fetchable at martinapps.dev/ai/STATE.md. Keep this file free of anything not meant to be public.
@@ -45,8 +45,24 @@ fetchable at martinapps.dev/ai/STATE.md. Keep this file free of anything not mea
   /privacy/, /burn-wizard/, /scrollometer/, /wilderness/, /shortless/; /boardbound/ and the home page replaced.
   Old /#burn-wizard, /#scrollometer (and the other home anchors) forward to the new pages by a small script.
   Styles: `assets/base.css` + `theme-a.css` + `extra.css`. Support, privacy and terms pages are unchanged and
-  still use `assets/site.css`. These pages are GENERATED from a private source folder; edit there and rebuild,
-  not here. No Engineering section yet.
+  still use `assets/site.css`. No Engineering section yet.
+  Correction 2026-11-22: these pages are edited here, by hand. The 2026-10-29 note that they are generated from a
+  private source folder no longer holds (about 60 direct edits since). Only the home page's header logo animation and
+  `assets/builder.css` come from a generator, in the private brand repo; change those there.
+
+- Site search 2026-11-22: a Search link in every header opens a search dialog (plain link to /search/ without
+  JavaScript, which lists every page). Results come from `assets/search-index.json`, a section-by-section index of
+  every content page, searched in the visitor's browser by `assets/search-core.js` with MiniSearch 7.2.0 (MIT,
+  vendored in `assets/vendor/`). Nothing is sent anywhere and nothing typed is kept. The 404 page searches the words
+  of the bad address. Every heading and FAQ question inside a page now has an id, so a result opens at its answer.
+  - **After editing any page, run `node _search/build-index.mjs`.** `site-check` fails when the index or the
+    /search/ page list is stale, or when a page with a header has no Search link (`node _search/add-header-link.mjs`).
+  - Accuracy is measured, not assumed: `node _search/score.mjs` runs the frozen query set (`_search/queries.json`,
+    must stay at 68/75 or better with the right page first) plus the development and blind acceptance sets.
+    Fix a miss by improving the search, never by editing an expected answer without saying why.
+  - `node --test _search/search.test.mjs` (unit tests) and `node _search/harness.mjs [--live]` (drives the real
+    dialog in headless Chrome: keyboard, phone widths, dark mode, no JavaScript, no outside requests).
+  - `node _search/why.mjs "query"` shows how the top pages were scored.
 
 ## Self-test (any model can run it)
 
