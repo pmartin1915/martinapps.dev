@@ -117,8 +117,9 @@ function createBox({ onClose, inline }) {
   }
   // Enter: if what is shown is not for what is typed yet, search first, then open the selected result
   async function activate() {
-    if (shown !== input.value.trim()) await run();
-    if (results.length) go(active >= 0 ? active : 0);
+    const q = input.value.trim();
+    if (shown !== q) { await run(); if (input.value.trim() !== q || shown !== q) return; }   // typing went on: no navigation
+    if (active >= 0) go(active);   // only what is selected (and announced) opens
   }
 
   input.addEventListener('input', () => { clearTimeout(timer); seq++; shown = null; timer = setTimeout(run, 60); });

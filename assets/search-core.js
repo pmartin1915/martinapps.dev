@@ -239,8 +239,12 @@ export function createEngine(MiniSearch, docs) {
       if (debug) p.why = { best: +best.score.toFixed(2), bestSec: best.doc.heading.slice(0, 30), rest: +rest.toFixed(1), cov, type: p.type, named: namesProduct && info.home };
       (cov >= need ? scored : close).push(p);
     }
-    const partial = !scored.length && close.length > 0;
-    if (partial) scored.push(...close);
+    // closest matches must still belong to the app the visitor named: "wilderness cancel" never answers with BoardBound
+    const namedIdx = [...strong].filter((i) => productNames.some((n) => near(all[i], n)));
+    const onTopic = (p) => !namedIdx.length || namedIdx.some((i) => p.covered.has(i) && p.info.productWords.some((t) => near(all[i], t)));
+    const closeOk = close.filter(onTopic);
+    const partial = !scored.length && closeOk.length > 0;
+    if (partial) scored.push(...closeOk);
     // An app's own page leads its family unless the visitor asked for help or a policy, or a help page's FAQ
     // question matches every word: "tiktok blocker" -> Shortless, "restore purchases" stays on the support FAQ.
     if (!intents.includes('help') && !intents.includes('legal')) {

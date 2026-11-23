@@ -161,3 +161,8 @@ test('no page has every word: closest matches with at least half the words, labe
   assert.equal(r.kind, 'partial'); assert.equal(r.results[0].url, '/boardbound/support.html');
   assert.equal(engine.search('asdfghjkl qwertyuiop').kind, 'none');
 });
+
+test('closest matches stay with the app the visitor named (review finding)', () => {
+  const r = engine.search('wilderness cancel subscription');
+  assert.ok(r.results.every((x) => x.url.startsWith('/wilderness/')) , JSON.stringify(r.results.map((x) => x.url)));
+});
