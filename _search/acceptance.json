@@ -1,0 +1,213 @@
+{
+ "about": "Blind acceptance set written 2026-11-22 by a separate model after ranking froze; scored once, never tuned against.",
+ "queries": [
+  {
+   "q": "restor purchse",
+   "category": "typo",
+   "top": "/boardbound/support.html",
+   "alsoOk": [],
+   "why": "Restore Purchases FAQ"
+  },
+  {
+   "q": "tiktokblocker safri",
+   "category": "typo",
+   "top": "/shortless/",
+   "alsoOk": [
+    "/shortless/support.html"
+   ],
+   "why": "feed blocker in Safari"
+  },
+  {
+   "q": "lund browder chrt",
+   "category": "typo",
+   "top": "/burn-wizard/",
+   "alsoOk": [],
+   "why": "Lund-Browder chart on app page"
+  },
+  {
+   "q": "airplan mode survial",
+   "category": "typo",
+   "top": "/wilderness/support.html",
+   "alsoOk": [
+    "/wilderness/"
+   ],
+   "why": "works in airplane mode FAQ"
+  },
+  {
+   "q": "delte my acount",
+   "category": "typo",
+   "top": "/boardbound/delete-account.html",
+   "alsoOk": [
+    "/boardbound/support.html",
+    "/privacy/"
+   ],
+   "why": "account deletion"
+  },
+  {
+   "q": "how far did i scroll",
+   "category": "synonym",
+   "top": "/scrollometer/",
+   "alsoOk": [],
+   "why": "screen time as distance"
+  },
+  {
+   "q": "stop doomscrolling on my phone",
+   "category": "synonym",
+   "top": "/shortless/",
+   "alsoOk": [
+    "/scrollometer/"
+   ],
+   "why": "hides short-form feeds"
+  },
+  {
+   "q": "cancel membership",
+   "category": "synonym",
+   "top": "/boardbound/support.html",
+   "alsoOk": [
+    "/boardbound/terms.html"
+   ],
+   "why": "cancel subscription FAQ"
+  },
+  {
+   "q": "kids scald fluid calculator",
+   "category": "synonym",
+   "top": "/burn-wizard/",
+   "alsoOk": [],
+   "why": "burn fluid math for children"
+  },
+  {
+   "q": "hiking gps no cell service",
+   "category": "synonym",
+   "top": "/wilderness/",
+   "alsoOk": [
+    "/wilderness/support.html",
+    "/apps/"
+   ],
+   "why": "works with no signal"
+  },
+  {
+   "q": "ads and selling my info",
+   "category": "synonym",
+   "top": "/privacy/",
+   "alsoOk": [
+    "/about/"
+   ],
+   "why": "no ads, never sell data"
+  },
+  {
+   "q": "who is the owner",
+   "category": "synonym",
+   "top": "/about/",
+   "alsoOk": [
+    "/"
+   ],
+   "why": "founder and company facts"
+  },
+  {
+   "q": "record my grandma's memories",
+   "category": "synonym",
+   "top": "/retold/support.html",
+   "alsoOk": [
+    "/tellfolk/support.html",
+    "/retold/privacy-policy.html"
+   ],
+   "why": "life stories recorded"
+  },
+  {
+   "q": "can i use it on the tiktok app",
+   "category": "question",
+   "top": "/shortless/support.html",
+   "alsoOk": [
+    "/shortless/"
+   ],
+   "why": "Safari only FAQ"
+  },
+  {
+   "q": "is the tutor safe",
+   "category": "question",
+   "top": "/boardbound/support.html",
+   "alsoOk": [
+    "/boardbound/"
+   ],
+   "why": "AI tutor safety FAQ"
+  },
+  {
+   "q": "why does it want my location",
+   "category": "question",
+   "top": "/wilderness/support.html",
+   "alsoOk": [
+    "/wilderness/privacy-policy.html"
+   ],
+   "why": "location FAQ"
+  },
+  {
+   "q": "how do i use the action button",
+   "category": "question",
+   "top": "/retold/support.html",
+   "alsoOk": [],
+   "why": "Action button FAQ"
+  },
+  {
+   "q": "camera not working",
+   "category": "question",
+   "top": "/tellfolk/support.html",
+   "alsoOk": [],
+   "why": "camera microphone FAQ"
+  },
+  {
+   "q": "shortlss help page",
+   "category": "pagetype",
+   "top": "/shortless/support.html",
+   "alsoOk": [
+    "/shortless/"
+   ],
+   "why": "support page"
+  },
+  {
+   "q": "wildernes privacy policy",
+   "category": "pagetype",
+   "top": "/wilderness/privacy-policy.html",
+   "alsoOk": [
+    "/privacy/"
+   ],
+   "why": "privacy policy page"
+  },
+  {
+   "q": "bordbound terms",
+   "category": "pagetype",
+   "top": "/boardbound/terms.html",
+   "alsoOk": [],
+   "why": "terms of service"
+  },
+  {
+   "q": "red mode for night",
+   "category": "feature",
+   "top": "/wilderness/",
+   "alsoOk": [],
+   "why": "red color mode for dark"
+  },
+  {
+   "q": "lock screen widget",
+   "category": "feature",
+   "top": "/shortless/",
+   "alsoOk": [
+    "/shortless/support.html"
+   ],
+   "why": "home and lock screen widgets"
+  },
+  {
+   "q": "bitcoin wallet",
+   "category": "empty",
+   "top": null,
+   "alsoOk": [],
+   "why": "not on site"
+  },
+  {
+   "q": "pizza delivery near me",
+   "category": "empty",
+   "top": null,
+   "alsoOk": [],
+   "why": "not on site"
+  }
+ ]
+}
