@@ -75,7 +75,7 @@ function createBox({ onClose, inline }) {
 
   function showEmpty(kind, words) {
     empty.replaceChildren();
-    const say = kind === 'filler' ? 'Type a word or two, like an app name.' : `No pages match “${words.join(' ')}”.`;
+    const say = kind === 'filler' ? 'Type a word or two, like an app name.' : `No pages match \u201c${words.join(' ')}\u201d.`;
     empty.append(el('p', { text: say }), el('p', { text: 'Our apps:' }),
       el('ul', {}, ...APPS.map(([t, h]) => el('li', {}, el('a', { href: h, text: t })))),
       el('p', { class: 'sx-more' }, el('a', { href: '/support/', text: 'Get help' }), ' or email ', el('a', { href: 'mailto:support@martinapps.dev', text: 'support@martinapps.dev' }), '.'));
@@ -102,7 +102,7 @@ function createBox({ onClose, inline }) {
     if (!q) { results = []; list.replaceChildren(); setActive(-1); empty.hidden = true; status.textContent = ''; input.setAttribute('aria-expanded', 'false'); return; }
     let engine;
     try {
-      if (!engineP) status.textContent = 'Loading search…';
+      if (!engineP) status.textContent = 'Loading search\u2026';
       engine = await loadEngine();
     } catch {
       if (mine !== seq) return;
@@ -117,6 +117,7 @@ function createBox({ onClose, inline }) {
   input.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowDown') { e.preventDefault(); if (results.length) setActive(Math.min(active + 1, results.length - 1)); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); if (results.length) setActive(active <= 0 ? -1 : active - 1); }
+    else if (e.key === 'Enter' && !e.isComposing) { if (results.length) { e.preventDefault(); go(active >= 0 ? active : 0); } }
     else if (e.key === 'Escape') {
       if (input.value) { e.preventDefault(); e.stopPropagation(); input.value = ''; run(); }
       // empty input: the dialog's own Escape handling closes it

@@ -67,7 +67,7 @@ const INTENT_PRIOR = 1.7;
 const BOOST = { title: 6, heading: 3, tags: 3, product: 1.5, desc: 2, body: 1 };
 const MAX_RESULTS = 8;
 
-const fold = (s) => s.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/[’‘]/g, "'");
+const fold = (s) => s.toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[\u2019\u2018]/g, "'");
 export const words = (s) => fold(s).match(/[a-z0-9$]+(?:'[a-z]+)?/g) || [];
 
 // Fold simple English plural and possessive endings, identically for pages and queries.
@@ -252,7 +252,7 @@ export function createEngine(MiniSearch, docs) {
       const d = p.target;
       return {
         url: p.url, href: d.anchor ? `${p.url}#${d.anchor}` : p.url, title: p.title, type: p.type,
-        heading: d.anchor ? d.heading : '', snippet: snippet(d, [...p.terms]),
+        heading: d.anchor ? d.heading : '', snippet: snippet(d, [...p.terms], 150, [...p.terms].filter((t) => [...own].some((o) => same(t, o) || (o.length >= 3 && t.startsWith(o))))),
       };
     });
     const out = { kind: 'results', words: all.filter((w) => w !== '\u0000phrase'), results };
@@ -264,18 +264,19 @@ export function createEngine(MiniSearch, docs) {
 }
 
 // A short piece of the section's text around the first matched word, split into marked and plain parts.
-export function snippet(doc, terms, width = 150) {
+export function snippet(doc, terms, width = 150, prefer = []) {
   const text = doc.body || doc.desc || '';
   if (!text) return [];
-  const toks = [...text.matchAll(/[A-Za-z0-9$À-ɏ]+(?:['’][A-Za-z]+)?/g)];
+  const toks = [...text.matchAll(/[A-Za-z0-9$\u00c0-\u024f]+(?:['\u2019][A-Za-z]+)?/g)];
   const matches = (w) => { const s = stem(fold(w)); return terms.some((t) => s === t || (t.length >= 3 && s.startsWith(t))); };
-  const first = toks.find((m) => matches(m[0]));
+  const hit = (list) => (w) => { const s = stem(fold(w)); return list.some((t) => s === t || (t.length >= 3 && s.startsWith(t))); };
+  const first = toks.find((m) => hit(prefer)(m[0])) || toks.find((m) => matches(m[0]));
   let start = 0;
   if (first && first.index > width / 3) { start = text.lastIndexOf(' ', first.index - Math.floor(width / 3)); start = start < 0 ? 0 : start + 1; }
   let end = Math.min(text.length, start + width);
   if (end < text.length) { const sp = text.lastIndexOf(' ', end); if (sp > start + width / 2) end = sp; }
   const out = [];
-  if (start > 0) out.push({ text: '…', mark: false });
+  if (start > 0) out.push({ text: '\u2026', mark: false });
   let at = start;
   for (const m of toks) {
     if (m.index < start || m.index + m[0].length > end) continue;
@@ -285,6 +286,6 @@ export function snippet(doc, terms, width = 150) {
     at = m.index + m[0].length;
   }
   if (at < end) out.push({ text: text.slice(at, end), mark: false });
-  if (end < text.length) out.push({ text: '…', mark: false });
+  if (end < text.length) out.push({ text: '\u2026', mark: false });
   return out;
 }

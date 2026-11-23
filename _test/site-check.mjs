@@ -61,7 +61,7 @@ export function resolveFile(root, urlPath) {
   return tries.find((f) => existsSync(f) && statSync(f).isFile()) || null;
 }
 
-function serve(root) {
+export function serve(root) {
   const srv = createServer((req, res) => {
     const u = new URL(req.url, 'http://x');
     const f = resolveFile(root, u.pathname);
@@ -75,7 +75,7 @@ function serve(root) {
 }
 
 // ---------- Chrome over the DevTools protocol (same approach as brand/mascot/lite/tools/eyes.mjs) ----------
-async function openChrome() {
+export async function openChrome() {
   const BROWSERS = ['C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
     'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe', '/usr/bin/google-chrome', '/usr/bin/chromium', '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'];
   const exe = process.env.CHROME || BROWSERS.find(existsSync);

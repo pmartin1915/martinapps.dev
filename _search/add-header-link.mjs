@@ -7,14 +7,23 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const LINK = '<a class="search-link" href="/search/"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span class="search-word">Search</span></a>';
+// On the narrowest phones (under 360px) the header has no room, so the redesigned pages' phone menu carries it too.
+export const MENU_LINK = '<a class="search-link menu-search" href="/search/">Search</a>';
 export const SCRIPT = '<script type="module" src="/assets/search.js"></script>';
 
+// the phone menu's links sit on the line after its opening tag; the Search entry goes at the end of that line
+const MENU_RE = /(<nav class="phone-menu[^>]*>\r?\n[^\r\n]*<\/a>)(\r?\n\s*<\/nav>)/;
+function addMenu(html) { return html.includes('menu-search') ? html : html.replace(MENU_RE, (all, a, c) => a + MENU_LINK + c); }
+
 export function addLink(html) {
-  if (!/class="site-header"/.test(html) || html.includes('class="search-link"')) return html;
+  if (!/class="site-header"/.test(html)) return html;
   let out = html;
-  const m = out.match(/^([ \t]*)<nav class="(desk-nav|site-nav)"/m);
-  if (!m) return html;
-  out = out.replace(m[0], `${m[1]}${LINK}\n${m[0]}`);
+  if (!out.includes('class="search-link"')) {
+    const m = out.match(/^([ \t]*)<nav class="(desk-nav|site-nav)"/m);
+    if (!m) return html;
+    out = out.replace(m[0], `${m[1]}${LINK}\n${m[0]}`);
+  }
+  out = addMenu(out);
   if (!out.includes(SCRIPT)) out = out.replace(/<\/body>/i, `${SCRIPT}\n</body>`);
   return out;
 }
