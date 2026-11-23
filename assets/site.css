@@ -351,3 +351,12 @@ main { flex: 1; width: 100%; }
 
 /* trademark notice after the brand name (header + footer) */
 .brand .tm { font-size: 0.5em; font-weight: 600; vertical-align: super; line-height: 0; margin-left: 1px; letter-spacing: 0; }
+
+/* header search link (search.js turns it into a dialog; without JavaScript it goes to /search/) */
+.site-header .search-link { display: inline-flex; align-items: center; gap: 0.4rem; margin-left: auto; min-height: 44px; padding: 0 0.6rem; border-radius: var(--radius); color: var(--ink-soft); font-size: 0.92rem; text-decoration: none; }
+.site-header .search-link:hover { color: var(--teal); }
+.site-header .search-link svg { width: 20px; height: 20px; flex: none; }
+@media (max-width: 560px) {
+  .site-header .search-link { min-width: 44px; justify-content: center; padding: 0; }
+  .site-header .search-link .search-word { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+}

@@ -26,7 +26,7 @@ import { createServer } from 'node:http';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { setTimeout as sleep } from 'node:timers/promises';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -238,6 +238,18 @@ export async function run({ root = SITE, live = false, only = [], shots = null }
       }
     }
   } finally { await cdp.close(); if (server) server.srv.close(); }
+  // site search: the index and the /search/ page list must match the pages, and every header carries the Search link
+  const indexer = path.join(root, '_search', 'build-index.mjs');
+  if (!live && existsSync(indexer)) {
+    const { checkIndex } = await import(pathToFileURL(indexer).href);
+    const r = checkIndex(root);
+    if (!r.indexFresh) findings.push({ page: '/assets/search-index.json', width: '-', kind: 'search', msg: (r.missing ? 'missing' : 'stale: pages changed since it was built') + ' (fix: node _search/build-index.mjs)' });
+    if (!r.dirFresh) findings.push({ page: '/search/', width: '-', kind: 'search', msg: 'the list of every page is stale (fix: node _search/build-index.mjs)' });
+    for (const p of pages) {
+      const f = resolveFile(root, p), h = f ? readFileSync(f, 'utf8') : '';
+      if (/class="site-header"/.test(h) && !/class="search-link"/.test(h)) findings.push({ page: p, width: '-', kind: 'search', msg: 'the header has no Search link (fix: node _search/add-header-link.mjs)' });
+    }
+  }
   return { pages, findings, ctx, mode: live ? 'live ' + LIVE : 'local ' + root };
 }
 

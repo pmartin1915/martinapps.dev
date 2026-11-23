@@ -1,0 +1,71 @@
+/* search.css: the search dialog and the inline search on /search/ and the 404 page. Loaded by search.js only when
+   search is used. Colours come from whichever page stylesheet is present: theme-a (redesigned pages) or site.css. */
+.sx {
+  --sx-bg: var(--surface, var(--paper-raised, #fff));
+  --sx-ground: var(--ground, var(--paper, #f4f3f0));
+  --sx-ink: var(--ink, #1a1a1a);
+  --sx-soft: var(--ink-soft, #5f5e5a);
+  --sx-line: var(--line, #dad8d3);
+  --sx-accent: var(--accent, var(--teal, #1f5c54));
+  --sx-hl: var(--surface-soft, var(--teal-wash, #f2f1ee));
+  --sx-mark: var(--know-bg, var(--teal-wash, #e6f0ed));
+  color: var(--sx-ink);
+  font-family: inherit;
+}
+.sx-visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+
+/* the dialog */
+.sx-dialog {
+  width: min(680px, calc(100vw - 32px)); max-height: min(720px, calc(100vh - 64px)); margin: 48px auto auto;
+  padding: 0; border: 1px solid var(--sx-line); border-radius: 20px; background: var(--sx-bg);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .25); overflow: hidden;
+}
+.sx-dialog[open] { display: flex; flex-direction: column; }
+.sx-dialog::backdrop { background: rgba(20, 20, 20, .45); }
+@media (prefers-reduced-motion: no-preference) {
+  .sx-dialog[open] { animation: sx-fade .12s ease-out; }
+  @keyframes sx-fade { from { opacity: 0; } to { opacity: 1; } }
+}
+@media (max-width: 600px) {
+  .sx-dialog { width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; margin: 0; border: 0; border-radius: 0; }
+}
+
+.sx-bar { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--sx-line); }
+.sx-field { position: relative; flex: 1; min-width: 0; }
+.sx-field svg { position: absolute; left: 14px; top: 50%; width: 20px; height: 20px; transform: translateY(-50%); color: var(--sx-soft); pointer-events: none; }
+.sx-input {
+  width: 100%; min-height: 48px; padding: 10px 14px 10px 44px; font: inherit; font-size: 18px; color: var(--sx-ink);
+  background: var(--sx-ground); border: 2px solid var(--sx-line); border-radius: 12px; -webkit-appearance: none; appearance: none;
+}
+.sx-input:focus { outline: none; border-color: var(--sx-accent); }
+.sx-input:focus-visible { outline: 3px solid var(--sx-ink); outline-offset: 2px; }
+.sx-input::-webkit-search-cancel-button { -webkit-appearance: none; }
+.sx-close {
+  min-height: 48px; min-width: 48px; padding: 0 16px; font: inherit; font-weight: 600; font-size: 17px; color: var(--sx-ink);
+  background: transparent; border: 1px solid var(--sx-line); border-radius: 12px; cursor: pointer;
+}
+.sx-close:hover { background: var(--sx-hl); }
+
+.sx-body { overflow-y: auto; overscroll-behavior: contain; padding: 8px 8px 16px; }
+.sx-status { margin: 8px 12px; font-size: 15px; color: var(--sx-soft); min-height: 1.4em; }
+.sx-list { list-style: none; margin: 0; padding: 0; }
+.sx-opt { display: block; padding: 12px 14px; margin: 2px 0; border-radius: 12px; cursor: pointer; border: 2px solid transparent; }
+.sx-opt:hover { background: var(--sx-hl); }
+.sx-opt[aria-selected="true"] { background: var(--sx-hl); border-color: var(--sx-accent); }
+.sx-title { display: block; font-weight: 700; font-size: 18px; line-height: 1.3; color: var(--sx-accent); }
+.sx-where { display: block; font-size: 15px; font-weight: 600; color: var(--sx-ink); margin-top: 2px; }
+.sx-snip { display: block; font-size: 15px; line-height: 1.5; color: var(--sx-soft); margin-top: 4px; overflow-wrap: anywhere; }
+.sx-snip mark { background: var(--sx-mark); color: var(--sx-ink); font-weight: 700; border-radius: 3px; padding: 0 1px; }
+@media (forced-colors: active) { .sx-opt[aria-selected="true"] { outline: 3px solid Highlight; } .sx-snip mark { forced-color-adjust: none; } }
+
+.sx-empty { margin: 4px 12px 0; font-size: 16px; }
+.sx-empty p { margin: 0 0 10px; }
+.sx-empty ul { list-style: none; margin: 0 0 12px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.sx-empty a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; border: 1px solid var(--sx-line); border-radius: 999px; color: var(--sx-accent); font-weight: 600; text-decoration: none; }
+.sx-empty a:hover { background: var(--sx-hl); }
+.sx-empty .sx-more a { border: 0; padding: 0; min-height: 44px; text-decoration: underline; }
+
+/* inline (on /search/ and the 404 page) */
+.sx-inline { margin: 8px 0 32px; }
+.sx-inline .sx-bar { padding: 0 0 8px; border: 0; }
+.sx-inline .sx-body { padding: 0; overflow: visible; }

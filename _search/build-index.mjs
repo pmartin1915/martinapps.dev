@@ -119,11 +119,37 @@ export function serialize(index) {
   return '{"v":' + index.v + ',"docs":[\n' + index.docs.map((d) => JSON.stringify(d)).join(',\n') + '\n]}\n';
 }
 
+// The no-JavaScript list of every page on /search/, grouped by product, between two markers in search/index.html.
+export const DIRECTORY_FILE = 'search/index.html';
+const ORDER = ['Martin Apps', 'BoardBound', 'Burn Wizard', 'Wilderness Survival Companion', 'Shortless', 'Scrollometer', 'Retold', 'Tellfolk'];
+const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+export function directoryHtml(index) {
+  const groups = new Map();
+  for (const d of index.docs) {
+    if (d.anchor) continue;
+    if (!groups.has(d.product)) groups.set(d.product, []);
+    groups.get(d.product).push(d);
+  }
+  const names = [...groups.keys()].sort((a, b) => (ORDER.indexOf(a) + 1 || 99) - (ORDER.indexOf(b) + 1 || 99) || a.localeCompare(b));
+  const typeRank = { company: 0, hub: 1, product: 2, help: 3, legal: 4 };
+  return names.map((n) => {
+    const items = groups.get(n).sort((a, b) => typeRank[a.type] - typeRank[b.type] || a.url.localeCompare(b.url))
+      .map((d) => `    <li><a href="${esc(d.url)}">${esc(d.pageTitle)}</a></li>`).join('\n');
+    return `  <h3>${esc(n === 'Martin Apps' ? 'The company' : n)}</h3>\n  <ul>\n${items}\n  </ul>`;
+  }).join('\n');
+}
+const DIR_RE = /(<!-- directory:start[^>]*-->\n)[\s\S]*?(<!-- directory:end -->)/;
+export function withDirectory(html, dir) { return html.replace(/\r\n/g, '\n').replace(DIR_RE, (m, a, b) => `${a}${dir}\n${b}`); }
+
 export function checkIndex(root = SITE) {
-  const want = serialize(buildIndex(root));
+  const idx = buildIndex(root);
+  const want = serialize(idx);
   const f = path.join(root, INDEX_FILE);
   const have = existsSync(f) ? readFileSync(f, 'utf8').replace(/\r\n/g, '\n') : null;
-  return { fresh: have === want, missing: have === null };
+  const df = path.join(root, DIRECTORY_FILE);
+  const page = existsSync(df) ? readFileSync(df, 'utf8').replace(/\r\n/g, '\n') : null;
+  const dirFresh = page !== null && DIR_RE.test(page) && withDirectory(page, directoryHtml(idx)) === page;
+  return { fresh: have === want && dirFresh, missing: have === null, indexFresh: have === want, dirFresh };
 }
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
@@ -131,11 +157,14 @@ if (isMain) {
   if (process.argv.includes('--check')) {
     const r = checkIndex();
     if (r.fresh) { console.log('search index is up to date'); process.exit(0); }
-    console.error(r.missing ? `${INDEX_FILE} is missing` : `${INDEX_FILE} is stale: the pages changed since it was built`);
+    if (!r.indexFresh) console.error(r.missing ? `${INDEX_FILE} is missing` : `${INDEX_FILE} is stale: the pages changed since it was built`);
+    if (!r.dirFresh) console.error(`the page list on ${DIRECTORY_FILE} is stale`);
     console.error('fix: node _search/build-index.mjs');
     process.exit(1);
   }
   const idx = buildIndex();
   writeFileSync(path.join(SITE, INDEX_FILE), serialize(idx));
-  console.log(`wrote ${INDEX_FILE}: ${idx.docs.length} sections from ${new Set(idx.docs.map((d) => d.url)).size} pages`);
+  const df = path.join(SITE, DIRECTORY_FILE);
+  if (existsSync(df)) writeFileSync(df, withDirectory(readFileSync(df, 'utf8'), directoryHtml(idx)));
+  console.log(`wrote ${INDEX_FILE}: ${idx.docs.length} sections from ${new Set(idx.docs.map((d) => d.url)).size} pages, and the page list on ${DIRECTORY_FILE}`);
 }
