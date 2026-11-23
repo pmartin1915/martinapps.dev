@@ -148,19 +148,19 @@
   {
    "q": "refund",
    "category": "synonym",
-   "top": "/boardbound/support.html",
+   "top": "/boardbound/terms.html",
    "alsoOk": [
-    "/boardbound/terms.html",
-    "/boardbound/delete-account.html"
+    "/boardbound/delete-account.html",
+    "/boardbound/support.html"
    ]
   },
   {
    "q": "money back",
    "category": "synonym",
-   "top": "/boardbound/support.html",
+   "top": "/boardbound/terms.html",
    "alsoOk": [
-    "/boardbound/terms.html",
-    "/boardbound/delete-account.html"
+    "/boardbound/delete-account.html",
+    "/boardbound/support.html"
    ]
   },
   {
@@ -242,11 +242,13 @@
   },
   {
    "q": "nclex",
-   "category": "synonym",
-   "top": "/boardbound/",
+   "category": "empty",
+   "top": null,
    "never": [
+    "/boardbound/",
     "/burn-wizard/"
-   ]
+   ],
+   "note": "NCLEX is the RN licensing exam; BoardBound is for the FNP board exam, so routing NCLEX there misleads."
   },
   {
    "q": "tiktok blocker",
@@ -487,5 +489,8 @@
    "category": "empty",
    "top": null
   }
+ ],
+ "corrections": [
+  "2026-11-22 (Sol review, before any tuning): refund and money back now expect /boardbound/terms.html first, because the support page never mentions refunds and the terms page says refund requests go to Apple. nclex now expects the empty screen, because NCLEX is a different exam from the FNP board exam BoardBound covers."
  ]
 }
