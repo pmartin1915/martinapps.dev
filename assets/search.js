@@ -55,12 +55,12 @@ function createBox({ onClose, inline }) {
   const list = el('ul', { class: 'sx-list', id: listId, role: 'listbox', 'aria-label': 'Results' });
   const empty = el('div', { class: 'sx-empty', hidden: '' });
   const close = onClose ? el('button', { class: 'sx-close', type: 'button', text: 'Close', onclick: onClose }) : null;
-  const form = el('form', { class: 'sx-bar', role: 'search', onsubmit: (e) => { e.preventDefault(); go(active >= 0 ? active : 0); } },
+  const form = el('form', { class: 'sx-bar', role: 'search', onsubmit: (e) => { e.preventDefault(); activate(); } },
     label, el('div', { class: 'sx-field' }, icon(), input), close);
   const body = el('div', { class: 'sx-body' }, status, list, empty);
   const root = el('div', { class: 'sx' + (inline ? ' sx-inline' : '') }, form, body);
 
-  let results = [], active = -1, timer = 0, seq = 0;
+  let results = [], active = -1, timer = 0, seq = 0, shown = null;
 
   function setActive(i) {
     const opts = list.children;
@@ -83,7 +83,7 @@ function createBox({ onClose, inline }) {
   }
 
   function render(r) {
-    results = r.kind === 'results' ? r.results : [];
+    results = r.kind === 'results' || r.kind === 'partial' ? r.results : [];
     list.replaceChildren(); setActive(-1);
     results.forEach((x, i) => {
       const snip = el('span', { class: 'sx-snip' });
@@ -92,14 +92,16 @@ function createBox({ onClose, inline }) {
         el('span', { class: 'sx-title', text: x.title }), x.heading ? el('span', { class: 'sx-where', text: x.heading }) : null, x.snippet.length ? snip : null));
     });
     input.setAttribute('aria-expanded', results.length ? 'true' : 'false');
-    if (results.length) { empty.hidden = true; status.textContent = results.length === 1 ? '1 result' : `${results.length} results`; }
+    if (results.length) setActive(0);   // the first result is selected (and announced) so Enter opens what was shown
+    if (results.length) { empty.hidden = true; status.textContent = r.kind === 'partial' ? `No page has all of those words. Closest ${results.length === 1 ? 'match' : 'matches'}:` : results.length === 1 ? '1 result' : `${results.length} results`; }
     else if (r.kind === 'none' || r.kind === 'filler') { showEmpty(r.kind, r.words); status.textContent = r.kind === 'none' ? 'No pages match' : ''; }
   }
 
   async function run() {
+    clearTimeout(timer); timer = 0;
     const q = input.value.trim(), mine = ++seq;
     if (inline && location.pathname === '/search/') history.replaceState(null, '', q ? '#q=' + encodeURIComponent(q) : location.pathname);
-    if (!q) { results = []; list.replaceChildren(); setActive(-1); empty.hidden = true; status.textContent = ''; input.setAttribute('aria-expanded', 'false'); return; }
+    if (!q) { results = []; list.replaceChildren(); setActive(-1); empty.hidden = true; status.textContent = ''; input.setAttribute('aria-expanded', 'false'); shown = ''; return; }
     let engine;
     try {
       if (!engineP) status.textContent = 'Loading search\u2026';
@@ -111,13 +113,19 @@ function createBox({ onClose, inline }) {
     }
     if (mine !== seq) return;
     render(engine.search(q));
+    shown = q;
+  }
+  // Enter: if what is shown is not for what is typed yet, search first, then open the selected result
+  async function activate() {
+    if (shown !== input.value.trim()) await run();
+    if (results.length) go(active >= 0 ? active : 0);
   }
 
-  input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(run, 60); });
+  input.addEventListener('input', () => { clearTimeout(timer); seq++; shown = null; timer = setTimeout(run, 60); });
   input.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowDown') { e.preventDefault(); if (results.length) setActive(Math.min(active + 1, results.length - 1)); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); if (results.length) setActive(active <= 0 ? -1 : active - 1); }
-    else if (e.key === 'Enter' && !e.isComposing) { if (results.length) { e.preventDefault(); go(active >= 0 ? active : 0); } }
+    else if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); activate(); }
     else if (e.key === 'Escape') {
       if (input.value) { e.preventDefault(); e.stopPropagation(); input.value = ''; run(); }
       // empty input: the dialog's own Escape handling closes it
@@ -158,7 +166,8 @@ function inlineMounts() {
     let q = '';
     if (host.dataset.searchPrefill === 'path') {
       // a 404: "/boardbond/" or "/wilderness/suport.html" becomes the words to search
-      q = decodeURIComponent(location.pathname).replace(/\.html?$/i, '').replace(/index$/i, '').split(/[/_\-.+]+/).filter(Boolean).join(' ').slice(0, 80);
+      let p = location.pathname; try { p = decodeURIComponent(p); } catch { /* a malformed address: search its raw words */ }
+      q = p.replace(/\.html?$/i, '').replace(/index$/i, '').split(/[/_\-.+]+/).filter(Boolean).join(' ').slice(0, 80);
     } else {
       const m = location.hash.match(/^#q=(.*)$/); if (m) { try { q = decodeURIComponent(m[1]); } catch { q = ''; } }
     }
@@ -180,5 +189,6 @@ document.addEventListener('click', (e) => {
 const warm = (e) => { if (e.target.closest && e.target.closest('a.search-link')) { loadEngine().catch(() => {}); loadCss(); } };
 document.addEventListener('pointerover', warm, { passive: true });
 document.addEventListener('focusin', warm);
+
 
 inlineMounts();

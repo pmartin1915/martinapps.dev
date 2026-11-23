@@ -151,3 +151,13 @@ test(`frozen query set meets the bar (${BAR.top1} first, ${BAR.top3} in top 3, n
   assert.equal(s.banned, 0);
   assert.equal(s.cats.empty.top1, s.cats.empty.n);
 });
+
+test('words that are names of built-in object properties are just words (review finding)', () => {
+  for (const q of ['constructor', 'boardbound constructor', 'toString', '__proto__ hasOwnProperty']) assert.doesNotThrow(() => engine.search(q), q);
+});
+
+test('no page has every word: closest matches with at least half the words, labelled partial; nonsense stays empty', () => {
+  const r = engine.search('cancel membership');
+  assert.equal(r.kind, 'partial'); assert.equal(r.results[0].url, '/boardbound/support.html');
+  assert.equal(engine.search('asdfghjkl qwertyuiop').kind, 'none');
+});

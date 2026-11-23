@@ -46,7 +46,7 @@ async function main() {
   const size = (w, h, mobile) => send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile });
   const shot = async (name) => { if (!SHOTS) return; mkdirSync(SHOTS, { recursive: true }); const r = await send('Page.captureScreenshot', { format: 'png' }); writeFileSync(path.join(SHOTS, name + '.png'), Buffer.from(r.data, 'base64')); };
   const resultUrls = () => evalJs(`[...document.querySelectorAll('.sx-opt')].map((o) => o.textContent)`);
-  const firstHref = async () => { await press('Down'); const p = loaded(); await press('Enter'); await p; return evalJs('location.pathname + location.hash'); };
+  const firstHref = async () => { const p = loaded(); await press('Enter'); await p; return evalJs('location.pathname + location.hash'); };
 
   try {
     await send('Page.enable'); await send('Runtime.enable'); await send('Network.enable');
@@ -68,8 +68,11 @@ async function main() {
     check(await waitFor(`document.querySelectorAll('.sx-opt').length > 0`), 'typing shows results');
     check(await evalJs(`document.querySelector('.sx-input').getAttribute('aria-expanded') === 'true'`), 'aria-expanded is true with results');
     check(/result/.test(await evalJs(`document.querySelector('dialog .sx-status').textContent`)), 'the live region announces the count');
+    const sel = () => evalJs(`(() => { const i = document.querySelector('.sx-input'); const a = i.getAttribute('aria-activedescendant'); return a && document.getElementById(a).getAttribute('aria-selected') === 'true' && document.activeElement === i ? a.replace(/.*-o/, '') : null; })()`);
+    check((await sel()) === '0', 'the first result is selected and announced (aria-activedescendant) as soon as results show');
     await press('Down');
-    check(await evalJs(`(() => { const i = document.querySelector('.sx-input'); const a = i.getAttribute('aria-activedescendant'); return !!a && document.getElementById(a).getAttribute('aria-selected') === 'true' && document.activeElement === i; })()`), 'Down arrow highlights a result while focus stays in the input');
+    check((await sel()) === '1', 'Down arrow moves the selection while focus stays in the input');
+    await press('Up');
     await press('Up');
     check(await evalJs(`!document.querySelector('.sx-input').hasAttribute('aria-activedescendant')`), 'Up from the first result returns to the input');
     await shot('desktop-results');
@@ -84,7 +87,21 @@ async function main() {
     await type('restore purchases');
     await waitFor(`document.querySelectorAll('.sx-opt').length > 0`);
     const opened = await firstHref();
-    check(opened === '/boardbound/support.html#how-do-i-restore-a-previous-purchase', 'Down then Enter opens the answer itself (restore purchases -> BoardBound support FAQ)', 'opened ' + opened);
+    check(opened === '/boardbound/support.html#how-do-i-restore-a-previous-purchase', 'Enter opens the selected answer itself (restore purchases -> BoardBound support FAQ)', 'opened ' + opened);
+
+    // Enter straight after retyping opens a result for the new words, never the old list
+    await nav('/apps/');
+    await evalJs("document.querySelector('a.search-link').click()"); await waitFor("document.querySelector('dialog')?.open");
+    await type('boardbound'); await waitFor("document.querySelectorAll('.sx-opt').length > 0");
+    await evalJs("(() => { const i = document.querySelector('.sx-input'); i.value = 'wilderness'; i.dispatchEvent(new Event('input')); })()");
+    const pl = loaded(); await press('Enter'); await pl;
+    check((await evalJs('location.pathname')) === '/wilderness/', 'Enter right after retyping opens a result for the new words', await evalJs('location.pathname'));
+
+    // no page has every word: closest matches, labelled, instead of a dead end
+    await nav('/about/');
+    await evalJs("document.querySelector('a.search-link').click()"); await waitFor("document.querySelector('dialog')?.open");
+    await type('cancel membership');
+    check(await waitFor("/Closest/.test(document.querySelector('dialog .sx-status').textContent) && document.querySelectorAll('.sx-opt').length > 0"), 'no page has every word: closest matches are shown and labelled');
 
     // nonsense: helpful empty screen
     await nav('/about/');
@@ -117,6 +134,8 @@ async function main() {
     check(await waitFor(`document.querySelector('[data-search-inline] .sx-input')?.value === 'boardbond'`), 'the 404 page searches the words of the bad address');
     check(await waitFor(`/BoardBound/.test(document.querySelector('[data-search-inline] .sx-opt')?.textContent || '')`), '...and its first result is BoardBound');
     await shot('404-search');
+    await nav('/%E0%A4%A/');
+    check(await waitFor("!!document.querySelector('[data-search-inline] .sx-input')"), 'a 404 with a malformed address still gets a working search box');
 
     // ---------- phone widths: no sideways scroll, link visible, dialog fills the screen ----------
     for (const w of [320, 360, 375, 390, 430]) {
@@ -183,6 +202,8 @@ async function main() {
     const html = LIVE ? await (await fetch(base + '/search/')).text() : readFileSync(path.join(SITE, 'search/index.html'), 'utf8');
     const listed = (html.match(/<li><a href="\//g) || []).length;
     check(nojs && listed >= 20, `JavaScript off: /search/ lists every page (${listed} links)`);
+
+    check(readFileSync(path.join(SITE, 'apps/index.html'), 'utf8').includes('<li><a href="/search/">Search</a></li>'), 'the footer links to /search/ (the way in on small phones without JavaScript)');
 
     // ---------- privacy: nothing but this site ----------
     const foreign = [...new Set(requests.filter((u) => /^https?:/.test(u) && new URL(u).origin !== origin))];

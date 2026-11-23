@@ -7,12 +7,15 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const LINK = '<a class="search-link" href="/search/"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span class="search-word">Search</span></a>';
-// On the narrowest phones (under 360px) the header has no room, so the redesigned pages' phone menu carries it too.
+// On phones under 380px the header has no room, so the redesigned pages' phone menu carries it too.
 export const MENU_LINK = '<a class="search-link menu-search" href="/search/">Search</a>';
 export const SCRIPT = '<script type="module" src="/assets/search.js"></script>';
 
 // the phone menu's links sit on the line after its opening tag; the Search entry goes at the end of that line
 const MENU_RE = /(<nav class="phone-menu[^>]*>\r?\n[^\r\n]*<\/a>)(\r?\n\s*<\/nav>)/;
+// the footer's Help column links to /search/ too: on the narrowest phones without JavaScript it is the way in
+export const FOOT_LINK = '<li><a href="/search/">Search</a></li>';
+function addFooter(html) { return html.includes(FOOT_LINK) ? html : html.replace(/(<div class="foot-grp" data-f="help">[\s\S]*?<li><a href="\/support\/">Support<\/a><\/li>)/, '$1' + FOOT_LINK); }
 function addMenu(html) { return html.includes('menu-search') ? html : html.replace(MENU_RE, (all, a, c) => a + MENU_LINK + c); }
 
 export function addLink(html) {
@@ -23,7 +26,7 @@ export function addLink(html) {
     if (!m) return html;
     out = out.replace(m[0], `${m[1]}${LINK}\n${m[0]}`);
   }
-  out = addMenu(out);
+  out = addFooter(addMenu(out));
   if (!out.includes(SCRIPT)) out = out.replace(/<\/body>/i, `${SCRIPT}\n</body>`);
   return out;
 }

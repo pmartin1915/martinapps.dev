@@ -3,7 +3,8 @@
 //
 //   import MiniSearch from './vendor/minisearch-7.2.0.min.js';
 //   const engine = createEngine(MiniSearch, indexJson.docs);
-//   engine.search('refund')  ->  { kind: 'results' | 'none' | 'filler', words: [...], results: [...] }
+//   engine.search('refund')  ->  { kind: 'results' | 'partial' | 'none' | 'filler', words: [...], results: [...] }
+//   'partial': no page has all the words, these have at least half of them (shown as closest matches)
 //
 // A result is { url, href, title, heading, type, snippet: [{ text, mark }] }. The snippet is plain text pieces
 // (mark = true for matched words) so the page builds it with textContent, never innerHTML.
@@ -44,6 +45,7 @@ const SYN = {
   bug: ['issue', 'error'], broken: ['issue'], crashes: ['crash'],
 };
 const SYN_WEIGHT = 0.3;
+const synOf = (w) => (Object.hasOwn(SYN, w) ? SYN[w] : []);   // own keys only: "constructor" is a word, not a lookup
 
 // Two-word phrases (the second word may come up to three words later) whose meaning neither word carries alone.
 const PHRASES = [
@@ -169,7 +171,7 @@ export function createEngine(MiniSearch, docs) {
     all.forEach((w, i) => {
       if (w === '\u0000phrase') { for (const s of extra) add(s, i, true); return; }
       add(w, i, true);
-      for (const s of SYN[w] || []) add(s, i, false);
+      for (const s of synOf(w)) add(s, i, false);
       for (const s of unglue(w)) add(s, i, true);
       for (const s of unswap(w)) add(s, i, true);
     });
@@ -207,11 +209,13 @@ export function createEngine(MiniSearch, docs) {
       for (const i of covered) p.covered.add(i);
       for (const t of h.terms) p.terms.add(t);
     }
-    const qwords = [...new Set([...all.map(stem), ...all.flatMap((w) => (SYN[w] || []).map(stem)), ...extra.map(stem)])];
-    const scored = [];
+    const qwords = [...new Set([...all.map(stem), ...all.flatMap((w) => (synOf(w)).map(stem)), ...extra.map(stem)])];
+    const scored = [], close = [];
+    // no page has (nearly) all the words: pages with at least half of them are shown as closest matches, never a dead end
+    const half = Math.max(1, Math.ceil(strong.size / 2));
     for (const p of pages.values()) {
       const cov = [...p.covered].filter((i) => strong.has(i)).length;
-      if (cov < need) continue;
+      if (cov < half) continue;
       const info = pageInfo.get(p.url);
       p.secs.sort((a, b) => b.score - a.score);
       const best = p.secs[0], rest = p.secs.slice(1).reduce((s, x) => s + x.score, 0);
@@ -233,8 +237,10 @@ export function createEngine(MiniSearch, docs) {
       p.faqAnswers = p.target.faq && [...strong].every((i) => all[i] === '\u0000phrase' || info.productWords.some((t) => near(all[i], t)) ||
         words(p.target.heading).map(stem).some((w) => near(stem(all[i]), w)));
       if (debug) p.why = { best: +best.score.toFixed(2), bestSec: best.doc.heading.slice(0, 30), rest: +rest.toFixed(1), cov, type: p.type, named: namesProduct && info.home };
-      scored.push(p);
+      (cov >= need ? scored : close).push(p);
     }
+    const partial = !scored.length && close.length > 0;
+    if (partial) scored.push(...close);
     // An app's own page leads its family unless the visitor asked for help or a policy, or a help page's FAQ
     // question matches every word: "tiktok blocker" -> Shortless, "restore purchases" stays on the support FAQ.
     if (!intents.includes('help') && !intents.includes('legal')) {
@@ -255,7 +261,7 @@ export function createEngine(MiniSearch, docs) {
         heading: d.anchor ? d.heading : '', snippet: snippet(d, [...p.terms], 150, [...p.terms].filter((t) => [...own].some((o) => same(t, o) || (o.length >= 3 && t.startsWith(o))))),
       };
     });
-    const out = { kind: 'results', words: all.filter((w) => w !== '\u0000phrase'), results };
+    const out = { kind: partial ? 'partial' : 'results', words: all.filter((w) => w !== '\u0000phrase'), results };
     if (debug) out.debug = scored.slice(0, 5).map((p) => ({ url: p.url, score: +p.score.toFixed(2), ...p.why }));
     return out;
   }
