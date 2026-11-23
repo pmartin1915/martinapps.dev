@@ -5,7 +5,7 @@
 //
 // What is indexed: the <main> of every served .html page, split into sections at each h1, h2, h3 and FAQ question.
 // Left out by rule, never by a list: folders starting with . or _ (not served), ai/, pages with a robots noindex,
-// pages that redirect (meta refresh), pages without <main>, and pages that opt out with
+// pages that redirect (meta refresh), and pages that opt out with
 // <meta name="site-search" content="skip">.
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -36,6 +36,18 @@ export function pageType(url) {
   return 'product';
 }
 
+// The part of a page that is its content: <main>, or on the few pages without one (Retold, Tellfolk) the <body>
+// from its start up to the page footer (<footer> or <div class="footer">). Returns [start, end] offsets or null.
+export function contentRange(html) {
+  const m = /<main\b[^>]*>([\s\S]*?)<\/main>/i.exec(html);
+  if (m) return [m.index + m[0].indexOf('>') + 1, m.index + m[0].length - 7];
+  const b = /<body\b[^>]*>/i.exec(html); if (!b) return null;
+  const start = b.index + b[0].length;
+  const rest = html.slice(start);
+  const end = rest.search(/<footer\b|<div\s+class="footer"|<\/body>/i);
+  return end < 0 ? null : [start, start + end];
+}
+
 export function listContentPages(root = SITE) {
   const out = [];
   (function walk(dir) {
@@ -46,7 +58,7 @@ export function listContentPages(root = SITE) {
       const html = readFileSync(p, 'utf8');
       if (/<meta[^>]+name="robots"[^>]+noindex/i.test(html) || /<meta[^>]+http-equiv="refresh"/i.test(html)) continue;
       if (/<meta[^>]+name="site-search"[^>]+content="skip"/i.test(html)) continue;
-      if (!/<main\b/i.test(html)) continue;
+      if (!contentRange(html)) continue;
       const rel = path.relative(root, p).split(path.sep).join('/');
       out.push({ file: p, url: '/' + rel.replace(/(^|\/)index\.html$/, '$1'), html });
     }
@@ -61,7 +73,8 @@ export const cleanTitle = (t) => decode(t).replace(/\s*[-—|]\s*Martin Apps( LL
 // One page -> its sections. Section 0 is the page itself (title, description and any text before the first heading).
 export function sectionsOf(page) {
   const { html, url } = page;
-  const main = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)[1];
+  const [a, b] = contentRange(html);
+  const main = html.slice(a, b).replace(/<(header|nav)\b[\s\S]*?<\/\1>/gi, ' ');
   const title = cleanTitle((html.match(/<title>([^<]*)<\/title>/i) || [, ''])[1]);
   const desc = meta(html, 'description');
   const seg = url.split('/')[1];
