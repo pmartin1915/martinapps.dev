@@ -1,9 +1,8 @@
 // Campaign redirect for BoardBound Prep. One folder per channel: /go/<channel>/.
 // Apple attributes with pt (provider token) + ct (campaign); Google Play with a UTM referrer.
-// shortcut: PT is blank until read from App Store Connect (App Analytics > Campaigns); until then
-// iOS clicks land on the store without attribution, Android clicks are still attributed.
+// PT: provider token from App Store Connect > Analytics > Campaigns (read 2026-11-24).
 (function () {
-  var PT = "";
+  var PT = "128659939";
   var APP_ID = "6761675393";
   var PKG = "com.boardbound.app";
   var ch = (document.documentElement.getAttribute("data-channel") || "site").replace(/[^a-z0-9-]/g, "");
