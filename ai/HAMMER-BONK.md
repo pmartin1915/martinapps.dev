@@ -57,3 +57,12 @@ works unchanged otherwise.
 - The sandwich wobble the brief asked for is not separate: `#o-sw` has its own SMIL transform that cannot be layered, so
   the sandwich simply stays with him through the squash.
 - `__bonk.at(t)` is the harness: it draws second t of the gag with no timers (for screenshots and the GIF).
+
+## As built (differences from the plan above)
+- The gag lives in its own file, `assets/footer-bonk.js` (loaded after `footer-scene.js` by a script tag in `index.html`), so regenerating `footer-scene.js` cannot wipe it. Only the shared `s.__act` flag lines are in `footer-scene.js`.
+- `assets/builder.js` is generated from `brand/mascot/builder/hammer.js` (branch `wk/hammer-bonk` in the brand repo); both carry the same edits.
+- Hit test: the head ledge is the head box widened 22 px each side (hat and shoulders count). The bonk is the FIRST contact of any part of the hammer with that ledge while falling faster than 250 px/s, or a resting contact when the fall ends.
+- Funnel: a hammer let go within ~70 px of his head and under 330 px above it falls through the footer text lines in between (they span the page and would otherwise catch it).
+- Edge scroll only starts after the pointer has moved 14 px from where it was pressed.
+- Checked in desktop Chrome with synthetic pointer events (carry from the top of the page, auto-scroll, drop, bonk, crack, pit, climb out, reset). NOT run on a real phone: the window could not be resized to phone width here.
+- Footer picture is no longer a landing shelf (the hammer passes through it to the street at the page bottom) while the gag is available.

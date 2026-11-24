@@ -313,18 +313,18 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
     e.preventDefault(); ease = null; sim = null; clearTimeout(fallT);   // caught: no fall
     var tg = e.currentTarget; try { tg.setPointerCapture(e.pointerId); } catch (x) {}
     var o = base(), c = [o[0] + loc[0], o[1] + loc[1]], p = [e.pageX, e.pageY], psi = Math.atan2(c[1] - p[1], c[0] - p[0]);
-    drag = { cy: e.clientY, id: e.pointerId, tg: tg, l: Math.hypot(c[0] - p[0], c[1] - p[1]), psi: psi, psi0: psi, a0: loc[2], w: 0, p: p, np: p, v: [0, 0], A: [0, 0], t: performance.now() };
+    drag = { p0: p, cy: e.clientY, id: e.pointerId, tg: tg, l: Math.hypot(c[0] - p[0], c[1] - p[1]), psi: psi, psi0: psi, a0: loc[2], w: 0, p: p, np: p, v: [0, 0], A: [0, 0], t: performance.now() };
     tg.style.cursor = 'grabbing'; document.documentElement.style.cursor = 'grabbing';
     tg.addEventListener('pointermove', move); tg.addEventListener('pointerup', up); tg.addEventListener('pointercancel', up);
     requestAnimationFrame(swing);
   }
-  function move(e) { if (drag && e.pointerId === drag.id) { drag.np = [e.pageX, e.pageY]; drag.cy = e.clientY; } }
+  function move(e) { if (drag && e.pointerId === drag.id) { drag.np = [e.pageX, e.pageY]; drag.cy = e.clientY; if (Math.hypot(e.pageX - drag.p0[0], e.pageY - drag.p0[1]) > 14) drag.moved = true; } }
   function swing(now) {
     var d = drag; if (!d) return;
     var dt = Math.min(.05, Math.max(.004, (now - d.t) / 1000)); d.t = now;
     /* Carrying it to the foot of the page (2026-11-24): a finger or mouse held in the top or bottom 64 px of the window scrolls the
        page, so the hammer can be carried a whole page without letting go (it is only a held hammer; nothing scrolls otherwise). */
-    var zn = 64, ch = innerHeight, sp = d.cy > ch - zn ? Math.min(1, (d.cy - (ch - zn)) / zn) * 900 : d.cy < zn ? -Math.min(1, (zn - d.cy) / zn) * 900 : 0;
+    var zn = 64, ch = innerHeight, sp = !d.moved ? 0 : d.cy > ch - zn ? Math.min(1, (d.cy - (ch - zn)) / zn) * 900 : d.cy < zn ? -Math.min(1, (zn - d.cy) / zn) * 900 : 0;
     if (sp) { var y0 = scrollY; scrollBy({ top: sp * dt, behavior: 'instant' }); if (scrollY !== y0) d.np = [d.np[0], d.cy + scrollY]; }
     var np = d.np, v = [(np[0] - d.p[0]) / dt, (np[1] - d.p[1]) / dt], k = Math.min(1, dt * 20);
     d.A = [d.A[0] + ((v[0] - d.v[0]) / dt - d.A[0]) * k, d.A[1] + ((v[1] - d.v[1]) / dt - d.A[1]) * k];   // the hand's acceleration, smoothed
@@ -364,7 +364,7 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
       rg.selectNodeContents(n); [].forEach.call(rg.getClientRects(), function (r) { add(r, .22); });
     }
     var hb = window.__bonk && window.__bonk.box();   // the footer sitter's head, while the gag is free to play (assets/footer-scene.js)
-    if (hb) out.push([hb[0], hb[1], hb[2], 'head']);
+    if (hb) out.push([hb[0] - 22, hb[1] + 22, hb[2], 'head']);   // a little wider than his head: hat and shoulders count
     [].forEach.call(document.body.querySelectorAll('*'), function (e) {   // boxes you can see the edge of
       if (e === el || el.contains(e) || (e.parentElement && e.parentElement.closest('svg'))) return;
       if (hb && e.tagName === 'svg' && e.closest('.foot-scene')) return;   // the footer picture is not a shelf: his head is (below)
@@ -387,17 +387,20 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
     for (i = 0; i <= 6; i++) { var x = u0 + (b.Lh - b.th / 2) * i / 6; pts.push([x, -b.rh, .18], [x, b.rh, .18]); }   // wooden handle
     pts.push([u0 - b.rh, 0, .18]);
     [[-1, -1], [1, -1], [-1, 1], [1, 1], [1, 0]].forEach(function (s) { pts.push([u0 + b.Lh + s[0] * b.th / 2, s[1] * b.hh / 2, .32]); });   // steel head
-    sim = { c: [o[0] + loc[0], o[1] + loc[1]], a: loc[2], v: [0, 0], w: 0, pts: pts, M: M, I: I, S: ledges(), still: 0, t: 0, last: performance.now() };
+    var S = ledges(), hb = S.filter(function (q) { return q[3] === 'head'; })[0], cy0 = o[1] + loc[1], cx0 = o[0] + loc[0];
+    if (hb && Math.abs(cx0 - (hb[0] + hb[1]) / 2) < 70 + (hb[1] - hb[0]) / 2 && cy0 > hb[2] - 330 && cy0 < hb[2])   // dropped right above his head: the lines of text in between are not in the way
+      S = S.filter(function (q) { return q === hb || q[2] <= cy0 || q[2] >= hb[2] - 1; });
+    sim = { c: [cx0, cy0], a: loc[2], v: [0, 0], w: 0, pts: pts, M: M, I: I, S: S, still: 0, t: 0, last: performance.now() };
     requestAnimationFrame(tick);
   }
   function tick(now) {
     var s = sim; if (!s || drag) { sim = null; return; }
     var dt = Math.min(.05, (now - s.last) / 1000), h = 1 / 240, k; s.last = now;
-    for (k = 0; k < Math.round(dt / h); k++) { var vy0 = s.v[1]; stepBody(s, h); if (vy0 > 250 && s.v[1] < vy0 - 150 && !s.bonked) bonkCheck(s); }
+    for (k = 0; k < Math.round(dt / h); k++) { var vy0 = s.v[1]; stepBody(s, h); if (vy0 > 250 && !s.bonked) bonkCheck(s); }   // falling fast and touching his head: the first contact is the bonk, however it lands
     var c = place(s.c, s.a); if (c[0] !== s.c[0]) s.v[0] *= -.3; s.c = c;      // the page sides stop it too
     var calm = Math.hypot(s.v[0], s.v[1]) < 8 && Math.abs(s.w) < .4;
     s.still = calm ? s.still + dt : 0; s.t += dt;
-    if (s.still > .35 || s.t > 8) { sim = null; return; }
+    if (s.still > .35 || s.t > 8) { if (!s.bonked) bonkCheck(s); if (!s.bonked || s.still > .35) sim = null; if (s.bonked && sim) return requestAnimationFrame(tick); return; }
     requestAnimationFrame(tick);
   }
   /* The bonk (2026-11-24): a hard stop (it was falling fast and lost speed in one step) with the steel head on the ledge that is the
@@ -411,11 +414,11 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
       if (px >= q[0] - 4 && px <= q[1] + 4 && Math.abs(py - q[2]) < 10) on = true;
     }
     if (!on) return;
-    s.bonked = true;
-    window.__bonk.play(function () {
+    if (!window.__bonk.play(function () {
       var j = s.S.indexOf(q); if (j >= 0) s.S.splice(j, 1);
       if (!sim && !drag) fall();                           // it had gone to sleep on his head: let it drop with him
-    });
+    })) { var j = s.S.indexOf(q); if (j >= 0) s.S.splice(j, 1); return; }   // a pigeon got there first: no gag, no ledge
+    s.bonked = true;
   }
   function stepBody(s, h) {   // one step: gravity, find the points touching a ledge, solve them together, move
     var ca = Math.cos(s.a), sa = Math.sin(s.a), C = [], i, k, it, q, c;
