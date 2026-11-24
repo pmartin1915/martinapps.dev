@@ -313,15 +313,19 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
     e.preventDefault(); ease = null; sim = null; clearTimeout(fallT);   // caught: no fall
     var tg = e.currentTarget; try { tg.setPointerCapture(e.pointerId); } catch (x) {}
     var o = base(), c = [o[0] + loc[0], o[1] + loc[1]], p = [e.pageX, e.pageY], psi = Math.atan2(c[1] - p[1], c[0] - p[0]);
-    drag = { id: e.pointerId, tg: tg, l: Math.hypot(c[0] - p[0], c[1] - p[1]), psi: psi, psi0: psi, a0: loc[2], w: 0, p: p, np: p, v: [0, 0], A: [0, 0], t: performance.now() };
+    drag = { cy: e.clientY, id: e.pointerId, tg: tg, l: Math.hypot(c[0] - p[0], c[1] - p[1]), psi: psi, psi0: psi, a0: loc[2], w: 0, p: p, np: p, v: [0, 0], A: [0, 0], t: performance.now() };
     tg.style.cursor = 'grabbing'; document.documentElement.style.cursor = 'grabbing';
     tg.addEventListener('pointermove', move); tg.addEventListener('pointerup', up); tg.addEventListener('pointercancel', up);
     requestAnimationFrame(swing);
   }
-  function move(e) { if (drag && e.pointerId === drag.id) drag.np = [e.pageX, e.pageY]; }
+  function move(e) { if (drag && e.pointerId === drag.id) { drag.np = [e.pageX, e.pageY]; drag.cy = e.clientY; } }
   function swing(now) {
     var d = drag; if (!d) return;
     var dt = Math.min(.05, Math.max(.004, (now - d.t) / 1000)); d.t = now;
+    /* Carrying it to the foot of the page (2026-11-24): a finger or mouse held in the top or bottom 64 px of the window scrolls the
+       page, so the hammer can be carried a whole page without letting go (it is only a held hammer; nothing scrolls otherwise). */
+    var zn = 64, ch = innerHeight, sp = d.cy > ch - zn ? Math.min(1, (d.cy - (ch - zn)) / zn) * 900 : d.cy < zn ? -Math.min(1, (zn - d.cy) / zn) * 900 : 0;
+    if (sp) { var y0 = scrollY; scrollBy({ top: sp * dt, behavior: 'instant' }); if (scrollY !== y0) d.np = [d.np[0], d.cy + scrollY]; }
     var np = d.np, v = [(np[0] - d.p[0]) / dt, (np[1] - d.p[1]) / dt], k = Math.min(1, dt * 20);
     d.A = [d.A[0] + ((v[0] - d.v[0]) / dt - d.A[0]) * k, d.A[1] + ((v[1] - d.v[1]) / dt - d.A[1]) * k];   // the hand's acceleration, smoothed
     var am = Math.hypot(d.A[0], d.A[1]); if (am > 30000) { d.A[0] *= 30000 / am; d.A[1] *= 30000 / am; }
@@ -359,8 +363,11 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
       if (!/\S/.test(n.data) || !n.parentElement || el.contains(n.parentElement) || hidden(getComputedStyle(n.parentElement)) || pinned(n.parentElement)) continue;
       rg.selectNodeContents(n); [].forEach.call(rg.getClientRects(), function (r) { add(r, .22); });
     }
+    var hb = window.__bonk && window.__bonk.box();   // the footer sitter's head, while the gag is free to play (assets/footer-scene.js)
+    if (hb) out.push([hb[0], hb[1], hb[2], 'head']);
     [].forEach.call(document.body.querySelectorAll('*'), function (e) {   // boxes you can see the edge of
       if (e === el || el.contains(e) || (e.parentElement && e.parentElement.closest('svg'))) return;
+      if (hb && e.tagName === 'svg' && e.closest('.foot-scene')) return;   // the footer picture is not a shelf: his head is (below)
       var cs = getComputedStyle(e), r;
       var solid = /^(IMG|svg|VIDEO|CANVAS|BUTTON|INPUT|SELECT|TEXTAREA|HR|IFRAME|PICTURE)$/.test(e.tagName) ||
         !/rgba\(\d+, \d+, \d+, 0\)|transparent/.test(cs.backgroundColor) || parseFloat(cs.borderTopWidth) > 0 || cs.boxShadow !== 'none';
@@ -386,12 +393,29 @@ const TOSS = {t: 12.5, x: 137.88, y: 91.37, ang: -37.2, style: "skate"};
   function tick(now) {
     var s = sim; if (!s || drag) { sim = null; return; }
     var dt = Math.min(.05, (now - s.last) / 1000), h = 1 / 240, k; s.last = now;
-    for (k = 0; k < Math.round(dt / h); k++) stepBody(s, h);
+    for (k = 0; k < Math.round(dt / h); k++) { var vy0 = s.v[1]; stepBody(s, h); if (vy0 > 250 && s.v[1] < vy0 - 150 && !s.bonked) bonkCheck(s); }
     var c = place(s.c, s.a); if (c[0] !== s.c[0]) s.v[0] *= -.3; s.c = c;      // the page sides stop it too
     var calm = Math.hypot(s.v[0], s.v[1]) < 8 && Math.abs(s.w) < .4;
     s.still = calm ? s.still + dt : 0; s.t += dt;
     if (s.still > .35 || s.t > 8) { sim = null; return; }
     requestAnimationFrame(tick);
+  }
+  /* The bonk (2026-11-24): a hard stop (it was falling fast and lost speed in one step) with the steel head on the ledge that is the
+     footer sitter's head. The ledge stays until the gag lets it go, so the hammer rests on his head, then falls with him. */
+  function bonkCheck(s) {
+    var q = null, i, ca = Math.cos(s.a), sa = Math.sin(s.a), on = false;
+    for (i = 0; i < s.S.length; i++) if (s.S[i][3] === 'head') q = s.S[i];
+    if (!q) return;
+    for (i = 0; i < s.pts.length; i++) {                     // any part of the hammer that is on his head box, at the ledge
+      var r = s.pts[i], px = s.c[0] + ca * r[0] - sa * r[1], py = s.c[1] + sa * r[0] + ca * r[1];
+      if (px >= q[0] - 4 && px <= q[1] + 4 && Math.abs(py - q[2]) < 10) on = true;
+    }
+    if (!on) return;
+    s.bonked = true;
+    window.__bonk.play(function () {
+      var j = s.S.indexOf(q); if (j >= 0) s.S.splice(j, 1);
+      if (!sim && !drag) fall();                           // it had gone to sleep on his head: let it drop with him
+    });
   }
   function stepBody(s, h) {   // one step: gravity, find the points touching a ledge, solve them together, move
     var ca = Math.cos(s.a), sa = Math.sin(s.a), C = [], i, k, it, q, c;

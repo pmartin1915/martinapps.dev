@@ -54,7 +54,7 @@
     function clean() { if (bird) { bird.remove(); bird = null; } if (bits) bits.forEach(function (b) { b.remove(); }); bits = null; }
     s.__egg = { at: function (t) { S0 = S0 || centre(sw); frame(t); }, reset: function () { clean(); sw.setAttribute('opacity', 1); S0 = null; } };
     hit.addEventListener('click', function () {
-      if (busy) return; busy = true; S0 = centre(sw); build();
+      if (busy || s.__act) return; busy = true; s.__act = true; S0 = centre(sw); build();
       var t0 = performance.now(), froze = false, thawed = false;
       (function tick(now) {
         var t = (now - t0) / 1000;
@@ -63,10 +63,11 @@
         frame(Math.min(t, 3.1));
         if (t < 3.1) return requestAnimationFrame(tick);
         clean(); sw.setAttribute('opacity', 0);
-        setTimeout(function () { var b = performance.now(); (function fade(n) { var u = Math.min((n - b) / 500, 1); sw.setAttribute('opacity', u); if (u < 1) requestAnimationFrame(fade); else busy = false; })(b); }, 2200);   // a fresh sandwich
+        setTimeout(function () { var b = performance.now(); (function fade(n) { var u = Math.min((n - b) / 500, 1); sw.setAttribute('opacity', u); if (u < 1) requestAnimationFrame(fade); else { busy = false; s.__act = false; } })(b); }, 2200);   // a fresh sandwich
       })(t0);
     });
   }
+
   function mount(text) {
     box.insertAdjacentHTML('beforeend', text);
     var s = box.querySelector('svg');
