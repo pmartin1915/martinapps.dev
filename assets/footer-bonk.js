@@ -113,12 +113,12 @@
       /* the portal: a swirl of its own (three arms, a ring, a dashed halo), seen from below, opens and closes like an iris */
       var po = t < 6.3 ? 0 : t < 6.9 ? 1 - Math.pow(1 - (t - 6.3) / .6, 3) : t < 7.7 ? 1 : 1 - ss((t - 7.7) / .6);
       c.portal.setAttribute('opacity', po > .01 ? 1 : 0);
-      c.flat.setAttribute('transform', 'translate(' + PX + ' ' + PY + ') scale(' + (1.15 * po).toFixed(3) + ' ' + (.4 * po).toFixed(3) + ')');
+      c.flat.setAttribute('transform', 'translate(' + PX + ' ' + PY + ') scale(' + (1.6 * po).toFixed(3) + ' ' + (.4 * po).toFixed(3) + ')');
       c.spin.setAttribute('transform', 'rotate(' + (t * 240 % 360).toFixed(1) + ')'); c.dash.setAttribute('transform', 'rotate(' + (-t * 70 % 360).toFixed(1) + ')');
       c.sp.forEach(function (n, i) {
         var a = t * 3 + i * 1.257, on = po > .3 && po === Math.min(po, 1) && t < 8.3;
         n.setAttribute('opacity', on ? (.5 + .5 * Math.sin(t * 9 + i)).toFixed(2) : 0);
-        n.setAttribute('transform', 'translate(' + (PX + 62 * Math.cos(a) * po).toFixed(1) + ' ' + (PY + 22 * Math.sin(a) * po - 4).toFixed(1) + ') scale(' + (.6 + .4 * Math.sin(t * 7 + i)).toFixed(2) + ')');
+        n.setAttribute('transform', 'translate(' + (PX + 88 * Math.cos(a) * po).toFixed(1) + ' ' + (PY + 22 * Math.sin(a) * po - 4).toFixed(1) + ') scale(' + (.6 + .4 * Math.sin(t * 7 + i)).toFixed(2) + ')');
       });
     }
     function clean() {
