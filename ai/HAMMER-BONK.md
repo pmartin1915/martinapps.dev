@@ -36,10 +36,14 @@ page (up to ~900 px/s, eased by depth), the held hammer keeps following the fing
 | 0.00-1.40 | Dazed beat: stars circle, he sways +-2 deg. Sandwich stays in his hand (the existing sandwich wobble is part of the scene loop, which is held). |
 | 1.40-2.40 | The street shakes (svg +-1.5 px) and a crack runs from the right edge to under his bar (stroke-dashoffset), small dust bits flick up along it. |
 | 2.40-2.90 | The crack gapes into a dark pit under the parking stop (ellipse grows from a slit, lip highlight). Dust ring. He and the stop hang for 0.2 s (cartoon beat). `release()` fires: the hammer falls. |
-| 2.90-3.50 | He and his stop drop into the pit (ease-in, slight tilt), clipped by the near lip so he sinks behind it. Dust cloud on landing, the cones jitter. |
-| 3.50-4.40 | Silence, a few stars in the pit. |
-| 4.40-5.80 | He climbs back out: three jerky heaves (up, slip, up) with the hat showing first; the stop rises with him. |
-| 5.80-6.60 | Dust, the pit closes (ellipse shrinks back to a slit, crack fades). Overlay removed, scene resumes where it was held. |
+| 2.90-3.50 | He and his stop drop into the pit (ease-in, slight tilt), clipped by the near lip so he sinks fully out of sight. Dust cloud on landing. `release()` fires at 2.9: the hammer falls to the street. |
+| 3.50-4.40 | The street closes: the pit shrinks to nothing, the crack fades, dust, a second small shake. The closing street spits the stop and thermos back up into place. He stays below. |
+| 4.40-6.30 | Quiet: an empty seat. |
+| 6.30-6.90 | A portal opens in the gap above the scene, below the footer disclaimer (drawn in the SVG's empty top band, so it sits between the text and the scene at any width): dark swirl, three spiral arms, a teal ring, a dashed halo, sparkles; it opens like an iris. |
+| 6.90-7.50 | He drops out of its lower lip (a full tumble), lands on the stop with a squash and a dust puff, sandwich in hand. |
+| 7.70-8.60 | The portal closes. Overlay removed, scene resumes. |
+
+Update 2026-11-24 (Perry): this replaces the first plan, where he climbed out of the pit. The portal is an original swirl, not from any game or show.
 
 Sitter and stop are moved by a `transform` attribute on `#o-sit` and `#o-bar` (they carry none of their own; SMIL is on
 their children). Their cast shadows (`use href="#o-sit"`, `#o-bar`, and the ellipse at cx 504) are hidden for the gag.
