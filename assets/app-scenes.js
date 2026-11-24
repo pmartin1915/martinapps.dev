@@ -15,6 +15,49 @@
     if (q < .5) return [A - 80 * q, 0];
     var s = (q - .5) / .5; return [-A + 2 * A * B.ease(s), -9 * Math.sin(Math.PI * s)];
   }
+  // The walk from the stickman workshop (brand/mascot/workshop, rounds 2, 5 and 7), as ported to about-frame.js: heel-to-toe roll, the swing
+  // foot leaving and landing at ground speed, pelvis and shoulders turning against each other, a head that rides steadier than the body.
+  // footRoll returns [x, y, pitch]; walk() blends it out over the last half stride (rw) so the stop is the plain gait it always was.
+  var FL = 11, RA = .16, RB = .58, RHS = -16, RTO = 38;
+  function herm(x0, x1, m0, m1, u) { var u2 = u * u, u3 = u2 * u; return (2 * u3 - 3 * u2 + 1) * x0 + (u3 - 2 * u2 + u) * m0 + (-2 * u3 + 3 * u2) * x1 + (u3 - u2) * m1; }
+  function stanceRoll(u) {
+    var hx = A - 2 * A * u, th;
+    if (u < RA) return [hx, 0, RHS * (1 - B.ease(u / RA))];
+    if (u < RB) return [hx, 0, 0];
+    th = RTO * B.ease((u - RB) / (1 - RB)) * Math.PI / 180;
+    return [hx + FL - FL * Math.cos(th), -FL * Math.sin(th), th * 180 / Math.PI];
+  }
+  function footRoll(q) {
+    q = q - Math.floor(q);
+    if (q < .5) return stanceRoll(q / .5);
+    var w = (q - .5) / .5, A0 = stanceRoll(1), m = -2 * A, lift = 9;
+    var y = herm(A0[1], 0, -lift * 1.6, lift * 1.4, w) - lift * Math.pow(Math.sin(Math.PI * w), 1.4);
+    return [herm(A0[0], A, m, m, w), Math.min(y, 0), w < .55 ? RHS + (RTO - RHS) * (1 - B.ease(w / .55)) : RHS];
+  }
+  function foot(q, rw) { var a = footOff(q), b = footRoll(q); return [B.lerp(a[0], b[0], rw), B.lerp(a[1], b[1], rw), b[2] * rw]; }
+  function dip(x, rw) { x = x - Math.floor(x); return x < .5 ? 0 : 1.2 * rw * Math.sin(Math.PI * (x - .5) / .5); }
+  // the roots of the legs and arms while walking (opt-in twist in the rig): pelvis turns with the forward leg, shoulders against it
+  function twist(w, hp, sh) {
+    if (!w) return {};
+    return { hf: [hp[0] + 2.2 * w.tc, hp[1] + w.df], hb: [hp[0] - 2.2 * w.tc, hp[1] + w.db], s1: [sh[0] - 2.8 * w.tc, sh[1]], s2: [sh[0] + 2.8 * w.tc, sh[1]], ffa: w.pa, fba: w.pb };
+  }
+  // The walk-off (2026-11-24): when a scene is finished he turns round and walks off the way he came in (left), carrying the hammer.
+  // off() is a pure function of time like everything here: wo.w is a walk() record in his own (unflipped) frame, wo.sx the turn (1 to -1),
+  // wo.gone once he is off the picture. fig() applies the turn about his standing spot. Reduced motion draws s.still (the finished pose), never this.
+  var TURN = .35;
+  function offN(u1) { return Math.ceil((u1 + 30 / K) / CYC); }
+  function off(t, TD, u1) {
+    var s = t - TD; if (s < 0) return null;
+    var N = offN(u1), s2 = s - TURN, w = null;
+    if (s2 >= 0 && s2 < N / WALKHZ) { w = walk(s2, u1, u1 + N * CYC, N); w.oa *= B.ease(s2 / .3); }   // arms swing up from hanging
+    return { w: w, sx: Math.cos(Math.PI * B.ease(s / TURN)), gone: s2 >= N / WALKHZ || (!!w && (2 * u1 - w.hu) * K < -34) };
+  }
+  function fig(f, wo, u1) {
+    var sx = wo ? wo.sx : 1;
+    f.g.setAttribute('transform', 'translate(' + (K * u1 * (1 - sx)).toFixed(2) + ' 0) scale(' + (K * sx).toFixed(4) + ' ' + K + ')');
+    f.g.setAttribute('visibility', wo && wo.gone ? 'hidden' : 'visible');
+  }
+  function pose(who, P, w) { var k = twist(w, P.hip, P.sh); for (var n in k) P[n] = k[n]; return who.pose(P); }
   // generic stage: ground line, figure group (not mirrored: he faces right), hammer prop
   function stage(svg) {
     svg.style.visibility = 'visible';
@@ -35,8 +78,9 @@
   // the walk-in: returns hip/feet/arms for t < tw, or null after
   function walk(t, x0u, x1u, N) {
     var tw = N / WALKHZ; if (t >= tw) return null;
-    var p = t * WALKHZ, hu = B.lerp(x0u, x1u, t / tw), oA = footOff(p), oB = footOff(p + .5);
-    return { hu: hu, fa: [hu + oA[0], gy + oA[1]], fb: [hu + oB[0], gy + oB[1]], bob: 1.5 * Math.cos(4 * Math.PI * p), oa: oA[0] / A, p: p, tw: tw };
+    var p = t * WALKHZ, hu = B.lerp(x0u, x1u, t / tw), rw = 1 - B.ease((p - (N - .5)) / .5), oA = foot(p, rw), oB = foot(p + .5, rw);   // the last half stride settles back to the plain gait for the stop
+    return { hu: hu, fa: [hu + oA[0], gy + oA[1]], fb: [hu + oB[0], gy + oB[1]], bob: 1.5 * Math.cos(4 * Math.PI * p), oa: oA[0] / A, p: p, tw: tw,
+      pa: oA[2], pb: oB[2], tc: Math.cos(2 * Math.PI * p) * rw, df: dip(p, rw), db: dip(p + .5, rw) };
   }
   // arm as angle + reach about the shoulder; keys = [[time, name]...], P = pose table; 'hit' eases in, the segment after it eases out
   function armAt(t, KEYS, P) {
@@ -62,7 +106,7 @@
     B.el('rect', { x: -2.6, y: -2, width: 5.2, height: 30, rx: 1, fill: '#A9743A', stroke: INK, 'stroke-width': 1.2 }, peg);
     B.el('rect', { x: -4.4, y: -4, width: 8.8, height: 4, rx: 1.2, fill: '#8C5F2D', stroke: INK, 'stroke-width': 1.2 }, peg);
     var spark = B.el('path', { d: 'M0 -6 L1.6 -1.6 L6 0 L1.6 1.6 L0 6 L-1.6 1.6 L-6 0 L-1.6 -1.6 Z', fill: '#F5B800', opacity: 0 }, svg);
-    var f = figure(svg), HX = 172, N = 5, u1 = HX / K, u0 = u1 - N * CYC, TS = N / WALKHZ + CLOSE;
+    var TD = 9.0, f = figure(svg), HX = 172, N = 5, u1 = HX / K, u0 = u1 - N * CYC, TS = N / WALKHZ + CLOSE;
     var KEYS = [[0, 'rest'], [TS, 'rest'], [4.2, 'wind'], [HITS[0], 'hit'], [4.85, 'reb'], [5.1, 'wind'], [HITS[1], 'hit'], [5.6, 'reb'], [5.85, 'wind'], [HITS[2], 'hit'], [6.35, 'reb'], [6.9, 'rest'], [99, 'rest']];
     function draw(t) {
       var sinks = 0; HITS.forEach(function (c) { sinks += B.ease((t - c) / .08); });
@@ -72,7 +116,7 @@
       var tip = [PEGX, GY - pegH - 1];
       rope.setAttribute('d', 'M' + tip[0] + ' ' + tip[1] + ' Q' + ((tip[0] + E[0]) / 2) + ' ' + ((tip[1] + E[1]) / 2 + sag) + ' ' + (E[0] + shiver) + ' ' + E[1]);
       tent.setAttribute('transform', 'translate(' + (shiver * .6) + ' 0)');
-      var w = walk(t, u0, u1, N), hip, fa, fb, drop = 0, lean = 0, near = 0, hit = 0, tilt = 0, oa = 0, bob = 0, h1, h2;
+      var wo = off(t, TD, u1), w = wo ? wo.w : walk(t, u0, u1, N), hip, fa, fb, drop = 0, lean = 0, near = 0, hit = 0, tilt = 0, oa = 0, bob = 0, h1, h2;
       var work = B.win(t, 3.9, 4.3, 6.5, 7.0);
       HITS.forEach(function (c) { hit = Math.max(hit, spikeNear(t, c, .07)); });
       if (w) { hip = w.hu; fa = w.fa; fb = w.fb; bob = w.bob; oa = w.oa; }
@@ -82,7 +126,7 @@
       }
       drop = 24 * work; lean = 12 * work - 2 * hit;
       var hp = [hip + lean * .35, gy - 67 + bob + drop], sh = [hp[0] + 3 + lean + (w ? 1 : 0), hp[1] - 50 + (w ? .4 * Math.cos(4 * Math.PI * (w.p)) : 0) + 4 * work];
-      var hc = [sh[0] + 6 + 4 * work, sh[1] - 11 + 6 * work + 1.5 * hit];
+      var hc = [sh[0] + 6 + 4 * work, sh[1] - 11 + 6 * work + 1.5 * hit - .65 * bob];   // the neck soaks up most of the bob
       var tap = [PEGX / K, (GY - pegH) / K - 2], aim = hitAim(sh, tap);
       var P = { rest: [1.35, 52], wind: [-1.9, 52], hit: aim, reb: [aim[0] - .75, 56] };
       var walkH1 = [sh[0] - 13 * oa + 4, sh[1] + 42 - 3 * Math.abs(oa)], walkH2 = [sh[0] + 13 * oa + 4, sh[1] + 42 - 3 * (1 - Math.abs(oa))];
@@ -94,11 +138,11 @@
         h2 = [B.lerp(h2[0], brim[0], tipH), B.lerp(h2[1], brim[1], tipH)];
         tilt = 8 * work * 1 - 6 * B.win(t, 6.9, 7.3, 8.2, 8.7) + 5 * B.win(t, 8.2, 8.5, 8.7, 9.0);
       }
-      var r = f.who.pose({ hip: hp, sh: sh, head: hc, tilt: tilt, ff: fa, fb: fb, h1: h1, h2: h2, bow: [-2 - 6 * work, 0], shadow: 30, ground: gy + 2, shadowX: hip });
-      f.put(r);
+      var r = pose(f.who, { hip: hp, sh: sh, head: hc, tilt: tilt, ff: fa, fb: fb, h1: h1, h2: h2, bow: [-2 - 6 * work, 0], shadow: 30, ground: gy + 2, shadowX: hip }, w);
+      f.put(r); fig(f, wo, u1);
       spark.setAttribute('transform', 'translate(' + (PEGX + 3) + ' ' + (GY - pegH - 5) + ') scale(' + (hit * 1.2) + ')'); spark.setAttribute('opacity', hit > 0 ? 1 : 0);
     }
-    return { draw: draw, end: 10 };
+    return { draw: draw, still: TD, end: TD + TURN + offN(u1) / WALKHZ + .2 };
   }
 
   // ------------------------------------------------------------------ Shortless: two planks nailed across the feed
@@ -121,19 +165,19 @@
     var N1 = [PX + 7, 32], N2 = [PX + 7, 66];
     var pa = plank(N1[0], N1[1], PX + PW - 7, 66), pb = plank(N2[0], N2[1], PX + PW - 7, 32);
     var spark = B.el('path', { d: 'M0 -6 L1.6 -1.6 L6 0 L1.6 1.6 L0 6 L-1.6 1.6 L-6 0 L-1.6 -1.6 Z', fill: '#F5B800', opacity: 0 }, svg);
-    var f = figure(svg), HX = 205, N = 5, u1 = HX / K, u0 = u1 - N * CYC, TW = N / WALKHZ, TS = TW + CLOSE;
+    var TD = 8.2, f = figure(svg), HX = 205, N = 5, u1 = HX / K, u0 = u1 - N * CYC, TW = N / WALKHZ, TS = TW + CLOSE;
     var KEYS = [[0, 'rest'], [TS, 'rest'], [4.2, 'wind'], [HITS[0], 'hit'], [4.72, 'reb'], [5.05, 'wind'], [HITS[1], 'hit'], [5.52, 'reb'], [6.0, 'rest'], [99, 'rest']];
     function drop(t, c) { var u = (t - (c - .28)) / .28; return u < 0 ? 36 : (u > 1 ? 0 : 36 * (1 - u * u)); }
     function draw(t) {
       pa.set(drop(t, HITS[0]), t > HITS[0] - .28); pb.set(drop(t, HITS[1]), t > HITS[1] - .28);
       var s = t - HITS[1], pos = s <= 0 ? 36 * t : 36 * (HITS[1] + Math.min(s, FREEZE) - Math.min(s, FREEZE) * Math.min(s, FREEZE) / (2 * FREEZE));
       feed.setAttribute('transform', 'translate(0 ' + (-(pos % 70)) + ')');
-      var w = walk(t, u0, u1, N), hip, fa, fb, bob = 0, oa = 0, h1, h2, near = 0, hit = 0;
+      var wo = off(t, TD, u1), w = wo ? wo.w : walk(t, u0, u1, N), hip, fa, fb, bob = 0, oa = 0, h1, h2, near = 0, hit = 0;
       HITS.forEach(function (c) { near = Math.max(near, B.win(t, c - .35, c - .03, c + .03, c + .45)); hit = Math.max(hit, spikeNear(t, c, .07)); });
       if (w) { hip = w.hu; fa = w.fa; fb = w.fb; bob = w.bob; oa = w.oa; }
       else { hip = u1; var c = B.ease((t - TW) / CLOSE); fa = [u1 + A, gy]; fb = [B.lerp(u1 - A, u1 - 4, c), gy - 7 * Math.sin(Math.PI * Math.min(c, 1))]; }
       var lean = 5 * near - 1.2 * hit, hp = [hip + lean * .5, gy - 67 + bob + 1.2 * near], sh = [hp[0] + 3 + lean + (w ? 1 : 0), hp[1] - 50 + (w ? .4 * Math.cos(4 * Math.PI * w.p) : 0)];
-      var hc = [sh[0] + 6 + .8 * near, sh[1] - 11 + 1.5 * hit];
+      var hc = [sh[0] + 6 + .8 * near, sh[1] - 11 + 1.5 * hit - .65 * bob];
       var cur = t < (HITS[0] + HITS[1]) / 2 ? N1 : N2, aim = hitAim(sh, [cur[0] / K - 3, cur[1] / K]);
       var P = { rest: [1.35, 52], wind: [-1.5 + (cur === N2 ? .5 : 0), 50], hit: aim, reb: [aim[0] - .7, 56] };
       var walkH1 = [sh[0] - 13 * oa + 4, sh[1] + 42 - 3 * Math.abs(oa)], walkH2 = [sh[0] + 13 * oa + 4, sh[1] + 42 - 3 * (1 - Math.abs(oa))];
@@ -145,12 +189,12 @@
         h2 = [B.lerp(h2[0], brim[0], tipH), B.lerp(h2[1], brim[1], tipH)];
       }
       var tilt = (w ? 2 * Math.sin(4 * Math.PI * w.p) : 0) + 7 * near - 3 * hit;
-      var r = f.who.pose({ hip: hp, sh: sh, head: hc, tilt: tilt, ff: fa, fb: fb, h1: h1, h2: h2, bow: [-2 - near, 0], shadow: 30, ground: gy + 2, shadowX: hip });
-      f.put(r);
+      var r = pose(f.who, { hip: hp, sh: sh, head: hc, tilt: tilt, ff: fa, fb: fb, h1: h1, h2: h2, bow: [-2 - near, 0], shadow: 30, ground: gy + 2, shadowX: hip }, w);
+      f.put(r); fig(f, wo, u1);
       var hn = t < (HITS[0] + HITS[1]) / 2 ? N1 : N2;
       spark.setAttribute('transform', 'translate(' + (hn[0] + 2) + ' ' + hn[1] + ') scale(' + (hit * 1.2) + ')'); spark.setAttribute('opacity', hit > 0 ? 1 : 0);
     }
-    return { draw: draw, end: 9.5 };
+    return { draw: draw, still: TD, end: TD + TURN + offN(u1) / WALKHZ + .2 };
   }
 
   // ------------------------------------------------------------------ Scrollometer: tape measure out to a flag
@@ -164,19 +208,19 @@
     var flag = B.el('g', { transform: 'translate(' + FX + ' ' + GY + ')' }, svg);
     B.el('line', { x1: 0, y1: 0, x2: 0, y2: -46, stroke: INK, 'stroke-width': 2.4, 'stroke-linecap': 'round' }, flag);
     var cloth = B.el('path', { fill: '#C0623B', stroke: INK, 'stroke-width': 1.6, 'stroke-linejoin': 'round' }, flag);
-    var f = figure(svg), HX = FX - 34, u1 = HX / K, u0 = u1 - N * CYC, TW = N / WALKHZ, TS = TW + CLOSE;
+    var TD = 6.3, f = figure(svg), HX = FX - 34, u1 = HX / K, u0 = u1 - N * CYC, TW = N / WALKHZ, TS = TW + CLOSE;
     function wave(t, amp) { var d = 'M1 -46 '; var pts = []; for (var i = 0; i <= 6; i++) { var x = 1 + i * 5, y = -46 + Math.sin(t * 7 - i * .9) * amp * (i / 6); pts.push([x, y]); }
       var top = pts.map(function (p) { return 'L' + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' '), bot = pts.slice().reverse().map(function (p) { return 'L' + p[0].toFixed(1) + ' ' + (p[1] + 14).toFixed(1); }).join(' ');
       return d + top + ' ' + bot + ' Z'; }
     function draw(t) {
-      var w = walk(t, u0, u1, N), hip, fa, fb, bob = 0, oa = 0, h1, h2;
+      var wo = off(t, TD, u1), w = wo ? wo.w : walk(t, u0, u1, N), hip, fa, fb, bob = 0, oa = 0, h1, h2;
       if (w) { hip = w.hu; fa = w.fa; fb = w.fb; bob = w.bob; oa = w.oa; }
       else { hip = u1; var c = B.ease((t - TW) / CLOSE); fa = [u1 + A, gy]; fb = [B.lerp(u1 - A, u1 - 4, c), gy - 7 * Math.sin(Math.PI * Math.min(c, 1))]; }
-      var hp = [hip, gy - 67 + bob], sh = [hp[0] + 3 + 1, hp[1] - 50 + (w ? .4 * Math.cos(4 * Math.PI * w.p) : 0)], hc = [sh[0] + 6, sh[1] - 11];
+      var hp = [hip, gy - 67 + bob], sh = [hp[0] + 3 + 1, hp[1] - 50 + (w ? .4 * Math.cos(4 * Math.PI * w.p) : 0)], hc = [sh[0] + 6, sh[1] - 11 - .65 * bob];
       var walkH1 = [sh[0] - 13 * oa + 4, sh[1] + 42 - 3 * Math.abs(oa)];
       // the tape is gripped in the far hand, held out low in front of him while he walks
       var grip = [sh[0] + 20, sh[1] + 36 - 3 * Math.abs(oa)];
-      if (w) { h1 = walkH1; h2 = grip; }
+      if (w) { h1 = walkH1; h2 = wo ? [sh[0] + 13 * oa + 4, sh[1] + 42 - 3 * (1 - Math.abs(oa))] : grip; }
       else {
         var k = B.ease((t - TW) / CLOSE), s1 = [sh[0] + 5, sh[1] + 40], s2 = [sh[0] + 17, sh[1] + 62], pull = B.win(t, TW + .1, TW + .7, 99, 100);
         h1 = [B.lerp(walkH1[0], s1[0], k), B.lerp(walkH1[1], s1[1], k)]; h2 = [B.lerp(grip[0], s2[0], pull), B.lerp(grip[1], s2[1], pull)];   // he lowers the tape's hook to the foot of the flag
@@ -184,8 +228,8 @@
         h2 = [B.lerp(h2[0], brim[0], tipH), B.lerp(h2[1], brim[1], tipH)];
       }
       var tilt = (w ? 2 * Math.sin(4 * Math.PI * w.p) : 0) + B.win(t, TS, TS + .4, 99, 100) * 6;
-      var r = f.who.pose({ hip: hp, sh: sh, head: hc, tilt: tilt, ff: fa, fb: fb, h1: h1, h2: h2, bow: [-2, 0], shadow: 30, ground: gy + 2, shadowX: hip });
-      f.put(r);
+      var r = pose(f.who, { hip: hp, sh: sh, head: hc, tilt: tilt, ff: fa, fb: fb, h1: h1, h2: h2, bow: [-2, 0], shadow: 30, ground: gy + 2, shadowX: hip }, w);
+      f.put(r); fig(f, wo, u1);
       // the tape: from the case along the ground to where his far hand holds the end (until he sets the hook at the flag)
       var hx = r.h2[0] * K, endX = Math.min(Math.max(hx, X0 + 12), FX - 4), end = t < TW ? hx : FX - 6;
       band.setAttribute('x1', X0 + 11); band.setAttribute('x2', Math.max(end, X0 + 11)); ticks.setAttribute('x1', X0 + 11); ticks.setAttribute('x2', Math.max(end, X0 + 11));
@@ -196,7 +240,7 @@
       if (w || lift > 0) { band.setAttribute('y1', GY - 2); band.setAttribute('y2', GY - 2 - (GY - 2 - (r.h2[1] * K)) * lift); ticks.setAttribute('y1', GY - 2); ticks.setAttribute('y2', GY - 2 - (GY - 2 - (r.h2[1] * K)) * lift); }
       else { band.setAttribute('y2', GY - 2); ticks.setAttribute('y2', GY - 2); }
     }
-    return { draw: draw, end: 7 };
+    return { draw: draw, still: TD, end: TD + TURN + offN(u1) / WALKHZ + .2 };
   }
 
   var scenes = { wilderness: wilderness, shortless: shortless, scrollometer: scrollometer };
@@ -205,6 +249,6 @@
     var s = mk(svg), handle = null;
     B.scenes[svg.getAttribute('data-scene')] = s.draw;
     function frame(t) { s.draw(Math.min(t, s.end)); if (t > s.end && handle && handle.stop) handle.stop(); }
-    handle = B.play(svg, frame, { loop: 0, still: s.end });
+    handle = B.play(svg, frame, { loop: 0, still: s.still == null ? s.end : s.still });
   });
 })();
