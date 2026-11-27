@@ -1,6 +1,6 @@
 # STATE — martinapps-site (martinapps.dev)
 
-**Last updated:** 2026-11-22
+**Last updated:** 2026-11-26
 **Branch:** `main`. Static site (plain HTML) served by GitHub Pages from `main`, custom domain via `CNAME`.
 The repo is PUBLIC and Pages serves every non-underscore directory, so anything under `ai/` would be
 fetchable at martinapps.dev/ai/STATE.md. Keep this file free of anything not meant to be public.
@@ -62,6 +62,15 @@ fetchable at martinapps.dev/ai/STATE.md. Keep this file free of anything not mea
   - `node --test _search/search.test.mjs` (unit tests) and `node _search/harness.mjs [--live]` (drives the real
     dialog in headless Chrome: keyboard, phone widths, dark mode, no JavaScript, no outside requests).
   - `node _search/why.mjs "query"` shows how the top pages were scored.
+
+- Holiday dress 2026-11-26 (live, `f45bc38`): on eight days the Builders get small touches, by the visitor's own clock, no
+  network or tracking. Windows: Valentine's Feb 13-14; St. Patrick's Mar 17; Easter Good Friday-Easter Monday; July 4th
+  Jul 3-5; Halloween Oct 25-31; Thanksgiving 4th Thursday-Sunday (checked before Christmas, since in 2030 it runs to Dec 1);
+  Christmas Dec 1-26; New Year's Dec 31-Jan 2. Preview any day with `?holiday=<thanksgiving|christmas|newyear|halloween|july4|
+  valentines|stpatricks|easter>`; `?holiday=none` forces plain. All of it is `assets/holiday.js` (pure `pickHoliday(date)`;
+  hats on every Builder by finding the hat path and wrapping `BuilderLite.create`; footer props drawn as overlays, no scene
+  file edited). It loads right after `builder-lite.js` on every page with a Builder. Test: `node --test _test/holiday.test.mjs`
+  (every boundary, 2026-2030). Reduced motion: props show, nothing moves.
 
 ## Self-test (any model can run it)
 
