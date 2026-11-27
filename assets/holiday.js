@@ -58,8 +58,8 @@
 
   /* ---- Thanksgiving ---- */
   var LEAF = 'M0 -9 C6 -7 8 0 0 9 C-8 0 -6 -7 0 -9 Z', LC = ['#C2571A', '#D98A1F', '#A63D1B', '#E0A82E', '#8C4A1E'];
-  function leg(p, scale, ang) {   // a turkey leg gripped at the shank (the origin), meat toward -x, bone toward +x; ang turns it (the held one is also under the sandwich group's own -22 deg)
-    var l = mk('g', { 'data-hd': 1, transform: 'rotate(' + ang + ') scale(' + scale + ') translate(-8 0)' }, p);
+  function leg(p, scale, ang, at) {   // a turkey leg gripped at the shank (the origin), meat toward -x, bone toward +x; ang turns it (the held one is also under the sandwich group's own -22 deg)
+    var l = mk('g', { 'data-hd': 1, transform: (at ? 'translate(' + at + ') ' : '') + 'rotate(' + ang + ') scale(' + scale + ') translate(-8 0)' }, p);
     mk('path', { d: 'M2 -3 L13 -1.4 L13 2.4 L2 4 Z', fill: '#B5651D' }, l);
     mk('ellipse', { cx: -4.5, cy: 0, rx: 10, ry: 8, fill: '#B5651D' }, l);
     mk('path', { d: 'M-12 -3 Q-8 -8 -2 -7.4 Q-7 -5 -8 -1 Z', fill: '#D98A3D' }, l);
@@ -79,13 +79,15 @@
     mk('path', { d: 'M-1 -19 Q-1 -24 3 -26 L5 -24 Q2 -22 2 -19 Z', fill: '#5E7B2E' }, p);
     return p;
   }
+  // held upright in his fist by the bone (knob below the hand), meat up toward his mouth; under the sandwich group's own -22 deg
+  var LEG = { s: 1.1, a: 122, at: '2.3 6.3' };
   function thanksgivingFooter(s) {
     var sw = s.querySelector('#o-sw'), art = s.querySelector('#o-swart');
     if (sw) {   // the sandwich becomes a turkey leg (its group keeps its own motion, and the pigeon still steals it)
       var rot = sw.querySelector(':scope > g');
-      if (rot) { for (var i = 0; i < rot.children.length; i++) { var c = rot.children[i]; if (!/^animate/.test(c.localName)) c.style.display = 'none'; } leg(rot, 1.3, 67); }
+      if (rot) { for (var i = 0; i < rot.children.length; i++) { var c = rot.children[i]; if (!/^animate/.test(c.localName)) c.style.display = 'none'; } leg(rot, LEG.s, LEG.a, LEG.at); }
     }
-    if (art) { for (var j = art.children.length - 1; j >= 0; j--) art.removeChild(art.children[j]); leg(art, 2.3, 45); }
+    if (art) { for (var j = art.children.length - 1; j >= 0; j--) art.removeChild(art.children[j]); leg(art, 2.1, LEG.a - 14); }   // the beak group turns -8 and the held one sits under -22: both read 100 deg on screen
     var bar = s.querySelector('#o-bar'); if (bar && bar.parentNode) { var pk = pumpkin(s, 722, 214); bar.parentNode.insertBefore(pk, bar); }
     var fx = mk('g', { 'data-hd': 1, 'pointer-events': 'none', class: 'hd-leaves' }, s);
     var rest = [[-60, 222], [150, 232], [330, 226], [470, 238], [650, 230], [790, 224], [20, 236], [250, 220], [590, 240], [850, 232]];
