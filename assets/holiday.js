@@ -80,7 +80,7 @@
     return p;
   }
   // held upright in his fist by the bone (knob below the hand), meat up toward his mouth; under the sandwich group's own -22 deg
-  var LEG = { s: 1.1, a: 122, at: '2.3 6.3' };
+  var LEG = { s: 1.1, a: 137, at: '2.3 6.3' };
   function thanksgivingFooter(s) {
     var sw = s.querySelector('#o-sw'), art = s.querySelector('#o-swart');
     if (sw) {   // the sandwich becomes a turkey leg (its group keeps its own motion, and the pigeon still steals it)
