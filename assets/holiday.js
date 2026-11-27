@@ -52,8 +52,8 @@
 
   /* ---- Thanksgiving ---- */
   var LEAF = 'M0 -9 C6 -7 8 0 0 9 C-8 0 -6 -7 0 -9 Z', LC = ['#C2571A', '#D98A1F', '#A63D1B', '#E0A82E', '#8C4A1E'];
-  function leg(p, scale) {   // a turkey leg in the sandwich's own space (about 28 wide, 18 tall): meat bulb, shank, bone
-    var l = mk('g', { 'data-hd': 1, transform: 'rotate(-18) scale(' + (scale || 1) + ')' }, p);
+  function leg(p, scale, ang) {   // a turkey leg gripped at the shank (the origin), meat toward -x, bone toward +x; ang turns it (the held one is also under the sandwich group's own -22 deg)
+    var l = mk('g', { 'data-hd': 1, transform: 'rotate(' + ang + ') scale(' + scale + ') translate(-8 0)' }, p);
     mk('path', { d: 'M2 -3 L13 -1.4 L13 2.4 L2 4 Z', fill: '#B5651D' }, l);
     mk('ellipse', { cx: -4.5, cy: 0, rx: 10, ry: 8, fill: '#B5651D' }, l);
     mk('path', { d: 'M-12 -3 Q-8 -8 -2 -7.4 Q-7 -5 -8 -1 Z', fill: '#D98A3D' }, l);
@@ -78,9 +78,9 @@
     var sw = s.querySelector('#o-sw'), art = s.querySelector('#o-swart');
     if (sw) {   // the sandwich becomes a turkey leg (its group keeps its own motion, and the pigeon still steals it)
       var rot = sw.querySelector(':scope > g');
-      if (rot) { for (var i = 0; i < rot.children.length; i++) { var c = rot.children[i]; if (!/^animate/.test(c.localName)) c.style.display = 'none'; } leg(rot, 1.4); }
+      if (rot) { for (var i = 0; i < rot.children.length; i++) { var c = rot.children[i]; if (!/^animate/.test(c.localName)) c.style.display = 'none'; } leg(rot, 1.3, 67); }
     }
-    if (art) { for (var j = art.children.length - 1; j >= 0; j--) art.removeChild(art.children[j]); leg(art, 1.7); }
+    if (art) { for (var j = art.children.length - 1; j >= 0; j--) art.removeChild(art.children[j]); leg(art, 2.3, 45); }
     var bar = s.querySelector('#o-bar'); if (bar && bar.parentNode) { var pk = pumpkin(s, 722, 214); bar.parentNode.insertBefore(pk, bar); }
     var fx = mk('g', { 'data-hd': 1, 'pointer-events': 'none', class: 'hd-leaves' }, s);
     var rest = [[-60, 222], [150, 232], [330, 226], [470, 238], [650, 230], [790, 224], [20, 236], [250, 220], [590, 240], [850, 232]];
