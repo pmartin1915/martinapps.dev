@@ -24,7 +24,7 @@
 //
 // Exit 0 all clear (notes allowed), 1 failures, 2 could not run. A missing meta description is a note. Store links (App Store, Play) are Store Watch's job
 // (dev-ops scripts/store-watch.mjs), so external links are listed but not fetched.
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { createServer } from 'node:http';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -83,6 +83,16 @@ const AXE_RUN = `axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 
   .then((r) => r.violations.map((v) => ({ id: v.id, impact: v.impact, help: v.help, n: v.nodes.length, at: v.nodes[0].target.join(' ') })))`;
 
 // ---------- Chrome over the DevTools protocol (same approach as brand/mascot/lite/tools/eyes.mjs) ----------
+// child.kill() ends only Chrome's browser process on Windows; its GPU, renderer and utility children keep running
+// with the temp profile locked (2026-11-27: ~22 orphan headless Chromes held ~11 GB). taskkill /T takes the whole tree.
+export function killTree(child) {
+  if (!child || child.pid === undefined || child.exitCode !== null) return;
+  if (process.platform === 'win32') {
+    try { spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore', windowsHide: true }); } catch {}
+  }
+  try { child.kill(); } catch {} // POSIX (and a fallback if taskkill was missing): the process itself
+}
+
 export async function openChrome() {
   const BROWSERS = ['C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
     'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe', '/usr/bin/google-chrome', '/usr/bin/chromium', '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'];
@@ -93,7 +103,7 @@ export async function openChrome() {
     '--remote-debugging-port=0', '--user-data-dir=' + prof, 'about:blank'], { stdio: 'ignore' });
   let port = null;
   for (let i = 0; i < 200 && !port; i++) { const f = path.join(prof, 'DevToolsActivePort'); if (existsSync(f)) port = Number(readFileSync(f, 'utf8').split('\n')[0]); else await sleep(100); }
-  if (!port) { child.kill(); throw new Error('Chrome did not open a debug port'); }
+  if (!port) { killTree(child); throw new Error('Chrome did not open a debug port'); }
   const list = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
   const ws = new WebSocket(list.find((t) => t.type === 'page').webSocketDebuggerUrl);
   await new Promise((r, j) => { ws.addEventListener('open', r); ws.addEventListener('error', j); });
@@ -104,7 +114,7 @@ export async function openChrome() {
     else for (const l of listeners) l(m);
   });
   const send = (method, params = {}) => new Promise((res, rej) => { const i = ++id; pend.set(i, { res, rej }); ws.send(JSON.stringify({ id: i, method, params })); });
-  const close = async () => { try { ws.close(); } catch {} child.kill(); await sleep(300); try { rmSync(prof, { recursive: true, force: true }); } catch {} };
+  const close = async () => { try { ws.close(); } catch {} killTree(child); await sleep(300); try { rmSync(prof, { recursive: true, force: true }); } catch {} };
   return { send, listeners, close };
 }
 
